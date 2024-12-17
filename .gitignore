@@ -47,3 +47,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+Output
+AnalyzeData.html
+AnalyzeData_files/
+
+_targets/

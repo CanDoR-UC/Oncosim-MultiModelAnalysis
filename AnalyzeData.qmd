@@ -1,0 +1,53 @@
+---
+title: "Thesis Project Results"
+author: "John Hutchinson"
+format: html
+---
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+
+
+dataDirectory = "Output/Runs"
+
+
+getCombinedTable <- function(tableName){
+    allScenarioNames = list.dirs(dataDirectory)
+    allScenarioNames = allScenarioNames[allScenarioNames != dataDirectory]
+
+    totalTable = data.frame()
+    for(scenario in allScenarioNames){
+        currentTable = read.csv(file.path(scenario,tableName))
+        name = strsplit(scenario,"OncoSim-")[[1]][2]
+        currentTable$sce = name
+        totalTable = bind_rows(totalTable,currentTable)
+    }
+    return(totalTable)
+}
+
+
+
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| fig-cap: Test Plot
+
+
+
+mortalityData = getCombinedTable("Colorectal_Cancer_Cases_Table.csv") %>% filter(Province == "all",Sex=="all",Colorectal_cancer_site == "all", expr_name == "Deaths_cause_specific")
+
+mortalityData = mortalityData %>% group_by(expr_name,Year,sce) %>% summarize(totalValue=sum(expr_value))
+
+
+ggplot(mortalityData,aes(x=Year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Colorectal")
+
+
+```
