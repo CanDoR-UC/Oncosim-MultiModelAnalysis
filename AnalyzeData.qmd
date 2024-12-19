@@ -50,4 +50,7 @@ mortalityData = mortalityData %>% group_by(expr_name,Year,sce) %>% summarize(tot
 ggplot(mortalityData,aes(x=Year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Colorectal")
 
 
+screenNum = getCombinedTable("Colorectal_Cancer_Screen_Table.csv") %>% filter(expr_name=="Screens_by_FOBT" & Province == "all" & Year == "all")
+screenNum2 = getCombinedTable("Colorectal_Cancer_Screen_Table.csv") %>% filter(expr_name=="Screens_by_FIT" & Province == "all" & Year == "all")
+
 ```

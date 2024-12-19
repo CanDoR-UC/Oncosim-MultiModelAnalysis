@@ -1,5 +1,6 @@
 #Obtained from previous cfDNA repository
 OutputAllTables <- function(){
+  unlink("Output",recursive = TRUE)
   for(modelToUse in modelsToUse){
 
     model= load_model(modelToUse)
@@ -26,7 +27,7 @@ OutputAllTables <- function(){
       specificScenarioDir <- paste(scenarioDirectory,"/",scenarioName,sep="")
       dir.create(specificScenarioDir,showWarnings = FALSE)
   
-      for(table in paramsToAlter[modelsToUse][[1]]){
+      for(table in paramsToAlter[modelToUse][[1]]){
         currentTableDir <- paste(specificScenarioDir,"/",table,".csv",sep="")
         write.csv(scenario$get_param(table),currentTableDir,row.names=FALSE)
       }
