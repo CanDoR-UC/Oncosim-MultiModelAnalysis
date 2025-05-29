@@ -13,6 +13,26 @@ RunScenario <- function(parametersAltered){
     "Breast_Cancer_Screen_Outcome_Modality_Table"
 )
   }
+  if(grepl("cervical",currentScenario$ModelName)){
+    neededTables <- list(
+      "Cervical_Cancer_Cases_Table",
+      "Cervical_Cancer_Timing_Of_Last_Screen",
+      "Cervical_Cancer_Costs_Table",
+      "Cervical_Cancer_ICER_Table",
+      "Hpv_Screening_Costs_Prov_Table",
+      "HPV_Colposcopy_Results_Table",
+      "Hpv_Screening_Costs_Age_Table",
+      "HPV_DNA_Results_Table")
+  }
+
+  if(grepl("lung",currentScenario$ModelName)){
+    neededTables <- list(
+      "Lung_Cancer_Cases_Table",
+      "Lung_Cancer_ScreenCases_Year_Table",
+      "Lung_Cancer_Costs_Table",
+      "Lung_Cancer_ICER_Table"
+    )
+  }
 
 
   fullSampleSize = 32000000

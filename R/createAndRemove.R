@@ -1,5 +1,6 @@
 CleanUpOldVersions <- function(){
   for(modelToUse in modelsToUse){
+    print(modelsToUse)
     model = load_model(modelToUse)
     allPreviousNames = model$ModelScenarios$Name
 

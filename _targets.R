@@ -3,7 +3,7 @@ library(tidyverse)
 library(openmpp)
 
 
-openmpp::use_OpenMpp_remote()
+openmpp::use_OpenMpp_CPAC()
 
 ## Source R files ----
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
@@ -14,12 +14,12 @@ analysisName = "MCEDTesting"
 randomNum <- sample(1000000:90000000,1)
 
 #modelsToUse <- c("OncoSim-breast","OncoSim-colorectal","OncoSim-cervical","OncoSim-lung")
-modelsToUse <- c("OncoSim-breast")
+modelsToUse <- c("OncoSim-lung")
 paramsToAlter <- list()
 paramsToAlter["OncoSim-breast"] <- list(c("BreastScreeningProtocolDispatcher","BreastScreeningSpecificityNew","BreastScreeningSensitivity","BreastScreeningCosts")) # Hack alternate modality E
 paramsToAlter["OncoSim-colorectal"] <- list(c("CrcScreenRecruitCanada","CrcScreenPlanCanada","CrcTestPositivitySuccinct","CrcScreenCostCanada"))#Planning to hack FOBT to use as MCED
-paramsToAlter["OncoSim-cervical"] <- list(c("HpvScreeningProtocolDispatcher","HpvDnaTestSensitivitySpecificity","CervicalTestCompliance")) #Planning to hack HPV DNA testing to use as MCED
-paramsToAlter["OncoSim-lung"] <- list(c("LcDispatcherDefault")) #Set threshold to 0 for PLC
+paramsToAlter["OncoSim-cervical"] <- list(c("HpvScreeningProtocolDispatcher","HpvScreeningPreCancerTreatmentCosts","CytologyResultCarcino")) #Planning to hack HPV DNA testing to use as MCED
+paramsToAlter["OncoSim-lung"] <- list(c("LungCancerScreenFollowupProtcol", "LcDispatcherDefault","LcScreenEfficacy","LcScreenCost")) #Efficacy may not work for this parameter?
 
 
 
@@ -28,6 +28,8 @@ paramsToAlter["OncoSim-lung"] <- list(c("LcDispatcherDefault")) #Set threshold t
 galleriParticipation = list()
 galleriParticipation["OncoSim-colorectal"] = list(c(0.43,0.9))
 galleriParticipation["OncoSim-breast"] = list(c(0.43,0.9))
+galleriParticipation["OncoSim-cervical"] = list(c(0.43,0.9))
+galleriParticipation["OncoSim-lung"] = list(c(0.43,0.9))
 
 
 
@@ -37,6 +39,8 @@ galleriEffectivenessValues = list()
 #These are probably wrong. THESE ARE MEANT AS A TEST. DO NOT KEEP FOR FURTHER ANALYSES
 galleriEffectivenessValues["OncoSim-colorectal"] = list(c(0.05,0.887,0.887,0.887,0.887))
 galleriEffectivenessValues["OncoSim-breast"] = list(c(0.95,0.887))
+galleriEffectivenessValues["OncoSim-cervical"] = list(c(0.515,0.995)) #Sens,Spec
+galleriEffectivenessValues["OncoSim-lung"] = list(c(0.95,0.887))
 
 testCosts = list()
 #https://www.galleri.com/patient/the-galleri-test/cost
@@ -65,7 +69,7 @@ tar_option_set(packages=c("openmpp","tidyverse"),workspace_on_error = TRUE)
 
 
 list(
-  tar_target(scenariosToRun,scenarios[1]),
+  tar_target(scenariosToRun,scenarios),
   tar_target(createdScenarios,CreateScenario(scenariosToRun,Sys.time()),pattern=map(scenariosToRun),iteration="list"),
   tar_target(parametersAltered,SetParameters(createdScenarios),pattern=map(createdScenarios),iteration="list"),
   tar_target(runScenarios,RunScenario(parametersAltered),pattern=map(parametersAltered),iteration = "list")
@@ -74,4 +78,6 @@ list(
 
 #Finished
 #Colon
-#Breast (but the results are funky)
+#Breast (but the results are funky). Recheck dispatcher
+#Cervical (BROKEN)
+# Lung (Implemented, but super duper super broken. Not usable yet)
