@@ -44,16 +44,22 @@ getCombinedTable <- function(tableName,modelType){
 
 
 
-mortalityData = getCombinedTable("Colorectal_Cancer_Cases_Table.csv","colorectal") %>% filter(Province == "all",Sex=="all",Colorectal_cancer_site == "all", expr_name == "Deaths_cause_specific")
+casesTable = getCombinedTable("Colorectal_Cancer_Cases_Table.csv","colorectal") %>% filter(Province == "all",Sex=="all",Colorectal_cancer_site == "all")
 
-mortalityData = mortalityData %>% group_by(expr_name,Shiftable_year,sce) %>% summarize(totalValue=sum(expr_value))
-
-
-ggplot(mortalityData,aes(x=Shiftable_year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Colorectal")
+incidenceData = casesTable %>% filter(expr_name == "Incidence_cases")%>% group_by(expr_name,Shiftable_year,sce) %>% summarize(totalValue=sum(expr_value))
 
 
-screenNum = getCombinedTable("Colorectal_Cancer_Screen_Table.csv","colorectal") %>% filter(expr_name=="Screens_by_FOBT" & Province == "all" & Shiftable_year == "all")
-screenNum2 = getCombinedTable("Colorectal_Cancer_Screen_Table.csv","colorectal") %>% filter(expr_name=="Screens_by_FIT" & Province == "all" & Shiftable_year == "all")
+ggplot(incidenceData,aes(x=Shiftable_year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Incidence - Colorectal")
+
+
+screenTable = getCombinedTable("Colorectal_Cancer_Screen_Table.csv","colorectal") %>% filter(Hackable_province == "all" & Shiftable_year == 2027)
+
+screenNum = screenTable %>% filter(expr_name=="Screens_by_FOBT")
+screenNum
+screenNum2 = screenTable %>% filter(expr_name=="Screens_by_FIT")
+screenNum2
+detectedCases = screenTable %>% filter(expr_name=="Screen_detected_cancers")
+detectedCases
 
 ```
 

@@ -2,62 +2,59 @@ SetParameters <- function(createdScenarios){
 
   scenario <- createdScenarios[[1]]
   scenarioName = names(createdScenarios)
-  parameters <- strsplit(scenarioName,"_")[[1]]
-
-  if(parameters[2] == "GalleriMCED"){
-    participationNumbers = galleriParticipation[parameters[1]][[1]]
-    effectivenessValues = galleriEffectivenessValues[parameters[1]][[1]]
-  }
-
-  if(parameters[2] != "BaseCase"){
-    cost = testCosts[parameters[2]][[1]]
-    frequency = testFrequency[parameters[2]][[1]]
-
-    participation = participationNumbers[1]
-    adherence = participationNumbers[2]
-  }
+  currentParameters = parameterTables[parameterTables$name == scenarioName,]
 
 
 
-  if(parameters[1] == "OncoSim-colorectal"){
 
-    #Set MCED Cost
-    if(parameters[2] != "BaseCase"){
+  if(currentParameters$model =="OncoSim-colorectal"){
+
+    if(currentParameters$type != "BaseCase"){
+
+      #Set MCED Cost
       costs <- scenario$get_param("CrcScreenCostCanada")
-      if(cost != -1){
-        costs$FOBT_KIT <- cost
-        costs$FOBT_PROCESSING <- 0
-      }
-  
+      costs$FOBT_KIT <- currentParameters$cost
+      costs$FOBT_PROCESSING <- 0
       scenario$set_param("CrcScreenCostCanada",costs)
   
       #Set up parameters for how MCED screening works.
       screen_param <- scenario$get_param("CrcScreenRecruitCanada")
       screen_param$`5` <- screen_param$`4` #first copy over element 4 to element 5 to make subsequent change easier
       screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_start_year_integer'] <- 2025
-      screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_start_age_integer'] <- startAge
-      screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_end_age_integer'] <- endAge
-      screen_param$`5`[screen_param$Overall_program_controls=='SR_FIRST_PARTICIPATION'] <- participation
+      screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_start_age_integer'] <- currentParameters$startAge
+      screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_end_year_integer'] <- 9999
+      screen_param$`5`[screen_param$Overall_program_controls=='Recruitment_end_age_integer'] <- currentParameters$endAge
+      screen_param$`5`[screen_param$Overall_program_controls=='SR_FIRST_PARTICIPATION'] <- currentParameters$actualParticipation
       screen_param$`5`[screen_param$Overall_program_controls=='SR_FIRST_PHASEIN'] <- 2
-      screen_param$`5`[screen_param$Overall_program_controls=='Assign_screening_group'] <- 0 #0 Means that anyone can be in this group
+      screen_param$`5`[screen_param$Overall_program_controls=='Assign_screening_group'] <- 5
+
+      #DISABLE #4 TO ENSURE NO FIT TESTS ARE PERFORMED ANYMORE
+      screen_param$`4`[screen_param$Overall_program_controls=='Recruitment_end_year_integer'] <- 2025
+
       scenario$set_param("CrcScreenRecruitCanada",screen_param)
   
       #Creating plan to dictate how people are screened with MCED
       modality_param <- scenario$get_param("CrcScreenPlanCanada")
       modality_param$B <- modality_param$A
-      modality_param$B[modality_param$Screening_modality_plan=='Screening_group'] <- 0
-      modality_param$B[modality_param$Screening_modality_plan=='Adherence_probability'] <- adherence
-      modality_param$B[modality_param$Screening_modality_plan=='SP_FREQUENCY'] <- frequency
+      modality_param$B[modality_param$Screening_modality_plan=='Screening_group'] <- 5
+      modality_param$B[modality_param$Screening_modality_plan=='Adherence_probability'] <- currentParameters$actualParticipation
+      modality_param$B[modality_param$Screening_modality_plan=='SP_FREQUENCY'] <- currentParameters$frequency      
+      modality_param$B[modality_param$Screening_modality_plan=='Age_start_in_ticks'] <- currentParameters$startAge
       modality_param$B[modality_param$Screening_modality_plan=='Modality'] <- 1  #For MCED scenarios, hack the FOBT modality
+
+      modality_param$A[modality_param$Screening_modality_plan=='Time_end_continuous_time'] <- 2026
+
 
       scenario$set_param("CrcScreenPlanCanada",modality_param)
   
       #Altering effectiveness to emulate MCED
       fit_param <- scenario$get_param("CrcTestPositivitySuccinct")
-      if(effectivenessValues[1] != "NONE"){
-        fit_param$FOBT_guaiac[1:5] <- effectivenessValues
-        fit_param$FOBT_guaiac[11:15] <- effectivenessValues
-      }
+      # 1-Specificity for "No polyp or cancer" and all others. If a polyp is detected, this is a false positive. Sensitivity for cancer
+      otherValues = as.numeric(scales::number(1-currentParameters$specificity,accuracy=0.001))
+      effectivenessValues = c(otherValues,otherValues,otherValues,otherValues,currentParameters$sensitivity)
+      fit_param$FOBT_guaiac[1:5] <- effectivenessValues
+      fit_param$FOBT_guaiac[11:15] <- effectivenessValues
+      
       scenario$set_param("CrcTestPositivitySuccinct",fit_param)
     }else{
       #Set base parameters here.
@@ -65,7 +62,7 @@ SetParameters <- function(createdScenarios){
     
 
   }
-  if(parameters[1] == "OncoSim-breast"){
+  if(currentParameters$model == "OncoSim-breast"){
 
     if(parameters[2] != "BaseCase"){
      #Set MCED Cost May have to change the other costs too?
@@ -116,7 +113,7 @@ SetParameters <- function(createdScenarios){
     
   }
 
-  if(parameters[1] == "OncoSim-cervical"){
+  if(currentParameters$model == "OncoSim-cervical"){
     if(parameters[2] != "BaseCase"){
 
       #Set colposcopy Cost to what we need
@@ -159,7 +156,7 @@ SetParameters <- function(createdScenarios){
     }
   }
 
-  if(parameters[1] == "OncoSim-lung"){
+  if(currentParameters$model == "OncoSim-lung"){
 
     followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
     followUpProtocol[[1]] = "Custom"

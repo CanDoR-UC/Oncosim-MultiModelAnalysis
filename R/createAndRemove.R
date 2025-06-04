@@ -22,9 +22,10 @@ CleanUpOldVersions <- function(){
 }
 
 CreateScenario <- function(scenarioToCreate,time){
-  scenarioElements = strsplit(scenarioToCreate,"_")[[1]]
-  modelToUse = scenarioElements[1]
-  model= load_model(modelToUse)
+
+  currentParameters = parameterTables[parameterTables$name == scenarioToCreate,]
+
+  model= load_model(currentParameters$model)
   baserun_digest = model$ModelRuns$RunDigest[[1]]
 
   scenarioName <- paste(analysisName,scenarioToCreate,sep="")
@@ -35,15 +36,15 @@ CreateScenario <- function(scenarioToCreate,time){
   matchingPrevious = allPreviousNames[grepl(scenarioName,allPreviousNames)]
   if(length(matchingPrevious) != 0){
     for(name in matchingPrevious){
-      scenarioToUse = load_scenario(modelToUse,name)
+      scenarioToUse = load_scenario(currentParameters$model,name)
       scenarioToUse$ReadOnly <- FALSE
-      delete_scenario(modelToUse,name)
+      delete_scenario(currentParameters$model,name)
     }
   }
 
-  scenarioToUse = create_scenario(modelToUse,scenarioNameRandom,baserun_digest)
-  scenarioToUse = load_scenario(modelToUse,scenarioNameRandom)
-  for(param in paramsToAlter[[modelToUse]]){
+  scenarioToUse = create_scenario(currentParameters$model,scenarioNameRandom,baserun_digest)
+  scenarioToUse = load_scenario(currentParameters$model,scenarioNameRandom)
+  for(param in paramsToAlter[[currentParameters$model]]){
     scenarioToUse$copy_params(param)
   }
 
