@@ -14,12 +14,12 @@ analysisName = "MCEDTesting"
 randomNum <- sample(1000000:90000000,1)
 
 #modelsToUse <- c("OncoSim-breast","OncoSim-colorectal","OncoSim-cervical","OncoSim-lung")
-modelsToUse <- c("OncoSim-colorectal")
+modelsToUse <- c("OncoSim-cervical")
 paramsToAlter <- list()
 paramsToAlter["OncoSim-breast"] <- list(c("BreastScreeningProtocolDispatcher","BreastScreeningSpecificityNew","BreastScreeningSensitivity","BreastScreeningCosts")) # Hack alternate modality E
 paramsToAlter["OncoSim-colorectal"] <- list(c("CrcScreenRecruitCanada","CrcScreenPlanCanada","CrcTestPositivitySuccinct","CrcScreenCostCanada"))#Planning to hack FOBT to use as MCED
-paramsToAlter["OncoSim-cervical"] <- list(c("HpvScreeningProtocolDispatcher","HpvScreeningPreCancerTreatmentCosts","CytologyResultCarcino")) #Planning to hack HPV DNA testing to use as MCED
-paramsToAlter["OncoSim-lung"] <- list(c("LungCancerScreenFollowupProtcol", "LcDispatcherDefault","LcScreenEfficacy","LcScreenCost")) #Efficacy may not work for this parameter?
+paramsToAlter["OncoSim-cervical"] <- list(c("HpvScreeningProtocolDispatcher","HpvScreeningPreCancerTreatmentCosts","CytologyResultCarcino","FollowUpCytologyProtocol1")) #Planning to hack HPV DNA testing to use as MCED
+paramsToAlter["OncoSim-lung"] <- list(c("LungCancerScreenFollowupProtcol", "LcDispatcherDefault","LungRadsScreenRegularDist","LcScreenCost")) #Efficacy may not work for this parameter?
 
 
 participationMultipliers = list()
@@ -143,7 +143,7 @@ tar_option_set(packages=c("openmpp","tidyverse"),workspace_on_error = TRUE)
 
 
 list(
-  tar_target(scenariosToRun,scenarios),
+  tar_target(scenariosToRun,scenarios[1:2]),
   tar_target(createdScenarios,CreateScenario(scenariosToRun,Sys.time()),pattern=map(scenariosToRun),iteration="list"),
   tar_target(parametersAltered,SetParameters(createdScenarios),pattern=map(createdScenarios),iteration="list"),
   tar_target(runScenarios,RunScenario(parametersAltered),pattern=map(parametersAltered),iteration = "list")
@@ -154,3 +154,11 @@ list(
 
 # Colorectal seems to work. Galleri has more screen_detected cancers than CancerSeek, which makes sense. in 2027, base case still has FIT and the MCED only have FOBT as expected.
 # May want to improve the polyp detection?
+
+# Lung should be OK? The screen positives are odd (More in CancerSeek), but the screen detected cancners are as they should be (More in Galleri)
+# Will need to figure out how many screens make sense for the base case.
+
+
+# Breast should be OK. No easily discernable problems so far.
+
+#Cervical seems to be working. May have to recheck the FollowUpCytologyProtocol1 setup

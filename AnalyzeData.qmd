@@ -70,7 +70,7 @@ detectedCases
 
 
 
-mortalityData = getCombinedTable("Breast_Cancer_Cases_Table.csv","breast") %>% filter(Province == "all", expr_name == "Deaths_cause_specific")
+mortalityData = getCombinedTable("Breast_Cancer_Cases_Table.csv","breast") %>% filter(Hackable_province == "all", expr_name == "Deaths_cause_specific")
 
 mortalityData1 = mortalityData %>% group_by(expr_name,Shiftable_year,sce) %>% summarize(totalValue=sum(expr_value))
 mortalityData2 = mortalityData %>% group_by(expr_name,sce) %>% summarize(totalValue=sum(expr_value))
@@ -79,7 +79,7 @@ mortalityData2 = mortalityData %>% group_by(expr_name,sce) %>% summarize(totalVa
 ggplot(mortalityData1,aes(x=Shiftable_year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Breast")
 
 
-screenNum = getCombinedTable("Breast_Cancer_Screen_Outcome_Modality_Table.csv","breast") %>% filter(expr_name=="Number_of_breast_cancer_screens" & Province == "all" & Shiftable_year == "all" &Age=="all")
+screenNum = getCombinedTable("Breast_Cancer_Screen_Outcome_Modality_Table.csv","breast") %>% filter(expr_name=="Number_of_breast_cancer_screens" & Hackable_province == "all" & Shiftable_year == "all" &Age=="all")
 
 ```
 
@@ -92,12 +92,15 @@ screenNum = getCombinedTable("Breast_Cancer_Screen_Outcome_Modality_Table.csv","
 
 
 
-mortalityData = getCombinedTable("Cervical_Cancer_Cases_Table.csv","cervical") %>% filter(Province == "all", expr_name == "Deaths_cause_specific")
+mortalityData = getCombinedTable("Cervical_Cancer_Cases_Table.csv","cervical") %>% filter(Hackable_province == "all", expr_name == "Deaths_cause_specific")
 mortalityData1 = mortalityData %>% group_by(expr_name,Shiftable_year,sce) %>% summarize(totalValue=sum(expr_value))
 ggplot(mortalityData1,aes(x=Shiftable_year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Breast")
 
-cytology = getCombinedTable("Hpv_Screening_Costs_Prov_Table.csv","cervical") %>% filter(expr_name=="Colposcopy_count" & Province == "all" & Shiftable_year == "all" &Sex=="all")
-colposcopy = getCombinedTable("Hpv_Screening_Costs_Prov_Table.csv","cervical") %>% filter(expr_name=="Primary_cytology_screening_count" & Province == "all" & Shiftable_year == "all" &Sex=="all")
+cytology = getCombinedTable("Hpv_Screening_Costs_Prov_Table.csv","cervical") %>% filter(expr_name=="Colposcopy_count" & Hackable_province == "all" & Shiftable_year == "all" &Sex=="all")
+colposcopy = getCombinedTable("Hpv_Screening_Costs_Prov_Table.csv","cervical") %>% filter(expr_name=="Primary_cytology_screening_count" & Hackable_province == "all" & Shiftable_year == "all" &Sex=="all")
+
+getCombinedTable("Cervical_Cancer_Cases_Table.csv","cervical") %>% filter(Hackable_province == "all", expr_name == "Cervical_cance_x_ected_by_screen",Shiftable_year==2027)
+
 ```
 
 
@@ -113,6 +116,9 @@ mortalityData = getCombinedTable("Lung_Cancer_Cases_Table.csv","lung") %>% filte
 mortalityData1 = mortalityData %>% group_by(expr_name,Shiftable_year,sce) %>% summarize(totalValue=sum(expr_value))
 ggplot(mortalityData1,aes(x=Shiftable_year,y=totalValue,colour=sce)) + geom_line() +ggtitle("Mortality - Lung")
 
-positive = getCombinedTable("Lung_Cancer_ScreenCases_Year_Table.csv","lung") %>% filter(expr_name=="Screen_positives" & Hackable_province == "all" & Year == "all")
-#colposcopy = getCombinedTable("Hpv_Screening_Costs_Prov_Table.csv","cervical") %>% filter(expr_name=="Primary_cytology_screening_count" & Province == "all" & Shiftable_year == "all" &Sex=="all")
+getCombinedTable("Lung_Cancer_ScreenCases_Year_Table.csv","lung") %>% filter(expr_name=="Screen_positives" & Hackable_province == "all" & Year == "all")
+
+getCombinedTable("Lung_Cancer_ScreenCases_Year_Table.csv","lung") %>% filter(expr_name=="Screen_detecte_x_over_detected" & Hackable_province == "all" & Year == "all")
+
+
 ```
