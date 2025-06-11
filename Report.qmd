@@ -1,0 +1,74 @@
+---
+title: "Thesis Project Report"
+author: "John Hutchinson"
+format:
+    html:
+        page-layout: full
+        embed-resources: true
+---
+
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(targets)
+
+
+
+importedData = tar_read(importedData,store="store_visualize")
+combinedTables = tar_read(combinedTables,store="store_visualize")
+
+
+```
+
+
+::: {.panel-tabset}
+
+# Breast
+
+
+```{r}
+#| echo: false
+#| warning: false
+
+breastScreening = importedData$Breast_Cancer_Screen_Outcome_Modality_Table %>% filter(expr_name=="Number_of_breast_cancer_screens",Hackable_province=="all",Breast_screening_modalities %in% c("Digital_radiography_mammogram","Alternative_modality_E"),Age=="all",Shiftable_year != "all") %>% mutate(Shiftable_year  = as.numeric(Shiftable_year))
+
+ggplot(aes(x=Shiftable_year,y=expr_value,colour=sce),data=breastScreening) + facet_grid(vars(Breast_screening_modalities),scales="free")+
+  geom_line()
+#Breast cancer screening with MCED (Alternate modality) should begin only in 2025. Digital radiography should be identical between scenarios
+yuj
+```
+
+# Colorectal
+
+# Lung
+
+# Cervical
+
+# Combined
+
+
+### Deaths
+```{r,fig-width:16,fig-height:16}
+#| echo: false
+#| warning: false
+
+
+deathTable = combinedTables$CancerDeaths
+
+deathTableCombined = deathTable %>% group_by(expr_name,Shiftable_year,sce,formattedName,minAge,frequency,participation,testType) %>% summarize(expr_value=sum(expr_value)) %>% mutate(cancertype="All")
+
+deathTable = bind_rows(deathTable,deathTableCombined)
+
+
+deathTable = deathTable %>% filter(Shiftable_year %in% 2020:2050)
+
+ggplot(aes(x=Shiftable_year,y=expr_value,colour=formattedName),data=deathTable) +
+ facet_grid(vars(cancertype),scales="free") +
+  geom_line()
+
+
+```
+
+:::

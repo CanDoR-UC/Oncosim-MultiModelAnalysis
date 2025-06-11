@@ -1,7 +1,13 @@
 #Obtained from previous cfDNA repository
-OutputAllTables <- function(){
+outputAllTables <- function(previousRunOutputs){
+
+  if(!downloadOncoSimRuns){
+    return()
+  }
+  openmpp::use_OpenMpp_CPAC()
   unlink("Output",recursive = TRUE)
-  for(modelToUse in modelsToUse){
+
+  for(modelToUse in c("OncoSim-colorectal","OncoSim-lung","OncoSim-breast","OncoSim-cervical")){
 
     model= load_model(modelToUse)
 
@@ -52,3 +58,4 @@ OutputAllTables <- function(){
     
   }
 }
+

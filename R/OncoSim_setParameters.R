@@ -1,8 +1,8 @@
 SetParameters <- function(createdScenarios){
-
-  scenario <- createdScenarios[[1]]
-  scenarioName = names(createdScenarios)
-  currentParameters = parameterTables[parameterTables$name == scenarioName,]
+  
+  scenario <- createdScenarios$scenario[[1]]
+  scenarioName = createdScenarios$name
+  currentParameters = createdScenarios
 
 
 
@@ -236,6 +236,6 @@ SetParameters <- function(createdScenarios){
     }
   }
 
-  return(createdScenarios)
+  return(currentParameters)
 
 }

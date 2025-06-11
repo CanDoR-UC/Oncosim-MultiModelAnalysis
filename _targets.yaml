@@ -1,0 +1,6 @@
+project_oncosim:
+  script: _oncosim.R
+  store: store_oncosim
+project_visualize:
+  script: _visualize.R
+  store: store_visualize

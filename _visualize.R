@@ -1,0 +1,24 @@
+library(targets)
+library(tarchetypes)
+
+tar_source()
+
+tar_option_set(packages=c("tidyverse","openmpp","quarto"),workspace_on_error = TRUE)
+
+analysisName = "AutomatedRun" #Fix later
+
+## Source R files ----
+purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
+
+
+#If OncoSim runs need to be downloaded. Disable this if they have been deleted from the server.
+downloadOncoSimRuns = TRUE
+
+list(
+  tar_target(previousRunOutputs,tar_read(runScenarios,store="store_oncosim")),
+  tar_target(outputtedTables,outputAllTables(previousRunOutputs)),
+  tar_target(importedData,importNeededTables(outputtedTables)),
+  tar_target(combinedTables,combineModelTables(importedData)),
+  tar_target(generateReport,generateQuarto(combinedTables))
+
+)

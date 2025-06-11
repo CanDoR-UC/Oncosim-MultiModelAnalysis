@@ -54,3 +54,7 @@ AnalyzeData_files/
 
 _targets/
 .DS_Store
+store_oncosim/
+renv/
+store_visualize/
+Report.html

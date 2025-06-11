@@ -1,6 +1,6 @@
 CleanUpOldVersions <- function(){
   for(modelToUse in modelsToUse){
-    print(modelsToUse)
+    print(modelToUse)
     model = load_model(modelToUse)
     allPreviousNames = model$ModelScenarios$Name
 
@@ -21,15 +21,14 @@ CleanUpOldVersions <- function(){
   }
 }
 
-CreateScenario <- function(scenarioToCreate,time){
+CreateScenario <- function(currentParameters){
 
-  currentParameters = parameterTables[parameterTables$name == scenarioToCreate,]
+  currentParameters = currentParameters[[1]]
 
   model= load_model(currentParameters$model)
   baserun_digest = model$ModelRuns$RunDigest[[1]]
 
-  scenarioName <- paste(analysisName,scenarioToCreate,sep="")
-  scenarioNameRandom <- paste(scenarioName,randomNum,sep="-")
+  scenarioName <- paste(analysisName,currentParameters$name,sep="")
 
   ## Create and Load Scenario (Delete if it previously existed)
   allPreviousNames <- model$ModelScenarios$Name
@@ -42,14 +41,19 @@ CreateScenario <- function(scenarioToCreate,time){
     }
   }
 
-  scenarioToUse = create_scenario(currentParameters$model,scenarioNameRandom,baserun_digest)
-  scenarioToUse = load_scenario(currentParameters$model,scenarioNameRandom)
+  ## Remove run if it exists
+  allPreviousRuns = model$ModelRuns[grepl(scenarioName,model$ModelRuns$Name),]$RunDigest
+  for(oldRun in allPreviousRuns){
+    delete_run(model$ModelDigest,oldRun)
+  }
+
+  scenarioToUse = create_scenario(currentParameters$model,scenarioName,baserun_digest)
+  scenarioToUse = load_scenario(currentParameters$model,scenarioName)
   for(param in paramsToAlter[[currentParameters$model]]){
     scenarioToUse$copy_params(param)
   }
 
-  returnList <- list()
-  returnList[scenarioToCreate] <- list(scenarioToUse)
-  return(returnList)
+  currentParameters$scenario <- list(scenarioToUse)
+  return(currentParameters)
 
 }
