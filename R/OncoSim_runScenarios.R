@@ -6,11 +6,10 @@ RunScenario <- function(parametersAltered){
   fullSampleSize = 32000000
   testSampleSize = 1000000
 
-  print(length(neededTables))
   if(actuallyRun){#Change to 4
-    currentScenario$run(paste("AutomatedRun_",analysisName,parametersAltered$name),opts=opts_run(Tables=outputTables[currentScenario$ModelName],SimulationCases=testSampleSize,Mpi = list(Np = 4, IsNotOnRoot = TRUE), Opts = list(OpenM.Threads = "4")))
+    currentScenario$run(paste("AutomatedRun_",analysisName,parametersAltered$name),opts=opts_run(Tables=outputTables[currentScenario$ModelName][[1]],SimulationCases=testSampleSize,Mpi = list(Np = 4, IsNotOnRoot = TRUE), Opts = list(OpenM.Threads = "4")))
     print("RUN HERE")
   }
 
-
+  parametersAltered
 }

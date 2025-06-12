@@ -64,28 +64,41 @@ SetParameters <- function(createdScenarios){
   }
   if(currentParameters$model == "OncoSim-breast"){
 
+    #Only need the original dispatcher
+    BreastScreeningUseLeanDispatcher = scenario$get_param("BreastScreeningUseLeanDispatcher")
+    BreastScreeningUseLeanDispatcher$Future_screening_era = FALSE
+    BreastScreeningUseLeanDispatcher$Past_screening_era = FALSE
+    scenario$set_param("BreastScreeningUseLeanDispatcher",BreastScreeningUseLeanDispatcher)
+
+
     if(currentParameters$type != "BaseCase"){
      #Set MCED Cost May have to change the other costs too?
+      
+    
+      
      costs <- scenario$get_param("BreastScreeningCosts")
      costs[costs$Breast_screening_modalities == "Alternative_modality_E",]$Cost_of_screen <- currentParameters$cost
      scenario$set_param("BreastScreeningCosts",costs)
       
+      
+
       #Set up parameters for how MCED screening works.
       screen_param <- scenario$get_param("BreastScreeningProtocolDispatcher")
       reference = screen_param$`3`[screen_param$Screening_era == "Future_screening_era"]
       screen_param$`5`[screen_param$Screening_era == "Future_screening_era"] <- reference
-      screen_param$`5`[screen_param$Screening_era == "Past_screening_era"] <- reference
 
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Visibility_prob_visible'] <- 1
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Minimum_recruit_age_integer'] <- currentParameters$startAge
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Maximum_recruit_age_integer'] <- currentParameters$endAge
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Recruitment_rate'] <- currentParameters$actualParticipation
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Rescreen_rate'] <- currentParameters$actualAdherence
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Protocol_to_be_used'] <- 1 
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_RTING_APPARATUS'] <- 8 #Alt modality E
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_L_MIN_FREQUENCY'] <- currentParameters$frequency
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_L_MAX_FREQUENCY'] <- currentParameters$frequency 
-      screen_param$`5`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_IN_RECRUIT_TIME'] <- 2025 
+      futureScreeningEra = screen_param$Screening_era == "Future_screening_era"
+
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Visibility_prob_visible'] <- 1
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Minimum_recruit_age_integer'] <- currentParameters$startAge
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Maximum_recruit_age_integer'] <- currentParameters$endAge
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Recruitment_rate'] <- currentParameters$actualParticipation
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Rescreen_rate'] <- currentParameters$actualAdherence
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='Protocol_to_be_used'] <- 1 
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_RTING_APPARATUS'] <- 8 #Alt modality E
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_L_MIN_FREQUENCY'] <- currentParameters$frequency
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_L_MAX_FREQUENCY'] <- currentParameters$frequency 
+      screen_param$`5`[futureScreeningEra & screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_IN_RECRUIT_TIME'] <- 2025 
 
       #Disable previous
       screen_param$`2`[screen_param$BREAST_SCREENI_x_CHARACTERISTICS=='BREAST_SCREENI_x_AX_RECRUIT_TIME'] <- 2025 

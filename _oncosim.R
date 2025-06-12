@@ -8,12 +8,10 @@ use_OpenMpp_CPAC()
 ## Source R files ----
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
-analysisName = "MCEDTesting"
+analysisName = "MCEDProject"
 
-#This number is added to scenario and run names to avoid collision
-
-modelsToUse <- c("OncoSim-breast","OncoSim-colorectal","OncoSim-cervical","OncoSim-lung")
-#modelsToUse <- c("OncoSim-breast")
+#modelsToUse <- c("OncoSim-breast","OncoSim-colorectal","OncoSim-cervical","OncoSim-lung")
+modelsToUse <- c("OncoSim-breast")
 
 
 

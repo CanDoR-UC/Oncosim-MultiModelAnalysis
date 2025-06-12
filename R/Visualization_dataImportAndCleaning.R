@@ -39,24 +39,6 @@ getCombinedTable <- function(tableName,modelType){
 }
 
 
-importNeededTables <- function(dataOutput){
-    allTables = list()
-
-    for(breastTable in outputTables["OncoSim-breast"][[1]]){
-        allTables[breastTable] = list(getCombinedTable(breastTable,"breast"))
-    }
-    for(colonTable in outputTables["OncoSim-colorectal"][[1]]){
-        allTables[colonTable] = list(getCombinedTable(colonTable,"colorectal"))
-    }
-    for(cervicalTable in outputTables["OncoSim-cervical"][[1]]){
-        allTables[cervicalTable] = list(getCombinedTable(cervicalTable,"cervical"))
-    }
-    for(lungTable in outputTables["OncoSim-lung"][[1]]){
-        allTables[lungTable] = list(getCombinedTable(lungTable,"lung"))
-    }
-    allTables
-}
-
 combineModelTables <- function(importedData){
 
     combinedTables <- list()

@@ -19,6 +19,8 @@ CleanUpOldVersions <- function(){
     }
 
   }
+  unlink("store_oncosim",recursive = TRUE)
+
 }
 
 CreateScenario <- function(currentParameters){
