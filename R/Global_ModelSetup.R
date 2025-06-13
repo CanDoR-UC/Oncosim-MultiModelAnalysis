@@ -9,7 +9,7 @@ outputTables <- list()
 outputTables["OncoSim-colorectal"] <- list(c("Colorectal_Cancer_Cases_Table","Colorectal_Cancer_Screen_Table","Colorectal_Cancer_ScreenState_Outcomes_Table","Colorectal_Cancer_ICER_Table","Colorectal_Cancer_ICER_Table_Discounted","Colorectal_Cancer_StageDist_Table"))
 outputTables["OncoSim-breast"] <- list(c("Breast_Cancer_Cases_Table","Breast_Cancer_Screen_Outcome_Modality_Table","Breast_Cancer_ICER_Table","Breast_Cancer_StageDist_AY_Table","Breast_Cancer_Screen_Outcome_EachSingleAge_Table","Breast_Cancer_Screen_Outcome_Positivity_Table","Breast_Cancer_Costs_Table","Breast_Cancer_ICER_Table_Discounted","Breast_Cancer_Screen_Outcome_Modality_Table"))
 outputTables["OncoSim-cervical"] <- list(c("Cervical_Cancer_Cases_Table","Cervical_Cancer_Timing_Of_Last_Screen","Cervical_Cancer_Costs_Table","Cervical_Cancer_ICER_Table","Hpv_Screening_Costs_Prov_Table","HPV_Colposcopy_Results_Table","Hpv_Screening_Costs_Age_Table","HPV_DNA_Results_Table"))
-outputTables["OncoSim-lung"] <- list(c("Lung_Cancer_Cases_Table","Lung_Cancer_ScreenCases_Year_Table","Lung_Cancer_Costs_Table","Lung_Cancer_ICER_Table"))
+outputTables["OncoSim-lung"] <- list(c("Lung_Cancer_Cases_Table","Lung_Cancer_ScreenCases_Year_Table","Lung_Cancer_Costs_Table","Lung_Cancer_ICER_Table","Lung_Cancer_Smoking_Cessation_Table","Lung_Cancer_StageDist_Table"))
 
 generateModelParameters <- function(modelsToUse){
     participationMultipliers = list()

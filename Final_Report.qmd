@@ -1,0 +1,24 @@
+---
+title: "MCED Project - Model Validation"
+author: "John Hutchinson"
+format:
+    html:
+        page-layout: full
+        embed-resources: true
+---
+
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(targets)
+
+
+
+importedData = tar_read(importedData,store="store_visualize")
+combinedTables = tar_read(combinedTables,store="store_visualize")
+
+
+```
+

@@ -1,3 +1,3 @@
-generateQuarto <- function(endpoint){
-  quarto_render("Report.qmd")
+generateQuarto <- function(document,endpoint){
+  quarto_render(document)
 }

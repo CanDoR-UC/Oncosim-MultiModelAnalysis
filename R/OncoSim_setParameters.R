@@ -5,6 +5,8 @@ SetParameters <- function(createdScenarios){
   currentParameters = createdScenarios
 
 
+  scenario$ReadOnly = FALSE
+
 
 
   if(currentParameters$model =="OncoSim-colorectal"){
@@ -143,31 +145,35 @@ SetParameters <- function(createdScenarios){
 
 
       dispatcher = scenario$get_param("HpvScreeningProtocolDispatcher")
+      futureScreeningEra = dispatcher$Screening_era == "Future_screening_era"
       dispatcher$`15` = dispatcher$`2`
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Visibility_prob_visible"] = 1
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("Minimum_recruit_age_integer","Minimum_re_screen_age_integer")] = currentParameters$startAge
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Maximum_recruit_age_integer"] = currentParameters$endAge
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_IN_RECRUIT_TIME","HPV_SCREENING_x_N_RESCREEN_TIME")] = 2025
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Recruitment_rate"] = currentParameters$actualParticipation
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Rescreen_rate"] = currentParameters$actualAdherence
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_L_MIN_FREQUENCY","HPV_SCREENING_x_L_MAX_FREQUENCY")] = currentParameters$frequency
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Protocol_to_be_used"] = 1
-      dispatcher$`15`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="HPV_SCREENING_x_RTING_APPARATUS"] = 1.1 # 1.1  1.1 : Cytology (PAP) with follow-up logic 1
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Visibility_prob_visible"] = 1
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("Minimum_recruit_age_integer","Minimum_re_screen_age_integer")] = currentParameters$startAge
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Maximum_recruit_age_integer"] = currentParameters$endAge
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_IN_RECRUIT_TIME","HPV_SCREENING_x_N_RESCREEN_TIME")] = 2025
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Recruitment_rate"] = currentParameters$actualParticipation
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Rescreen_rate"] = currentParameters$actualAdherence
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_L_MIN_FREQUENCY","HPV_SCREENING_x_L_MAX_FREQUENCY")] = currentParameters$frequency
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="Protocol_to_be_used"] = 1
+      dispatcher$`15`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS=="HPV_SCREENING_x_RTING_APPARATUS"] = 1.1 # 1.1  1.1 : Cytology (PAP) with follow-up logic 1
 
-      dispatcher$`2`[dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_AX_RECRUIT_TIME","HPV_SCREENING_x_X_RESCREEN_TIME")] = 2025
+      dispatcher$`2`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in% c("HPV_SCREENING_x_AX_RECRUIT_TIME","HPV_SCREENING_x_X_RESCREEN_TIME")] = 2025
 
 
       scenario$set_param("HpvScreeningProtocolDispatcher",dispatcher)
 
       sensSpec = scenario$get_param("CytologyResultCarcino")
-      sensSpec[5:12] = 0
-      sensSpec$All_cells_normal = 1
 
-      sensSpec$All_cells_normal[sensSpec$Progression_status == "No_infection_and_no_lesion"] = currentParameters$specificity#Probability of correctly saying that its negative (specificity)
-      sensSpec$Has_cervical_cancer[sensSpec$Progression_status == "No_infection_and_no_lesion"] = 1-currentParameters$specificity# 1- Probability of correctly saying that its negative (specificity)
+      sensSpecFilter = sensSpec$Sensitivity_era == "Future_sensitivity_era" & sensSpec$Cytology_type == "Conventional_cytology"
 
-      sensSpec$All_cells_normal[sensSpec$Progression_status== "Cervical_cancer"] = 1-currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
-      sensSpec$Has_cervical_cancer[sensSpec$Progression_status== "Cervical_cancer"] = currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
+      sensSpec[sensSpecFilter,][5:12] = 0
+      sensSpec[sensSpecFilter,]$All_cells_normal = 1
+
+      sensSpec$All_cells_normal[sensSpec$Progression_status == "No_infection_and_no_lesion"& sensSpecFilter] = currentParameters$specificity#Probability of correctly saying that its negative (specificity)
+      sensSpec$Has_cervical_cancer[sensSpec$Progression_status == "No_infection_and_no_lesion"& sensSpecFilter] = 1-currentParameters$specificity# 1- Probability of correctly saying that its negative (specificity)
+
+      sensSpec$All_cells_normal[sensSpec$Progression_status== "Cervical_cancer" & sensSpecFilter] = 1-currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
+      sensSpec$Has_cervical_cancer[sensSpec$Progression_status== "Cervical_cancer"& sensSpecFilter] = currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
       scenario$set_param("CytologyResultCarcino",sensSpec)
 
 
@@ -194,12 +200,6 @@ SetParameters <- function(createdScenarios){
     followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
     followUpProtocol[[1]] = "Custom"
     scenario$set_param("LungCancerScreenFollowupProtcol",followUpProtocol)
-
-    LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
-    #Enable screening
-    LcDispatcherDefault$`3`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_OCOL_VISIBILITY"] = 1
-    LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_OCOL_VISIBILITY"] = 1
-    scenario$set_param("LcDispatcherDefault",LcDispatcherDefault)
 
 
     if(currentParameters$type != "BaseCase"){
@@ -231,19 +231,23 @@ SetParameters <- function(createdScenarios){
 
       LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
-      #Only need one column. Blank out the other one
-      LcDispatcherDefault$`3`[LcDispatcherDefault$Characteristics_of_program=="Recruitment_end_year_integer"] = 2025
-      LcDispatcherDefault$`3`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_OCOL_VISIBILITY"] = 1
+      LcDispatcherDefault$`1` = LcDispatcherDefault$`0`
 
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_OCOL_VISIBILITY"] = 1
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MIN_RECRUIT_AGE"] = currentParameters$startAge
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MAX_SCREEN_AGE"] = currentParameters$endAge
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MAX_RECRUIT_AGE"] = currentParameters$endAge
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="Recruitment_start_year_integer"] = 2025
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_N_PARTICIPATION"] = currentParameters$actualParticipation
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program=="Rescreen_rate"] = currentParameters$actualAdherence
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_OCOL_VISIBILITY"] = 1
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MIN_RECRUIT_AGE"] = currentParameters$startAge
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MAX_SCREEN_AGE"] = currentParameters$endAge
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_MAX_RECRUIT_AGE"] = currentParameters$endAge
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="Recruitment_start_year_integer"] = 2025
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="Participation_rate_for_screening"] = currentParameters$actualParticipation
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="Rescreen_rate"] = currentParameters$actualAdherence
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_ECRUIT_ATTEMPTS"] = 1
 
-      LcDispatcherDefault$`2`[LcDispatcherDefault$Characteristics_of_program %in% c("LUNG_SCREENING_x_ST_SEQ_HIGHRISK","LUNG_SCREENING_x_ND_SEQ_HIGHRISK","LUNG_SCREENING_x_EQ_VERYHIGHRISK","LUNG_SCREENING_x_EQ_VERYHIEnum22")] = currentParameters$frequency
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program=="LUNG_SCREENING_x_N_PARTICIPATION"] = 0
+
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program %in% c("LUNG_SCREENING_x_ST_SEQ_HIGHRISK","LUNG_SCREENING_x_ND_SEQ_HIGHRISK","LUNG_SCREENING_x_EQ_VERYHIGHRISK","LUNG_SCREENING_x_EQ_VERYHIEnum22")] = currentParameters$frequency
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program %in% c("LUNG_SCREENING_x_ST_SEQ_HIEnum17","LUNG_SCREENING_x_ND_SEQ_HIEnum19","LUNG_SCREENING_x_EQ_VERYHIEnum21","LUNG_SCREENING_x_EQ_VERYHIEnum23")] = 99
+      LcDispatcherDefault$`0`[LcDispatcherDefault$Characteristics_of_program %in% c("LUNG_SCREENING_x_OTHER_PHASE_IN","LUNG_SCREENING_x_FIRST_PHASE_IN")] = 0
+
       scenario$set_param("LcDispatcherDefault",LcDispatcherDefault)
 
     }
