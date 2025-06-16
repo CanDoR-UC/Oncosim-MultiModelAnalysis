@@ -1,3 +1,3 @@
-generateQuarto <- function(document,endpoint){
-  quarto_render(document)
+generateQuarto <- function(document, endpoint) {
+	quarto_render(document)
 }

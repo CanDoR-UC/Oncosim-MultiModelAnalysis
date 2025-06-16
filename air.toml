@@ -1,0 +1,9 @@
+[format]
+line-width = 320
+indent-width = 2
+indent-style = "tab"
+line-ending = "lf"
+persistent-line-breaks = true
+exclude = []
+default-exclude = true
+skip = []
