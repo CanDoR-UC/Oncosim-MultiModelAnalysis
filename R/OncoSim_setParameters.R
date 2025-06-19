@@ -252,6 +252,17 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-cervical") {
+		#Use regular (not lean) dispatcher
+		HpvScreeningUseLeanDispatcher = scenario$get_param(
+			"HpvScreeningUseLeanDispatcher"
+		)
+		HpvScreeningUseLeanDispatcher$Future_screening_era = FALSE
+		HpvScreeningUseLeanDispatcher$Past_screening_era = FALSE
+		scenario$set_param(
+			"HpvScreeningUseLeanDispatcher",
+			HpvScreeningUseLeanDispatcher
+		)
+
 		if (currentParameters$type != "BaseCase") {
 			#Set pap Cost to what we need. Only the initial
 			testCosts = scenario$get_param("HpvScreeningPreCancerTreatmentCosts")
@@ -262,25 +273,25 @@ SetParameters <- function(createdScenarios) {
 			dispatcher = scenario$get_param("HpvScreeningProtocolDispatcher")
 			futureScreeningEra = dispatcher$Screening_era == "Future_screening_era"
 
-			dispatcher$`15` = dispatcher$`2`
+			dispatcher$`1`[futureScreeningEra] = dispatcher$`2`[futureScreeningEra]
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Visibility_prob_visible"
 			] = 1
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
 						c("Minimum_recruit_age_integer", "Minimum_re_screen_age_integer")
 			] = currentParameters$startAge
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_recruit_age_integer"
 			] = currentParameters$endAge
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
 						c(
@@ -289,17 +300,17 @@ SetParameters <- function(createdScenarios) {
 						)
 			] = 2025
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Recruitment_rate"
 			] = currentParameters$actualParticipation
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Rescreen_rate"
 			] = currentParameters$actualAdherence
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
 						c(
@@ -308,21 +319,36 @@ SetParameters <- function(createdScenarios) {
 						)
 			] = currentParameters$frequency
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Protocol_to_be_used"
-			] = 1
+			] = 5 #Protocol 5 is overriden for MCED
 
-			dispatcher$`15`[
+			dispatcher$`1`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_RTING_APPARATUS"
 			] = 1.1 # 1.1  1.1 : Cytology (PAP) with follow-up logic 1
 
+			#End current screening at 2025
 			dispatcher$`2`[
 				futureScreeningEra &
 					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
 						c(
 							"HPV_SCREENING_x_AX_RECRUIT_TIME",
+							"HPV_SCREENING_x_X_RESCREEN_TIME"
+						)
+			] = 2025
+			dispatcher$`0`[
+				futureScreeningEra &
+					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
+						c(
+							"HPV_SCREENING_x_X_RESCREEN_TIME" #
+						)
+			] = 2025
+			dispatcher$`6`[
+				futureScreeningEra &
+					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
+						c(
 							"HPV_SCREENING_x_X_RESCREEN_TIME"
 						)
 			] = 2025
@@ -335,46 +361,55 @@ SetParameters <- function(createdScenarios) {
 				sensSpec$Cytology_type == "Conventional_cytology"
 
 			sensSpec[sensSpecFilter, ][5:12] = 0
-			sensSpec[sensSpecFilter, ]$All_cells_normal = 1
 
 			sensSpec$All_cells_normal[
 				sensSpec$Progression_status == "No_infection_and_no_lesion" &
 					sensSpecFilter
-			] = currentParameters$specificity #Probability of correctly saying that its negative (specificity)
+			] = currentParameters$specificity * 100 #Probability of correctly saying that its negative (specificity)
 
 			sensSpec$Has_cervical_cancer[
 				sensSpec$Progression_status == "No_infection_and_no_lesion" &
 					sensSpecFilter
-			] = 1 - currentParameters$specificity # 1- Probability of correctly saying that its negative (specificity)
+			] = (1 - currentParameters$specificity) * 100 # 1- Probability of correctly saying that its negative (specificity)
 
 			sensSpec$All_cells_normal[
 				sensSpec$Progression_status == "Cervical_cancer" & sensSpecFilter
-			] = 1 - currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
+			] = (1 - currentParameters$sensitivity) * 100 #1- Probability of correctly sayign there is cervical cancer (sensitivity)
 
 			sensSpec$Has_cervical_cancer[
 				sensSpec$Progression_status == "Cervical_cancer" & sensSpecFilter
-			] = currentParameters$sensitivity #1- Probability of correctly sayign there is cervical cancer (sensitivity)
+			] = currentParameters$sensitivity * 100 #1- Probability of correctly sayign there is cervical cancer (sensitivity)
+
 			scenario$set_param("CytologyResultCarcino", sensSpec)
 
-			FollowUpCytologyProtocol = scenario$get_param("FollowUpCytologyProtocol1")
+			FollowUpCytologyProtocol = scenario$get_param("FollowUpCytologyProtocol5")
+
+			normalResultFilter = FollowUpCytologyProtocol$Outcome_of_the_test_treatment > 0 & FollowUpCytologyProtocol$Outcome_of_the_test_treatment != 8 & FollowUpCytologyProtocol$Follow_up_logics == "Follow_up_logic_1"
 			#MCED only detects cancer or no cancer. Meaning that all non-cancer findings must be referred to the "all-cells normal" pipeline
-			FollowUpCytologyProtocol$Outcome_of_the_test_treatment = 1
+			FollowUpCytologyProtocol$Apparatus_used_in_the_follow_up[normalResultFilter] = 1.1
+			FollowUpCytologyProtocol$Lower_bound_for_follow_up_time[normalResultFilter] = 0
+			FollowUpCytologyProtocol$Upper_bound_for_follow_up_time[normalResultFilter] = 0
+			FollowUpCytologyProtocol$HPV_SCREENING_x_E_MEAN_LOCATION[normalResultFilter] = 0
+			FollowUpCytologyProtocol$Negative_results_sought[normalResultFilter] = 0
 
-			#May have to recheck
+			#Try to match Protocol 1
 			FollowUpCytologyProtocol[
-				FollowUpCytologyProtocol$Follow_up_element == 7,
-			]$Outcome_of_the_test_treatment = 8
-
-			FollowUpCytologyProtocol[
-				FollowUpCytologyProtocol$Follow_up_element == 8,
-			]$Outcome_of_the_test_treatment = 8
-
-			#Colposcopy should always follow. Never go back to pap after detection
-			FollowUpCytologyProtocol[
-				FollowUpCytologyProtocol$Follow_up_element == 1,
+				FollowUpCytologyProtocol$Follow_up_element == 8 & FollowUpCytologyProtocol$Follow_up_logics == "Follow_up_logic_1",
 			]$Apparatus_used_in_the_follow_up = 3.2
 
-			scenario$set_param("FollowUpCytologyProtocol1", FollowUpCytologyProtocol)
+			#Use extra row for outcome 2 for 8. (If theres a positive test, MCED should continue unaltered)
+			FollowUpCytologyProtocol[
+				FollowUpCytologyProtocol$Follow_up_element == 2 & FollowUpCytologyProtocol$Follow_up_logics == "Follow_up_logic_1",
+			]$Probability_of_this_follow_up = 1
+			FollowUpCytologyProtocol[
+				FollowUpCytologyProtocol$Follow_up_element == 2 & FollowUpCytologyProtocol$Follow_up_logics == "Follow_up_logic_1",
+			]$Outcome_of_the_test_treatment = 8
+
+			FollowUpCytologyProtocol[
+				FollowUpCytologyProtocol$Follow_up_element == 1 & FollowUpCytologyProtocol$Follow_up_logics == "Follow_up_logic_1",
+			]$Probability_of_this_follow_up = 1
+
+			scenario$set_param("FollowUpCytologyProtocol5", FollowUpCytologyProtocol)
 		}
 	}
 
@@ -383,6 +418,26 @@ SetParameters <- function(createdScenarios) {
 		followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
 		followUpProtocol[[1]] = "Custom"
 		scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
+
+		LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
+
+		LcDispatcherDefault$`0`[
+			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
+		] = 1
+		LcDispatcherDefault$`0`[
+			LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
+		] = 0.05
+		LcDispatcherDefault$`0`[
+			LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
+		] = 2000
+		LcDispatcherDefault$`0`[
+			LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+		] = 2025
+		LcDispatcherDefault$`0`[
+			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+		] = 2025
+
+		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 
 		if (currentParameters$type != "BaseCase") {
 			LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
@@ -435,6 +490,12 @@ SetParameters <- function(createdScenarios) {
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
 			] = 2025
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+			] = 9999
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+			] = 9999
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
 			] = currentParameters$actualParticipation

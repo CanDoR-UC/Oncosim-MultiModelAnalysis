@@ -15,7 +15,7 @@ purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 downloadOncoSimRuns = TRUE
 
 list(
-	tar_target(previousRunOutputs, tar_read(runScenarios, store = "store_oncosim")),
+	tar_target(previousRunOutputs, tar_read(parametersAltered, store = "store_oncosim")),
 	tar_target(importedData, outputAllTables(previousRunOutputs)),
 	tar_target(combinedTables, combineModelTables(importedData)),
 	tar_target(generateValidationReport, generateQuarto("Validation_Report.qmd", combinedTables)),

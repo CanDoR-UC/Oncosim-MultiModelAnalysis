@@ -52,7 +52,6 @@ tar_visnetwork(targets_only = TRUE, store = "store_oncosim", script = "_oncosim.
 tar_visnetwork(targets_only = TRUE, store = "store_visualize", script = "_visualize.R")
 ```
 
-
 ::: {.panel-tabset}
 
 # Breast - Validation
@@ -307,8 +306,8 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
 #| echo: false
 #| warning: false
 
-cervicalScreens <- importedData$HPV_Colposcopy_Results_Table %>%
-	filter(expr_name == "Colposcopy_count", Shiftable_year %in% 2020:2050, Colposcopy_results == "all", Age_group == "all") %>%
+cervicalScreens <- importedData$Hpv_Screening_Costs_Prov_Table %>%
+	filter(expr_name == "Primary_cytology_screening_count", Shiftable_year %in% 2020:2050, Hackable_province == "all", Sex == "all") %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
@@ -316,11 +315,11 @@ cervicalScreens <- cervicalScreens %>% filter(formattedName %in% c("CancerSeek\n
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalScreens) +
 	geom_line() +
-	ggtitle("Colposcopy_count")
+	ggtitle("Primary_cytology_screening_count")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalScreens) +
 	geom_smooth() +
-	ggtitle("Colposcopy_count - Smooth")
+	ggtitle("Primary_cytology_screening_count - Smooth")
 
 ```
 
@@ -387,8 +386,30 @@ PrimaryTable <- combinedTables$PrimaryTable
 PrimaryTable <- PrimaryTable %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 
+PrimaryTable$SexAdjustedScreens <- PrimaryTable$Total_Screens
+
+
+PrimaryTable$SexAdjustedScreens[PrimaryTable$cancertype %in% c("breast", "cervical")] <- PrimaryTable$SexAdjustedScreens[PrimaryTable$cancertype %in% c("breast", "cervical")] * 2
+
+
 ggplot(aes(x = Shiftable_year, y = Total_Screens, colour = cancertype), data = PrimaryTable) +
-	facet_grid(vars(sce)) +
+	facet_grid(vars(sce), scales = "free") +
+	geom_line()
+
+ggplot(aes(x = Shiftable_year, y = SexAdjustedScreens, colour = cancertype), data = PrimaryTable) +
+	facet_grid(vars(sce), scales = "free") +
+	geom_line()
+
+ggplot(aes(x = Shiftable_year, y = Cancer_Deaths, colour = sce), data = PrimaryTable) +
+	facet_grid(vars(cancertype), scales = "free") +
+	geom_line()
+
+ggplot(aes(x = Shiftable_year, y = Detected_Cases, colour = sce), data = PrimaryTable) +
+	facet_grid(vars(cancertype), scales = "free") +
+	geom_line()
+
+ggplot(aes(x = Shiftable_year, y = Screening_Cost, colour = sce), data = PrimaryTable) +
+	facet_grid(vars(cancertype), scales = "free") +
 	geom_line()
 
 ```

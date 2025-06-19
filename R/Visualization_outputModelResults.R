@@ -2,9 +2,9 @@
 outputAllTables <- function(previousRunOutputs) {
 	if (downloadOncoSimRuns) {
 		openmpp::use_OpenMpp_CPAC()
-		unlink("Output", recursive = TRUE)
-
-		for (modelToUse in c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast", "OncoSim-cervical")) {
+		#unlink("Output", recursive = TRUE)
+		#"OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast",
+		for (modelToUse in c("OncoSim-cervical")) {
 			model = load_model(modelToUse)
 
 			outputDirectory <- paste("Output", sep = "")
@@ -24,6 +24,7 @@ outputAllTables <- function(previousRunOutputs) {
 				scenario <- load_scenario(modelToUse, scenarioName)
 
 				specificScenarioDir <- paste(scenarioDirectory, "/", scenarioName, sep = "")
+				unlink(specificScenarioDir, recursive = TRUE)
 				dir.create(specificScenarioDir, showWarnings = FALSE)
 
 				for (table in paramsToAlter[modelToUse][[1]]) {
@@ -43,6 +44,7 @@ outputAllTables <- function(previousRunOutputs) {
 				model <- load_run(modelToUse, allRunTable[allRunTable$Name == runName, ]$RunDigest)
 
 				specificRunDir <- paste(runDirectory, "/", runName, sep = "")
+				unlink(specificRunDir, recursive = TRUE)
 				dir.create(specificRunDir, showWarnings = FALSE)
 				model$write_tables(specificRunDir)
 			}

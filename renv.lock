@@ -211,6 +211,42 @@
       "Maintainer": "Dirk Eddelbuettel <edd@debian.org>",
       "Repository": "CRAN"
     },
+    "V8": {
+      "Package": "V8",
+      "Version": "6.0.4",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Embedded JavaScript and WebAssembly Engine for R",
+      "Authors@R": "c( person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\", comment = c(ORCID = \"0000-0002-4035-0289\")), person(\"Jan Marvin\", \"Garbuszus\", role = \"ctb\"))",
+      "Description": "An R interface to V8 <https://v8.dev>: Google's open source JavaScript and WebAssembly engine. This package can be compiled either with V8 version 6  and up or NodeJS when built as a shared library.",
+      "License": "MIT + file LICENSE",
+      "URL": "https://jeroen.r-universe.dev/V8",
+      "BugReports": "https://github.com/jeroen/v8/issues",
+      "SystemRequirements": "V8 engine version 6+ is needed for ES6 and WASM support. On Linux you can build against libv8-dev (Debian) or v8-devel (Fedora). We also provide static libv8 binaries for most platforms, see the README for details.",
+      "NeedsCompilation": "yes",
+      "VignetteBuilder": "knitr",
+      "Imports": [
+        "Rcpp (>= 0.12.12)",
+        "jsonlite (>= 1.0)",
+        "curl (>= 1.0)",
+        "utils"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "Suggests": [
+        "testthat",
+        "knitr",
+        "rmarkdown"
+      ],
+      "RoxygenNote": "7.3.1",
+      "Language": "en-US",
+      "Encoding": "UTF-8",
+      "Biarch": "true",
+      "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>), Jan Marvin Garbuszus [ctb]",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+      "Repository": "CRAN"
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.2.1",
@@ -922,6 +958,30 @@
       "NeedsCompilation": "yes",
       "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>), Hadley Wickham [ctb], Posit Software, PBC [cph]",
       "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+      "Repository": "CRAN"
+    },
+    "daff": {
+      "Package": "daff",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Title": "Diff, Patch and Merge for Data.frames",
+      "Authors@R": "c( person(\"Paul\", \"Fitzpatrick\", email=\"paul@robotrebuilt.com\", role=c(\"aut\"), comment=\"JavaScript original, http://paulfitz.github.io/daff/\"), person(\"Edwin\", \"de Jonge\", email=\"edwindjonge@gmail.com\", role=c(\"aut\",\"cre\"), comment=c(\"R wrapper\", ORCID=\"0000-0002-6580-4718\")), person( c(\"Gregory\", \"R.\"), \"Warnes\", email=\"gwarnes@mdsol.com\", role=c(\"aut\")) )",
+      "Description": "Diff, patch and merge for data frames. Document changes in data sets and use them to apply patches. Changes to data can be made visible by using render_diff(). The 'V8' package is used to wrap the 'daff.js' 'JavaScript' library which is included in the package.",
+      "License": "MIT + file LICENSE",
+      "Imports": [
+        "V8 (>= 0.6)",
+        "jsonlite",
+        "utils"
+      ],
+      "URL": "https://github.com/edwindj/daff",
+      "Suggests": [
+        "testthat"
+      ],
+      "RoxygenNote": "7.2.3",
+      "Encoding": "UTF-8",
+      "NeedsCompilation": "no",
+      "Author": "Paul Fitzpatrick [aut] (JavaScript original, http://paulfitz.github.io/daff/), Edwin de Jonge [aut, cre] (R wrapper, <https://orcid.org/0000-0002-6580-4718>), Gregory R. Warnes [aut]",
+      "Maintainer": "Edwin de Jonge <edwindjonge@gmail.com>",
       "Repository": "CRAN"
     },
     "data.table": {

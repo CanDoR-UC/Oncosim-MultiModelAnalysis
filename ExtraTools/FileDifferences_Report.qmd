@@ -1,0 +1,49 @@
+
+---
+title: "MCED Project - OncoSim Change Summary"
+author: "John Hutchinson"
+format:
+    html:
+        grid:
+          body-width: 1920px
+        embed-resources: true
+---
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+
+sourceDir <- "Output/Scenarios/"
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: asis
+
+library(daff)
+
+sourceDir <- "../Output/Scenarios/"
+model <- "OncoSim-cervical"
+specificScenario <- "cervical_45_3_90_CancerSeek"
+referenceScenario <- "cervical_BaseCase"
+
+scenarioDirectories <- list.dirs(sourceDir)
+
+specificScenarioPath <- scenarioDirectories[grepl(specificScenario, scenarioDirectories)]
+referenceScenarioPath <- scenarioDirectories[grepl(referenceScenario, scenarioDirectories)]
+
+
+for (parameter in list.files(specificScenarioPath)) {
+  currentParamTable <- read.csv(file.path(specificScenarioPath, parameter))
+  currentRefTable <- read.csv(file.path(referenceScenarioPath, parameter))
+
+  cat(render_diff(diff_data(currentRefTable, currentParamTable), title = paste(referenceScenario, specificScenario)))
+  cat("  \n\n")
+}
+
+```
+

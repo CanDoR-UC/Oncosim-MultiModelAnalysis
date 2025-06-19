@@ -51,7 +51,7 @@ combineModelTables <- function(importedData) {
 
 	exprRename["Number_of_breast_cancer_screens"] = "Total_Screens"
 	exprRename["Total_screens_x_iple_per_visit"] = "Total_Screens"
-	exprRename["Colposcopy_count"] = "Total_Screens"
+	exprRename["Primary_cytology_screening_count"] = "Total_Screens"
 	exprRename["Total_screens_attended"] = "Total_Screens"
 
 	exprRename["Total_cost_as_x_and_treatment"] = "Total_Cost"
@@ -78,7 +78,7 @@ combineModelTables <- function(importedData) {
 	colorectalICERTable = importedData$Colorectal_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_sc_x_ng_treatment", "Cost_of_screen_x_reen_positives", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
 
 	cervicalCasesTable = importedData$Cervical_Cancer_Cases_Table %>% filter(expr_name %in% c("Cervical_cance_x_ected_by_screen", "Deaths_cause_specific"), Hackable_province == "all", Shiftable_year %in% 2015:2051) %>% select(-Hackable_province)
-	cervicalScreenTable = importedData$Hpv_Screening_Costs_Age_Table %>% filter(expr_name %in% c("Colposcopy_count"), age_group == "all", Shiftable_year != "all") %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-age_group)
+	cervicalScreenTable = importedData$Hpv_Screening_Costs_Prov_Table %>% filter(expr_name %in% c("Primary_cytology_screening_count"), Sex == "all", Hackable_province == "all", Shiftable_year %in% 2015:2051) %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-c(Hackable_province, Sex))
 	cervicalICERTable = importedData$Cervical_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_va_x_all_treatment", "Cost_of_screening", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
 
 	lungCasesTable = importedData$Lung_Cancer_ScreenCases_Year_Table %>% filter(expr_name %in% c("Screen_detecte_x_over_detected", "Lung_cancer_deaths", "Total_screens_attended"), Hackable_province == "all", Year != "all") %>% mutate(Shiftable_year = as.numeric(Year)) %>% select(-c(Hackable_province, Year))
@@ -100,6 +100,7 @@ combineModelTables <- function(importedData) {
 		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Detected_Cases), Total_Screens = mean(Detected_Cases), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
 		mutate(cancertype = "Combined") #Total cost may be entirely wrong
 
+	combinedTable = bind_rows(combinedTable, combinedTableAllCancer)
 	combinedTables["PrimaryTable"] = list(combinedTable)
 
 	#Need to figure out a way to isolate by sex
