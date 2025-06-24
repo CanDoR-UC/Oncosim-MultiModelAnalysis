@@ -27,9 +27,9 @@ sourceDir <- "Output/Scenarios/"
 library(daff)
 
 sourceDir <- "../Output/Scenarios/"
-model <- "OncoSim-cervical"
-specificScenario <- "cervical_45_3_90_CancerSeek"
-referenceScenario <- "cervical_BaseCase"
+model <- "OncoSim-lung"
+specificScenario <- "lung_45_3_90_CancerSeek"
+referenceScenario <- "lung_BaseCase"
 
 scenarioDirectories <- list.dirs(sourceDir)
 
@@ -38,11 +38,11 @@ referenceScenarioPath <- scenarioDirectories[grepl(referenceScenario, scenarioDi
 
 
 for (parameter in list.files(specificScenarioPath)) {
-  currentParamTable <- read.csv(file.path(specificScenarioPath, parameter))
-  currentRefTable <- read.csv(file.path(referenceScenarioPath, parameter))
+	currentParamTable <- read.csv(file.path(specificScenarioPath, parameter))
+	currentRefTable <- read.csv(file.path(referenceScenarioPath, parameter))
 
-  cat(render_diff(diff_data(currentRefTable, currentParamTable), title = paste(referenceScenario, specificScenario)))
-  cat("  \n\n")
+	cat(render_diff(diff_data(currentRefTable, currentParamTable), title = paste(referenceScenario, specificScenario)))
+	cat("  \n\n")
 }
 
 ```

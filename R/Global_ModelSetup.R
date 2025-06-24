@@ -23,7 +23,8 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungCancerScreenFollowupProtcol",
 	"LcDispatcherDefault",
 	"LungRadsScreenRegularDist",
-	"LcScreenCost"
+	"LcScreenCost",
+	"LcScreenEligibilityRiskThreshold"
 ))
 
 outputTables <- list()
@@ -34,7 +35,9 @@ outputTables["OncoSim-colorectal"] <- list(c(
 	"Colorectal_Cancer_ScreenState_Outcomes_Table",
 	"Colorectal_Cancer_ICER_Table",
 	"Colorectal_Cancer_ICER_Table_Discounted",
-	"Colorectal_Cancer_StageDist_Table"
+	"Colorectal_Cancer_StageDist_Table",
+	"Colorectal_Cancer_Screen_Table_By_FH",
+	"Colorectal_Cancer_Timing_Of_Last_Screen"
 ))
 outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Cases_Table",
@@ -63,7 +66,8 @@ outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Costs_Table",
 	"Lung_Cancer_ICER_Table",
 	"Lung_Cancer_Smoking_Cessation_Table",
-	"Lung_Cancer_StageDist_Table"
+	"Lung_Cancer_StageDist_Table",
+	"Lung_Cancer_Timing_Of_Last_Screen"
 ))
 
 generateModelParameters <- function(modelsToUse) {

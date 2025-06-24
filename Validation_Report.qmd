@@ -62,19 +62,19 @@ tar_visnetwork(targets_only = TRUE, store = "store_visualize", script = "_visual
 #| warning: false
 
 breastScreening <- importedData$Breast_Cancer_Screen_Outcome_Modality_Table %>%
-	filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("Digital_radiography_mammogram", "Alternative_modality_E"), Age == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("Digital_radiography_mammogram", "Alternative_modality_E"), Age == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 breastScreening <- breastScreening %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastScreening) +
-	facet_grid(vars(Breast_screening_modalities), scales = "free") +
-	geom_line()
+  facet_grid(vars(Breast_screening_modalities), scales = "free") +
+  geom_line()
 
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = Breast_screening_modalities), data = breastScreening) +
-	facet_grid(vars(sce), scales = "free") +
-	geom_smooth()
+  facet_grid(vars(sce), scales = "free") +
+  geom_smooth()
 
 ```
 
@@ -85,14 +85,14 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = Breast_screening_modalit
 #| warning: false
 
 breastScreening2 <- importedData$Breast_Cancer_Screen_Outcome_Modality_Table %>%
-	filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("all", "Alternative_modality_E"), Age == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("all", "Alternative_modality_E"), Age == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 breastScreening2 <- breastScreening2 %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = Breast_screening_modalities), data = breastScreening2) +
-	facet_grid(vars(sce), scales = "free") +
-	geom_line()
+  facet_grid(vars(sce), scales = "free") +
+  geom_line()
 
 
 ```
@@ -104,18 +104,18 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = Breast_screening_modalit
 #| warning: false
 
 detections <- importedData$Breast_Cancer_Cases_Table %>%
-	filter(expr_name == "Breast_cancer_detected_by_screen", Hackable_province == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Breast_cancer_detected_by_screen", Hackable_province == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 detections <- detections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = detections) +
-	geom_line() +
-	ggtitle("Breast_cancer_detected_by_screen")
+  geom_line() +
+  ggtitle("Breast_cancer_detected_by_screen")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = detections) +
-	geom_smooth() +
-	ggtitle("Breast_cancer_detected_by_screen - Smooth")
+  geom_smooth() +
+  ggtitle("Breast_cancer_detected_by_screen - Smooth")
 ```
 
 **MCED should be more expensive than conventional. Galleri should be the most expensive**
@@ -125,18 +125,18 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = detections)
 #| warning: false
 
 breastCost <- importedData$Breast_Cancer_Costs_Table %>%
-	filter(expr_name == "Cost_of_screening", Hackable_province == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Cost_of_screening", Hackable_province == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 breastCost <- breastCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost) +
-	geom_line() +
-	ggtitle("Cost_of_screening")
+  geom_line() +
+  ggtitle("Cost_of_screening")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost) +
-	geom_smooth() +
-	ggtitle("Cost_of_screening - Smooth")
+  geom_smooth() +
+  ggtitle("Cost_of_screening - Smooth")
 ```
 
 # Colorectal - Validation
@@ -148,15 +148,15 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost)
 #| warning: false
 
 colonScreening <- importedData$Colorectal_Cancer_Screen_Table %>%
-	filter(expr_name %in% c("Screens_by_FOBT", "Screens_by_FIT"), Hackable_province == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name %in% c("Screens_by_FOBT", "Screens_by_FIT"), Hackable_province == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 colonScreening <- colonScreening %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonScreening) +
-	scale_y_continuous(labels = scales::number) +
-	facet_grid(vars(expr_name), scales = "free") +
-	geom_line()
+  scale_y_continuous(labels = scales::number) +
+  facet_grid(vars(expr_name), scales = "free") +
+  geom_line()
 
 ```
 
@@ -167,15 +167,36 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonScreen
 #| warning: false
 
 colonScreening2 <- importedData$Colorectal_Cancer_Screen_Table %>%
-	filter(expr_name %in% c("Screens_by_FOBT", "Total_screens_x_iple_per_visit"), Hackable_province == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name %in% c("Screens_by_FOBT", "Total_screens_x_iple_per_visit"), Hackable_province == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 colonScreening2 <- colonScreening2 %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = expr_name), data = colonScreening2) +
-	scale_y_continuous(labels = scales::number) +
-	facet_grid(vars(sce), scales = "free") +
-	geom_line()
+  scale_y_continuous(labels = scales::number) +
+  facet_grid(vars(sce), scales = "free") +
+  geom_line()
+
+```
+
+
+**Screening should approximate 90%.**
+```{r}
+#| echo: false
+#| warning: false
+
+# Including only 50-75 for simplicity
+participation <- importedData$Colorectal_Cancer_Timing_Of_Last_Screen %>%
+  filter(Colorectal_cancer_family_history == "all", age_group %in% c("[50,60)", "[60,70)", "[70,75)"), Time_of_last_screen_years %in% c("Last_screen_within_0_1", "Last_screen_within_1_2", "Last_screen_within_2_3", "all"), Shiftable_year != "all") %>%
+  group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
+  summarize(expr_value = sum(expr_value)) %>%
+  pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+  mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, Shiftable_year = as.numeric(Shiftable_year))
+
+
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
+  scale_y_continuous(labels = scales::number) +
+  geom_line()
 
 ```
 
@@ -187,19 +208,19 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = expr_name), data = colon
 #| warning: false
 
 colonDetections <- importedData$Colorectal_Cancer_Screen_Table %>%
-	filter(expr_name %in% c("Screen_detected_cancers"), Hackable_province == "all", Shiftable_year != "all", ) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name %in% c("Screen_detected_cancers"), Hackable_province == "all", Shiftable_year != "all", ) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
 colonDetections <- colonDetections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonDetections) +
-	geom_line() +
-	ggtitle("Screen_detected_cancers")
+  geom_line() +
+  ggtitle("Screen_detected_cancers")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonDetections) +
-	geom_smooth() +
-	ggtitle("Screen_detected_cancers - Smooth")
+  geom_smooth() +
+  ggtitle("Screen_detected_cancers - Smooth")
 
 ```
 
@@ -210,18 +231,18 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonDetect
 #| warning: false
 
 colonCost <- importedData$Colorectal_Cancer_ICER_Table %>%
-	filter(expr_name == "Cost_of_screen_x_nical_diagnosis", Shiftable_year %in% 2020:2050) %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Cost_of_screen_x_nical_diagnosis", Shiftable_year %in% 2020:2050) %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 colonCost <- colonCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonCost) +
-	geom_line() +
-	ggtitle("Cost_of_screen_x_nical_diagnosis")
+  geom_line() +
+  ggtitle("Cost_of_screen_x_nical_diagnosis")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonCost) +
-	geom_smooth() +
-	ggtitle("Cost_of_screen_x_nical_diagnosis - Smooth")
+  geom_smooth() +
+  ggtitle("Cost_of_screen_x_nical_diagnosis - Smooth")
 ```
 
 # Lung - Validation
@@ -234,21 +255,43 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonCost) 
 #| warning: false
 
 lungScreens <- importedData$Lung_Cancer_ScreenCases_Year_Table %>%
-	filter(expr_name == "Total_screens_attended", Year %in% 2020:2050, Hackable_province == "all") %>%
-	mutate(Year = as.numeric(Year))
+  filter(expr_name == "Total_screens_attended", Year %in% 2020:2050, Hackable_province == "all") %>%
+  mutate(Year = as.numeric(Year))
 
 
 lungScreens <- lungScreens %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungScreens) +
-	geom_line() +
-	ggtitle("Total_screens_attended")
+  geom_line() +
+  ggtitle("Total_screens_attended")
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungScreens) +
-	geom_smooth() +
-	ggtitle("Total_screens_attended - Smooth")
+  geom_smooth() +
+  ggtitle("Total_screens_attended - Smooth")
 
 ```
+
+
+**Screening should approximate 90%.**
+```{r}
+#| echo: false
+#| warning: false
+
+# Including only 50-75 for simplicity
+participation <- importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
+  filter(age_group %in% c("[50,60)", "[60,70)", "[70,75)"), Time_of_last_screen_years %in% c("Last_screen_within_0_1", "Last_screen_within_1_2", "Last_screen_within_2_3", "all", "Never_screened"), Shiftable_year != "all") %>%
+  group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
+  summarize(expr_value = sum(expr_value)) %>%
+  pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+  mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedEver = 1 - (Never_screened / all), Shiftable_year = as.numeric(Shiftable_year))
+
+
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
+  scale_y_continuous(labels = scales::number) +
+  geom_line()
+
+```
+
 
 **Cancer detections should be different between Galleri and CancerSeek. Galleri should be higher**
 
@@ -258,19 +301,19 @@ ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungScreens) +
 #| warning: false
 
 lungDetections <- importedData$Lung_Cancer_ScreenCases_Year_Table %>%
-	filter(expr_name == "Screen_detecte_x_over_detected", Year %in% 2020:2050, Hackable_province == "all") %>%
-	mutate(Year = as.numeric(Year))
+  filter(expr_name == "Screen_detecte_x_over_detected", Year %in% 2020:2050, Hackable_province == "all") %>%
+  mutate(Year = as.numeric(Year))
 
 
 lungDetections <- lungDetections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungDetections) +
-	geom_line() +
-	ggtitle("Screen_detecte_x_over_detected")
+  geom_line() +
+  ggtitle("Screen_detecte_x_over_detected")
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungDetections) +
-	geom_smooth() +
-	ggtitle("Screen_detecte_x_over_detected - Smooth")
+  geom_smooth() +
+  ggtitle("Screen_detecte_x_over_detected - Smooth")
 
 ```
 
@@ -280,19 +323,19 @@ ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungDetections) +
 #| warning: false
 
 lungCost <- importedData$Lung_Cancer_ICER_Table %>%
-	filter(expr_name == "Cost_of_screen_x_tected_cancers", Shiftable_year %in% 2020:2050, lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all", Province == "all") %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Cost_of_screen_x_tected_cancers", Shiftable_year %in% 2020:2050, lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all", Province == "all") %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
 lungCost <- lungCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
-	geom_line() +
-	ggtitle("Cost_of_screen_x_tected_cancers")
+  geom_line() +
+  ggtitle("Cost_of_screen_x_tected_cancers")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
-	geom_smooth() +
-	ggtitle("Cost_of_screen_x_tected_cancers - Smooth")
+  geom_smooth() +
+  ggtitle("Cost_of_screen_x_tected_cancers - Smooth")
 
 ```
 
@@ -307,19 +350,19 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
 #| warning: false
 
 cervicalScreens <- importedData$Hpv_Screening_Costs_Prov_Table %>%
-	filter(expr_name == "Primary_cytology_screening_count", Shiftable_year %in% 2020:2050, Hackable_province == "all", Sex == "all") %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Primary_cytology_screening_count", Shiftable_year %in% 2020:2050, Hackable_province == "all", Sex == "all") %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
 cervicalScreens <- cervicalScreens %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalScreens) +
-	geom_line() +
-	ggtitle("Primary_cytology_screening_count")
+  geom_line() +
+  ggtitle("Primary_cytology_screening_count")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalScreens) +
-	geom_smooth() +
-	ggtitle("Primary_cytology_screening_count - Smooth")
+  geom_smooth() +
+  ggtitle("Primary_cytology_screening_count - Smooth")
 
 ```
 
@@ -331,19 +374,19 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalScr
 #| warning: false
 
 cervicalDetections <- importedData$Cervical_Cancer_Cases_Table %>%
-	filter(expr_name == "Cervical_cance_x_ected_by_screen", Shiftable_year %in% 2020:2050, Hackable_province == "all") %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Cervical_cance_x_ected_by_screen", Shiftable_year %in% 2020:2050, Hackable_province == "all") %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
 cervicalDetections <- cervicalDetections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalDetections) +
-	geom_line() +
-	ggtitle("Cervical_cance_x_ected_by_screen")
+  geom_line() +
+  ggtitle("Cervical_cance_x_ected_by_screen")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalDetections) +
-	geom_smooth() +
-	ggtitle("Cervical_cance_x_ected_by_screen - Smooth")
+  geom_smooth() +
+  ggtitle("Cervical_cance_x_ected_by_screen - Smooth")
 
 ```
 
@@ -355,19 +398,19 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalDet
 #| warning: false
 
 cervicalPrice <- importedData$Cervical_Cancer_ICER_Table %>%
-	filter(expr_name == "Cost_of_screening", Shiftable_year %in% 2020:2050, Province == "all") %>%
-	mutate(Shiftable_year = as.numeric(Shiftable_year))
+  filter(expr_name == "Cost_of_screening", Shiftable_year %in% 2020:2050, Province == "all") %>%
+  mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
 cervicalPrice <- cervicalPrice %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalPrice) +
-	geom_line() +
-	ggtitle("Cost_of_screening")
+  geom_line() +
+  ggtitle("Cost_of_screening")
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalPrice) +
-	geom_smooth() +
-	ggtitle("Cost_of_screening - Smooth")
+  geom_smooth() +
+  ggtitle("Cost_of_screening - Smooth")
 
 ```
 
@@ -393,23 +436,23 @@ PrimaryTable$SexAdjustedScreens[PrimaryTable$cancertype %in% c("breast", "cervic
 
 
 ggplot(aes(x = Shiftable_year, y = Total_Screens, colour = cancertype), data = PrimaryTable) +
-	facet_grid(vars(sce), scales = "free") +
-	geom_line()
+  facet_grid(vars(sce), scales = "free") +
+  geom_line()
 
 ggplot(aes(x = Shiftable_year, y = SexAdjustedScreens, colour = cancertype), data = PrimaryTable) +
-	facet_grid(vars(sce), scales = "free") +
-	geom_line()
+  facet_grid(vars(sce), scales = "free") +
+  geom_line()
 
 ggplot(aes(x = Shiftable_year, y = Cancer_Deaths, colour = sce), data = PrimaryTable) +
-	facet_grid(vars(cancertype), scales = "free") +
-	geom_line()
+  facet_grid(vars(cancertype), scales = "free") +
+  geom_line()
 
 ggplot(aes(x = Shiftable_year, y = Detected_Cases, colour = sce), data = PrimaryTable) +
-	facet_grid(vars(cancertype), scales = "free") +
-	geom_line()
+  facet_grid(vars(cancertype), scales = "free") +
+  geom_line()
 
 ggplot(aes(x = Shiftable_year, y = Screening_Cost, colour = sce), data = PrimaryTable) +
-	facet_grid(vars(cancertype), scales = "free") +
-	geom_line()
+  facet_grid(vars(cancertype), scales = "free") +
+  geom_line()
 
 ```

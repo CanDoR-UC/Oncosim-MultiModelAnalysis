@@ -3,8 +3,9 @@ outputAllTables <- function(previousRunOutputs) {
 	if (downloadOncoSimRuns) {
 		openmpp::use_OpenMpp_CPAC()
 		#unlink("Output", recursive = TRUE)
-		#"OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast",
-		for (modelToUse in c("OncoSim-cervical")) {
+		models = c("OncoSim-cervical", "OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
+		models = c("OncoSim-lung")
+		for (modelToUse in models) {
 			model = load_model(modelToUse)
 
 			outputDirectory <- paste("Output", sep = "")

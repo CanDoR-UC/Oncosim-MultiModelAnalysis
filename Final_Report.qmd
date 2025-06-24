@@ -13,12 +13,48 @@ format:
 #| warning: false
 library(tidyverse)
 library(targets)
+library(ggplot2)
+library(extrafont)
+
+importedData <- tar_read(importedData, store = "store_visualize")
+combinedTables <- tar_read(combinedTables, store = "store_visualize")
+
+# extrafont::font_import()
+extrafont::loadfonts()
 
 
+dateRangeToShow <- 2025:2051
 
-importedData = tar_read(importedData,store="store_visualize")
-combinedTables = tar_read(combinedTables,store="store_visualize")
 
+visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
+  dataset$ColumnToShow <- dataset[[variable]]
+  return(
+    ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
+      facet_grid(vars(cancertype), scales = "free") +
+      geom_line() +
+      scale_x_continuous("Simulated Year") +
+      scale_y_continuous(yAxisTitle, labels = scales::comma) +
+      scale_colour_discrete("Scenario") +
+      expand_limits(y = 0) +
+      ggtitle(title) +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir"))
+  )
+}
+
+
+datasetToVisualize <- combinedTables$PrimaryTable
+
+datasetToVisualize <- datasetToVisualize %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
+
+datasetToVisualize$cancertype <- str_to_title(datasetToVisualize$cancertype)
+datasetToVisualize$cancertype <- factor(datasetToVisualize$cancertype, levels = c("Breast", "Cervical", "Colorectal", "Lung", "Combined"))
+
+datasetToVisualize$formattedName <- paste(datasetToVisualize$formattedName, "\n")
+
+visualizeByTime(datasetToVisualize, "Cancer_Deaths", "Cancer Deaths by Time", "Number of Cancer Deaths")
 
 ```
+
+
 

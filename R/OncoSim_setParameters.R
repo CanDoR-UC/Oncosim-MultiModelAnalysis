@@ -37,16 +37,27 @@ SetParameters <- function(createdScenarios) {
 
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'SR_FIRST_PHASEIN'
-			] <- 2
+			] <- 0
 
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'Assign_screening_group'
 			] <- 5
 
+			#Trying to achieve 90% ppt
+			screen_param$`5`[
+				screen_param$Overall_program_controls == 'Additional_recruitment_attempts'
+			] <- 99
+			screen_param$`5`[
+				screen_param$Overall_program_controls == 'SR_RETRY_WAITTIME'
+			] <- 0
+			screen_param$`5`[
+				screen_param$Overall_program_controls == 'SR_RETRY_PARTICIPATION'
+			] <- currentParameters$actualParticipation
+
 			#DISABLE #4 TO ENSURE NO FIT TESTS ARE PERFORMED ANYMORE
 			screen_param$`4`[
 				screen_param$Overall_program_controls == 'Recruitment_end_year_integer'
-			] <- 2025
+			] <- 2024
 
 			scenario$set_param("CrcScreenRecruitCanada", screen_param)
 
@@ -54,9 +65,10 @@ SetParameters <- function(createdScenarios) {
 			modality_param <- scenario$get_param("CrcScreenPlanCanada")
 			modality_param$B <- modality_param$A
 
+			#Include people who were already recruited
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Screening_group'
-			] <- 5
+			] <- 345
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Adherence_probability'
@@ -73,6 +85,11 @@ SetParameters <- function(createdScenarios) {
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Modality'
 			] <- 1 #For MCED scenarios, hack the FOBT modality
+
+			#Enable MCED starting in 2025
+			modality_param$B[
+				modality_param$Screening_modality_plan == 'Time_start_continuous_time'
+			] <- 2025
 
 			modality_param$A[
 				modality_param$Screening_modality_plan == 'Time_end_continuous_time'
@@ -430,12 +447,6 @@ SetParameters <- function(createdScenarios) {
 		LcDispatcherDefault$`0`[
 			LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
 		] = 2000
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-		] = 2025
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-		] = 2025
 
 		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 
@@ -444,6 +455,13 @@ SetParameters <- function(createdScenarios) {
 			LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
 			LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
 			scenario$set_param("LcScreenCost", LcScreenCost)
+
+			LcScreenEligibilityRiskThreshold = scenario$get_param("LcScreenEligibilityRiskThreshold") # Make sure anyone can be screened
+			LcScreenEligibilityRiskThreshold$High_risk_threshold = 0
+			LcScreenEligibilityRiskThreshold$Very_high_risk_threshold = 0
+			LcScreenEligibilityRiskThreshold$Prediction_horizon_years = 99
+
+			scenario$set_param("LcScreenEligibilityRiskThreshold", LcScreenEligibilityRiskThreshold)
 
 			#Cancer detectable - 6(Highest risk) = True positive ~ Sensitivity
 			# Cancer detectable - 1(Lowest risk) = False negative ~ 1 - Sensitivity
@@ -475,42 +493,41 @@ SetParameters <- function(createdScenarios) {
 
 			LcDispatcherDefault$`1` = LcDispatcherDefault$`0`
 
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
 			] = 1
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MIN_RECRUIT_AGE"
 			] = currentParameters$startAge
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MAX_SCREEN_AGE"
 			] = currentParameters$endAge
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MAX_RECRUIT_AGE"
 			] = currentParameters$endAge
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
 			] = 2025
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
 			] = 9999
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
 			] = 9999
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
 			] = currentParameters$actualParticipation
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Rescreen_rate"
-			] = currentParameters$actualAdherence
-			LcDispatcherDefault$`0`[
+			] = 1
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
 			] = 1
-
-			LcDispatcherDefault$`0`[
-				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_N_PARTICIPATION"
+			LcDispatcherDefault$`1`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OL_RECRUIT_FREQ"
 			] = 0
 
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
 					c(
 						"LUNG_SCREENING_x_ST_SEQ_HIGHRISK",
@@ -519,7 +536,7 @@ SetParameters <- function(createdScenarios) {
 						"LUNG_SCREENING_x_EQ_VERYHIEnum22"
 					)
 			] = currentParameters$frequency
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
 					c(
 						"LUNG_SCREENING_x_ST_SEQ_HIEnum17",
@@ -528,13 +545,30 @@ SetParameters <- function(createdScenarios) {
 						"LUNG_SCREENING_x_EQ_VERYHIEnum23"
 					)
 			] = 99
-			LcDispatcherDefault$`0`[
+			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
 					c(
 						"LUNG_SCREENING_x_OTHER_PHASE_IN",
 						"LUNG_SCREENING_x_FIRST_PHASE_IN"
 					)
 			] = 0
+			LcDispatcherDefault$`1`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
+			] = 99
+
+			#End previous screening
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+			] = 2025
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+			] = 2025
+
+			first = LcDispatcherDefault$`0`
+			second = LcDispatcherDefault$`1`
+
+			LcDispatcherDefault$`0` = second
+			LcDispatcherDefault$`1` = first
 
 			scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 		}

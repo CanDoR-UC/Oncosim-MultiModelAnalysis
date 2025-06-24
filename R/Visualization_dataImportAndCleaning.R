@@ -97,13 +97,25 @@ combineModelTables <- function(importedData) {
 	combinedTableAllCancer = combinedTable %>%
 		select(-cancertype) %>%
 		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
-		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Detected_Cases), Total_Screens = mean(Detected_Cases), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
+		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = mean(Total_Screens), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
 		mutate(cancertype = "Combined") #Total cost may be entirely wrong
 
 	combinedTable = bind_rows(combinedTable, combinedTableAllCancer)
 	combinedTables["PrimaryTable"] = list(combinedTable)
 
-	#Need to figure out a way to isolate by sex
+	yearsToFilterWith = 2025:2051
+	combinedTableCombinedYears = combinedTable %>%
+		group_by(sce, formattedName, minAge, frequency, participation, testType, cancertype) %>%
+		filter(Shiftable_year %in% yearsToFilterWith) %>%
+		select(-Shiftable_year) %>%
+		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = sum(Total_Screens), Total_Cost = sum(Total_Cost), Screening_Cost = sum(Screening_Cost))
+
+	#One row per set of years
+	if (!(nrow(combinedTableCombinedYears) * length(yearsToFilterWith) == nrow(combinedTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {
+		stop("ERROR. NOT ADDING UP TO CORRECT VALUE")
+	}
+
+	combinedTables["PrimaryTable_2025-2051"] = list(combinedTableCombinedYears)
 
 	combinedTables
 }
