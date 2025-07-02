@@ -13,8 +13,8 @@ RunScenario <- function(parametersAltered) {
 			opts = opts_run(
 				Tables = outputTables[currentScenario$ModelName][[1]],
 				SimulationCases = testSampleSize,
-				Mpi = list(Np = 4, IsNotOnRoot = TRUE),
-				Opts = list(OpenM.Threads = "4")
+				Mpi = list(Np = 2, IsNotOnRoot = TRUE),
+				Opts = list(OpenM.Threads = "2")
 			)
 		)
 		print("RUN HERE")

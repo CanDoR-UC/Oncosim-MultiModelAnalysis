@@ -13,18 +13,23 @@ paramsToAlter["OncoSim-colorectal"] <- list(c(
 	"CrcScreenCostCanada"
 ))
 paramsToAlter["OncoSim-cervical"] <- list(c(
-	"HpvScreeningProtocolDispatcher",
+	"HpvScreeningLeanProtocolDispatcher",
 	"HpvScreeningPreCancerTreatmentCosts",
 	"CytologyResultCarcino",
 	"FollowUpCytologyProtocol5",
-	"HpvScreeningUseLeanDispatcher"
+	"HpvScreeningUseLeanDispatcher",
+	"ProbWomanMayScreenPriorToSexualDebut",
+	"ProbWomanMayScreenWithoutCervix",
+	"CervicalProbWomanMayScreenPriorToResident",
+	"CervicalProbWomanMayScreenAsFormerResident"
 ))
 paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungCancerScreenFollowupProtcol",
 	"LcDispatcherDefault",
 	"LungRadsScreenRegularDist",
 	"LcScreenCost",
-	"LcScreenEligibilityRiskThreshold"
+	"LcScreenEligibilityRiskThreshold",
+	"SwitchEligibilityRule"
 ))
 
 outputTables <- list()

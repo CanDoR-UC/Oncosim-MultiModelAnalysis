@@ -273,7 +273,7 @@ SetParameters <- function(createdScenarios) {
 		HpvScreeningUseLeanDispatcher = scenario$get_param(
 			"HpvScreeningUseLeanDispatcher"
 		)
-		HpvScreeningUseLeanDispatcher$Future_screening_era = FALSE
+		HpvScreeningUseLeanDispatcher$Future_screening_era = TRUE
 		HpvScreeningUseLeanDispatcher$Past_screening_era = FALSE
 		scenario$set_param(
 			"HpvScreeningUseLeanDispatcher",
@@ -281,96 +281,42 @@ SetParameters <- function(createdScenarios) {
 		)
 
 		if (currentParameters$type != "BaseCase") {
+			#Ensure that everyone can be screened
+			for (paramName in c("ProbWomanMayScreenPriorToSexualDebut", "ProbWomanMayScreenWithoutCervix", "CervicalProbWomanMayScreenPriorToResident", "CervicalProbWomanMayScreenAsFormerResident")) {
+				param = scenario$get_param(paramName)
+				param[[1]] = 1
+				scenario$set_param(paramName, param)
+			}
+
 			#Set pap Cost to what we need. Only the initial
 			testCosts = scenario$get_param("HpvScreeningPreCancerTreatmentCosts")
 			testCosts$Cytology_PAP_screen = currentParameters$cost
 
 			scenario$set_param("HpvScreeningPreCancerTreatmentCosts", testCosts)
 
-			dispatcher = scenario$get_param("HpvScreeningProtocolDispatcher")
+			dispatcher = scenario$get_param("HpvScreeningLeanProtocolDispatcher")
 			futureScreeningEra = dispatcher$Screening_era == "Future_screening_era"
 
-			dispatcher$`1`[futureScreeningEra] = dispatcher$`2`[futureScreeningEra]
+			#Stop other entries at 2025
+			dispatcher$`0`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
+			dispatcher$`2`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
+			dispatcher$`3`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
+			dispatcher$`6`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
 
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Visibility_prob_visible"
-			] = 1
+			#MCED Entry in #1
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Visibility_prob_visible"] = 1
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_OCOL_POPULATION"] = 2
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_age_integer"] = currentParameters$startAge
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_age_integer"] = currentParameters$endAge
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_time_continuous"] = 2025
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 9999
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Recruitment_rate"] = currentParameters$actualParticipation
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Rescreen_rate"] = currentParameters$actualParticipation # May be wrong
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Frequency_of_regular_screening"] = currentParameters$frequency
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Protocol_to_be_used"] = 5
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_RTING_APPARATUS"] = 1.1
 
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c("Minimum_recruit_age_integer", "Minimum_re_screen_age_integer")
-			] = currentParameters$startAge
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_recruit_age_integer"
-			] = currentParameters$endAge
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c(
-							"HPV_SCREENING_x_IN_RECRUIT_TIME",
-							"HPV_SCREENING_x_N_RESCREEN_TIME"
-						)
-			] = 2025
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Recruitment_rate"
-			] = currentParameters$actualParticipation
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Rescreen_rate"
-			] = currentParameters$actualAdherence
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c(
-							"HPV_SCREENING_x_L_MIN_FREQUENCY",
-							"HPV_SCREENING_x_L_MAX_FREQUENCY"
-						)
-			] = currentParameters$frequency
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Protocol_to_be_used"
-			] = 5 #Protocol 5 is overriden for MCED
-
-			dispatcher$`1`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_RTING_APPARATUS"
-			] = 1.1 # 1.1  1.1 : Cytology (PAP) with follow-up logic 1
-
-			#End current screening at 2025
-			dispatcher$`2`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c(
-							"HPV_SCREENING_x_AX_RECRUIT_TIME",
-							"HPV_SCREENING_x_X_RESCREEN_TIME"
-						)
-			] = 2025
-			dispatcher$`0`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c(
-							"HPV_SCREENING_x_X_RESCREEN_TIME" #
-						)
-			] = 2025
-			dispatcher$`6`[
-				futureScreeningEra &
-					dispatcher$HPV_SCREENING_x_CHARACTERISTICS %in%
-						c(
-							"HPV_SCREENING_x_X_RESCREEN_TIME"
-						)
-			] = 2025
-
-			scenario$set_param("HpvScreeningProtocolDispatcher", dispatcher)
+			scenario$set_param("HpvScreeningLeanProtocolDispatcher", dispatcher)
 
 			sensSpec = scenario$get_param("CytologyResultCarcino")
 
@@ -435,6 +381,10 @@ SetParameters <- function(createdScenarios) {
 		followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
 		followUpProtocol[[1]] = "Custom"
 		scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
+
+		SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")
+		SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
+		scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
 
 		LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
@@ -554,7 +504,7 @@ SetParameters <- function(createdScenarios) {
 			] = 0
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
-			] = 99
+			] = 1
 
 			#End previous screening
 			LcDispatcherDefault$`0`[

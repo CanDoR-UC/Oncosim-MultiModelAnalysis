@@ -27,32 +27,56 @@ dateRangeToShow <- 2025:2051
 
 
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
-  dataset$ColumnToShow <- dataset[[variable]]
-  return(
-    ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
-      facet_grid(vars(cancertype), scales = "free") +
-      geom_line() +
-      scale_x_continuous("Simulated Year") +
-      scale_y_continuous(yAxisTitle, labels = scales::comma) +
-      scale_colour_discrete("Scenario") +
-      expand_limits(y = 0) +
-      ggtitle(title) +
-      theme_minimal() +
-      theme(text = element_text(family = "Avenir"))
-  )
+	dataset$ColumnToShow <- dataset[[variable]]
+	dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
+	return(
+		ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
+			facet_grid(vars(cancertype), scales = "free") +
+			geom_line() +
+			scale_x_continuous("Simulated Year") +
+			scale_y_continuous(yAxisTitle, labels = scales::comma) +
+			scale_colour_discrete("Scenario") +
+			expand_limits(y = 0) +
+			ggtitle(title) +
+			theme_minimal() +
+			theme(text = element_text(family = "Avenir"))
+	)
 }
 
 
-datasetToVisualize <- combinedTables$PrimaryTable
+visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
+	dataset$ColumnToShow <- dataset[[variable]]
+	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
+	return(
+		ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
+			facet_grid(vars(Type), scales = "free") +
+			geom_col(position = "dodge") +
+			scale_x_discrete("Scenario") +
+			scale_y_continuous(yAxisTitle, labels = scales::comma) +
+			scale_fill_discrete("Cancer Type") +
+			expand_limits(y = 0) +
+			ggtitle(title) +
+			theme_minimal() +
+			theme(text = element_text(family = "Avenir"))
+	)
+}
 
-datasetToVisualize <- datasetToVisualize %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
-datasetToVisualize$cancertype <- str_to_title(datasetToVisualize$cancertype)
-datasetToVisualize$cancertype <- factor(datasetToVisualize$cancertype, levels = c("Breast", "Cervical", "Colorectal", "Lung", "Combined"))
+timeData <- combinedTables$PrimaryTable
 
-datasetToVisualize$formattedName <- paste(datasetToVisualize$formattedName, "\n")
+timeData <- timeData %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
 
-visualizeByTime(datasetToVisualize, "Cancer_Deaths", "Cancer Deaths by Time", "Number of Cancer Deaths")
+
+timeData$formattedName <- paste(timeData$formattedName, "\n")
+
+totalData <- combinedTables$`PrimaryTable_2025-2051`
+totalData <- totalData %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 3 Years", "BaseCase"))
+totalData$formattedName <- paste(totalData$formattedName, "\n")
+
+visualizeByTime(timeData, "Cancer_Deaths", "Cancer Deaths by Time", "Number of Cancer Deaths")
+visualizeTotals(totalData, "Cancer_Deaths", "Cancer Deaths", "Number of Cancer Deaths")
+
+visualizeTotals(totalData, "Cancer_Deaths_Diff", "Differnece in Cancer Deaths", "Difference in Number of Cancer Deaths")
 
 ```
 

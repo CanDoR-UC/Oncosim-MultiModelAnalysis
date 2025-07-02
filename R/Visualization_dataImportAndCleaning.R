@@ -101,6 +101,27 @@ combineModelTables <- function(importedData) {
 		mutate(cancertype = "Combined") #Total cost may be entirely wrong
 
 	combinedTable = bind_rows(combinedTable, combinedTableAllCancer)
+
+	combinedTable$cancertype <- str_to_title(combinedTable$cancertype)
+	combinedTable$cancertype <- factor(combinedTable$cancertype, levels = c("Breast", "Cervical", "Colorectal", "Lung", "Combined"))
+
+	combinedTableBaseCase <- combinedTable %>% filter(sce == "BaseCase") %>% select(-c(sce, formattedName, minAge, frequency, participation, testType))
+	names(combinedTableBaseCase) = paste("BASECASE", names(combinedTableBaseCase), sep = "_")
+	names(combinedTableBaseCase) = gsub("BASECASE_Shiftable_year", "Shiftable_year", names(combinedTableBaseCase))
+	names(combinedTableBaseCase) = gsub("BASECASE_cancertype", "cancertype", names(combinedTableBaseCase))
+
+	combinedTable <- combinedTable %>%
+		group_by(Shiftable_year, cancertype) %>%
+		left_join(combinedTableBaseCase)
+
+	createDifference = c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost")
+
+	for (variable in createDifference) {
+		combinedTable[[paste(variable, "Diff", sep = "_")]] = combinedTable[[variable]] - combinedTable[[paste("BASECASE", variable, sep = "_")]]
+	}
+
+	combinedTable = combinedTable[, !grepl("BASECASE", names(combinedTable))]
+
 	combinedTables["PrimaryTable"] = list(combinedTable)
 
 	yearsToFilterWith = 2025:2051
@@ -108,7 +129,18 @@ combineModelTables <- function(importedData) {
 		group_by(sce, formattedName, minAge, frequency, participation, testType, cancertype) %>%
 		filter(Shiftable_year %in% yearsToFilterWith) %>%
 		select(-Shiftable_year) %>%
-		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = sum(Total_Screens), Total_Cost = sum(Total_Cost), Screening_Cost = sum(Screening_Cost))
+		summarize(
+			Detected_Cases = sum(Detected_Cases),
+			Cancer_Deaths = sum(Cancer_Deaths),
+			Total_Screens = sum(Total_Screens),
+			Total_Cost = sum(Total_Cost),
+			Screening_Cost = sum(Screening_Cost),
+			Detected_Cases_Diff = sum(Detected_Cases_Diff),
+			Cancer_Deaths_Diff = sum(Cancer_Deaths_Diff),
+			Total_Screens_Diff = sum(Total_Screens_Diff),
+			Total_Cost_Diff = sum(Total_Cost_Diff),
+			Screening_Cost_Diff = sum(Screening_Cost_Diff)
+		)
 
 	#One row per set of years
 	if (!(nrow(combinedTableCombinedYears) * length(yearsToFilterWith) == nrow(combinedTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {

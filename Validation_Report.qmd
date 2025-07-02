@@ -1,6 +1,7 @@
 ---
 title: "MCED Project - Model Validation"
 author: "John Hutchinson"
+date: "`r Sys.time()`"
 format:
     html:
         grid:
@@ -389,6 +390,27 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = cervicalDet
   ggtitle("Cervical_cance_x_ected_by_screen - Smooth")
 
 ```
+
+**Screening should approximate 90%.**
+```{r}
+#| echo: false
+#| warning: false
+
+# Including only 50-75 for simplicity
+participation <- importedData$Cervical_Cancer_Timing_Of_Last_Screen %>%
+  filter(age_group %in% c("[50,60)", "[60,70)", "[70,75)"), Time_of_last_screen_years %in% c("Last_screen_within_0_1", "Last_screen_within_1_2", "Last_screen_within_2_3", "all"), Shiftable_year != "all") %>%
+  group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
+  summarize(expr_value = sum(expr_value)) %>%
+  pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+  mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, Shiftable_year = as.numeric(Shiftable_year))
+
+
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
+  scale_y_continuous(labels = scales::number) +
+  geom_line()
+
+```
+
 
 
 **Galleri should be the most expensive**
