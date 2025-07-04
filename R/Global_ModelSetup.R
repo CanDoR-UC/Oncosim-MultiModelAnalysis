@@ -53,7 +53,8 @@ outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Screen_Outcome_Positivity_Table",
 	"Breast_Cancer_Costs_Table",
 	"Breast_Cancer_ICER_Table_Discounted",
-	"Breast_Cancer_Screen_Outcome_Modality_Table"
+	"Breast_Cancer_Screen_Outcome_Modality_Table",
+	"Breast_Cancer_Timing_Of_Last_Screen"
 ))
 outputTables["OncoSim-cervical"] <- list(c(
 	"Cervical_Cancer_Cases_Table",
@@ -125,7 +126,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	for (scenarioType in c("Galleri", "CancerSeek")) {
 		for (startAge in c(45, 50)[1]) {
-			for (testFrequency in c(3, 5)[1]) {
+			for (testFrequency in c(1, 3)[1]) {
 				for (participation in c(90)) {
 					#(3:9*10)
 					for (cancerType in modelsToUse) {

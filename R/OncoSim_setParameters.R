@@ -160,12 +160,12 @@ SetParameters <- function(createdScenarios) {
 
 			screen_param$`5`[
 				futureScreeningEra &
-					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Minimum_recruit_age_integer'
+					screen_param$BREAST_SCREENI_x_CHARACTERISTICS %in% c('Minimum_recruit_age_integer', "Minimum_re_screen_age_integer")
 			] <- currentParameters$startAge
 
 			screen_param$`5`[
 				futureScreeningEra &
-					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Maximum_recruit_age_integer'
+					screen_param$BREAST_SCREENI_x_CHARACTERISTICS %in% c('Maximum_recruit_age_integer', "Maximum_re_screen_age_integer")
 			] <- currentParameters$endAge
 
 			screen_param$`5`[
@@ -176,12 +176,21 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Rescreen_rate'
-			] <- currentParameters$actualAdherence
+			] <- 1
 
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Protocol_to_be_used'
 			] <- 1
+
+			screen_param$`5`[
+				futureScreeningEra &
+					screen_param$BREAST_SCREENI_x_CHARACTERISTICS %in% c("BREAST_SCREENI_x_ATTEMPTS_GLOBAL", "BREAST_SCREENI_x_ATTEMPTS_LOCAL")
+			] <- 99
+
+			screen_param$`3`[
+				screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'BREAST_SCREENI_x_X_RESCREEN_TIME'
+			] <- 2025
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -200,7 +209,7 @@ SetParameters <- function(createdScenarios) {
 
 			screen_param$`5`[
 				futureScreeningEra &
-					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'BREAST_SCREENI_x_IN_RECRUIT_TIME'
+					screen_param$BREAST_SCREENI_x_CHARACTERISTICS %in% c('BREAST_SCREENI_x_IN_RECRUIT_TIME', "BREAST_SCREENI_x_N_RESCREEN_TIME")
 			] <- 2025
 
 			#Disable previous
@@ -294,11 +303,10 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("HpvScreeningPreCancerTreatmentCosts", testCosts)
 
-			dispatcher = scenario$get_param("HpvScreeningLeanProtocolDispatcher")
+			dispatcher = scenario$get_param("HpvScreeningLeanProtocolDispatcher") #AKA My mortal enemy
 			futureScreeningEra = dispatcher$Screening_era == "Future_screening_era"
 
 			#Stop other entries at 2025
-			dispatcher$`0`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
 			dispatcher$`2`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
 			dispatcher$`3`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
 			dispatcher$`6`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 2025
@@ -308,13 +316,20 @@ SetParameters <- function(createdScenarios) {
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_OCOL_POPULATION"] = 2
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_age_integer"] = currentParameters$startAge
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_age_integer"] = currentParameters$endAge
-			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_time_continuous"] = 2025
+			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_time_continuous"] = 2015
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 9999
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Recruitment_rate"] = currentParameters$actualParticipation
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Rescreen_rate"] = currentParameters$actualParticipation # May be wrong
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Frequency_of_regular_screening"] = currentParameters$frequency
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Protocol_to_be_used"] = 5
 			dispatcher$`1`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "HPV_SCREENING_x_RTING_APPARATUS"] = 1.1
+
+			#Allowing cervical rescreen for younger people after 2025 (using MCED however)
+
+			dispatcher$`8`[futureScreeningEra] = dispatcher$`3`[futureScreeningEra]
+			dispatcher$`8`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Protocol_to_be_used"] = 5
+			dispatcher$`8`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Minimum_time_continuous"] = 2025
+			dispatcher$`8`[futureScreeningEra & dispatcher$HPV_SCREENING_x_CHARACTERISTICS == "Maximum_time_continuous"] = 9999
 
 			scenario$set_param("HpvScreeningLeanProtocolDispatcher", dispatcher)
 
@@ -469,7 +484,7 @@ SetParameters <- function(createdScenarios) {
 			] = currentParameters$actualParticipation
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Rescreen_rate"
-			] = 1
+			] = currentParameters$actualAdherence
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
 			] = 1
@@ -501,7 +516,7 @@ SetParameters <- function(createdScenarios) {
 						"LUNG_SCREENING_x_OTHER_PHASE_IN",
 						"LUNG_SCREENING_x_FIRST_PHASE_IN"
 					)
-			] = 0
+			] = 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
 			] = 1
@@ -511,6 +526,25 @@ SetParameters <- function(createdScenarios) {
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
 			] = 2025
 			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+			] = 2025
+
+			LcDispatcherDefault$`2`[
+				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+			] = 2025
+			LcDispatcherDefault$`2`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+			] = 2025
+			LcDispatcherDefault$`3`[
+				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+			] = 2025
+			LcDispatcherDefault$`3`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
+			] = 2025
+			LcDispatcherDefault$`4`[
+				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
+			] = 2025
+			LcDispatcherDefault$`4`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
 			] = 2025
 
