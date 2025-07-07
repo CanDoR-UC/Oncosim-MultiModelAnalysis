@@ -4,7 +4,7 @@ outputAllTables <- function(previousRunOutputs) {
 		openmpp::use_OpenMpp_CPAC()
 		#unlink("Output", recursive = TRUE)
 		models = c("OncoSim-cervical", "OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
-		models = c("OncoSim-lung")
+		#models = c("OncoSim-breast")
 		for (modelToUse in models) {
 			model = load_model(modelToUse)
 

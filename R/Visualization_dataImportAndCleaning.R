@@ -94,7 +94,12 @@ combineModelTables <- function(importedData) {
 
 	#No idea how person years should be factored in?
 	#Maybe by adding together the differences from base case?
-	combinedTableAllCancer = combinedTable %>%
+
+	#Not great, but just multiplying resource usage (Screening Cost, Screen Num) by 2. Add Screening_Cost to total cost to simulate double the screening cost (since males are also being screened)
+	femaleOnlyTable = combinedTable %>% filter(cancertype %in% c("cervical", "breast")) %>% mutate(Total_Screens = Total_Screens * 2, Screening_Cost = Screening_Cost * 2, Total_Cost = Total_Cost + Screening_Cost)
+	allSexTable = combinedTable %>% filter(cancertype %in% c("lung", "colorectal"))
+
+	combinedTableAllCancer = bind_rows(femaleOnlyTable, allSexTable) %>%
 		select(-cancertype) %>%
 		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
 		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = mean(Total_Screens), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
@@ -141,6 +146,9 @@ combineModelTables <- function(importedData) {
 			Total_Cost_Diff = sum(Total_Cost_Diff),
 			Screening_Cost_Diff = sum(Screening_Cost_Diff)
 		)
+	#Add stage analysis. Fix sex option in combined
+
+	combinedTableCombinedYears$ICER_ReducedDeaths = combinedTableCombinedYears$Total_Cost_Diff - (combinedTableCombinedYears$Cancer_Deaths_Diff * -1)
 
 	#One row per set of years
 	if (!(nrow(combinedTableCombinedYears) * length(yearsToFilterWith) == nrow(combinedTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {

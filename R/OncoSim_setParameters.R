@@ -176,7 +176,7 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Rescreen_rate'
-			] <- 1
+			] <- 0.75 # Probably should parameterize this.
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -397,10 +397,6 @@ SetParameters <- function(createdScenarios) {
 		followUpProtocol[[1]] = "Custom"
 		scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
 
-		SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")
-		SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
-		scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
-
 		LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
 		LcDispatcherDefault$`0`[
@@ -409,13 +405,14 @@ SetParameters <- function(createdScenarios) {
 		LcDispatcherDefault$`0`[
 			LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
 		] = 0.05
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
-		] = 2000
 
 		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 
 		if (currentParameters$type != "BaseCase") {
+			SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")
+			SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
+			scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
+
 			LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
 			LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
 			LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
