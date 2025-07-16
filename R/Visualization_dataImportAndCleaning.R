@@ -43,7 +43,6 @@ combineModelTables <- function(importedData) {
 	exprRename = list()
 	exprRename["Breast_cancer_detected_by_screen"] = "Detected_Cases"
 	exprRename["Screen_detected_cancers"] = "Detected_Cases"
-	exprRename["Cervical_cance_x_ected_by_screen"] = "Detected_Cases"
 	exprRename["Screen_detecte_x_over_detected"] = "Detected_Cases"
 
 	exprRename["Deaths_cause_specific"] = "Cancer_Deaths"
@@ -51,7 +50,6 @@ combineModelTables <- function(importedData) {
 
 	exprRename["Number_of_breast_cancer_screens"] = "Total_Screens"
 	exprRename["Total_screens_x_iple_per_visit"] = "Total_Screens"
-	exprRename["Primary_cytology_screening_count"] = "Total_Screens"
 	exprRename["Total_screens_attended"] = "Total_Screens"
 
 	exprRename["Total_cost_as_x_and_treatment"] = "Total_Cost"
@@ -77,16 +75,12 @@ combineModelTables <- function(importedData) {
 	colorectalCasesTable = importedData$Colorectal_Cancer_Cases_Table %>% filter(expr_name %in% c("Deaths_cause_specific"), Province == "all", Sex == "all", Colorectal_cancer_site == "all") %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-c(Colorectal_cancer_site, Province, Sex))
 	colorectalICERTable = importedData$Colorectal_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_sc_x_ng_treatment", "Cost_of_screen_x_reen_positives", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
 
-	cervicalCasesTable = importedData$Cervical_Cancer_Cases_Table %>% filter(expr_name %in% c("Cervical_cance_x_ected_by_screen", "Deaths_cause_specific"), Hackable_province == "all", Shiftable_year %in% 2015:2051) %>% select(-Hackable_province)
-	cervicalScreenTable = importedData$Hpv_Screening_Costs_Prov_Table %>% filter(expr_name %in% c("Primary_cytology_screening_count"), Sex == "all", Hackable_province == "all", Shiftable_year %in% 2015:2051) %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-c(Hackable_province, Sex))
-	cervicalICERTable = importedData$Cervical_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_va_x_all_treatment", "Cost_of_screening", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
-
 	lungCasesTable = importedData$Lung_Cancer_ScreenCases_Year_Table %>% filter(expr_name %in% c("Screen_detecte_x_over_detected", "Lung_cancer_deaths", "Total_screens_attended"), Hackable_province == "all", Year != "all") %>% mutate(Shiftable_year = as.numeric(Year)) %>% select(-c(Hackable_province, Year))
 	lungICERTable = importedData$Lung_Cancer_ICER_Table %>%
 		filter(expr_name %in% c("Total_cost", "Cost_of_screen_x_tected_cancers", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051, lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all") %>%
 		select(-c(Province, lc_screen_participated_ever, lc_cessation_p_x_rticipated_ever))
 
-	combinedTable = bind_rows(breastCasesTable, breastScreenTable, breastICERTable, colorectalCasesTable, colorectalScreenTable, colorectalICERTable, cervicalCasesTable, cervicalScreenTable, cervicalICERTable, lungCasesTable, lungICERTable)
+	combinedTable = bind_rows(breastCasesTable, breastScreenTable, breastICERTable, colorectalCasesTable, colorectalScreenTable, colorectalICERTable, lungCasesTable, lungICERTable)
 
 	combinedTable$expr_name = as.character(exprRename[combinedTable$expr_name])
 
@@ -96,19 +90,27 @@ combineModelTables <- function(importedData) {
 	#Maybe by adding together the differences from base case?
 
 	#Not great, but just multiplying resource usage (Screening Cost, Screen Num) by 2. Add Screening_Cost to total cost to simulate double the screening cost (since males are also being screened)
-	femaleOnlyTable = combinedTable %>% filter(cancertype %in% c("cervical", "breast")) %>% mutate(Total_Screens = Total_Screens * 2, Screening_Cost = Screening_Cost * 2, Total_Cost = Total_Cost + Screening_Cost)
+	femaleOnlyTable = combinedTable %>% filter(cancertype %in% c("breast")) %>% mutate(Total_Screens = Total_Screens * 2, Screening_Cost = Screening_Cost * 2, Total_Cost = Total_Cost + Screening_Cost)
 	allSexTable = combinedTable %>% filter(cancertype %in% c("lung", "colorectal"))
 
-	combinedTableAllCancer = bind_rows(femaleOnlyTable, allSexTable) %>%
+	combinedTableAllCancerMCED = bind_rows(femaleOnlyTable, allSexTable) %>%
 		select(-cancertype) %>%
+		filter(sce != "BaseCase") %>%
 		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
 		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = mean(Total_Screens), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
 		mutate(cancertype = "Combined") #Total cost may be entirely wrong
 
-	combinedTable = bind_rows(combinedTable, combinedTableAllCancer)
+	combinedTableAllCancerBaseCase = combinedTable %>% #Don't need to multiply breast x2 for base case
+		select(-cancertype) %>%
+		filter(sce == "BaseCase") %>%
+		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
+		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = sum(Total_Screens), Total_Cost = sum(Total_Cost), Screening_Cost = sum(Screening_Cost)) %>%
+		mutate(cancertype = "Combined")
+
+	combinedTable = bind_rows(combinedTable, combinedTableAllCancerMCED, combinedTableAllCancerBaseCase)
 
 	combinedTable$cancertype <- str_to_title(combinedTable$cancertype)
-	combinedTable$cancertype <- factor(combinedTable$cancertype, levels = c("Breast", "Cervical", "Colorectal", "Lung", "Combined"))
+	combinedTable$cancertype <- factor(combinedTable$cancertype, levels = c("Breast", "Colorectal", "Lung", "Combined"))
 
 	combinedTableBaseCase <- combinedTable %>% filter(sce == "BaseCase") %>% select(-c(sce, formattedName, minAge, frequency, participation, testType))
 	names(combinedTableBaseCase) = paste("BASECASE", names(combinedTableBaseCase), sep = "_")
@@ -148,7 +150,7 @@ combineModelTables <- function(importedData) {
 		)
 	#Add stage analysis. Fix sex option in combined
 
-	combinedTableCombinedYears$ICER_ReducedDeaths = combinedTableCombinedYears$Total_Cost_Diff - (combinedTableCombinedYears$Cancer_Deaths_Diff * -1)
+	combinedTableCombinedYears$ICER_ReducedDeaths = combinedTableCombinedYears$Total_Cost_Diff / (combinedTableCombinedYears$Cancer_Deaths_Diff * -1)
 
 	#One row per set of years
 	if (!(nrow(combinedTableCombinedYears) * length(yearsToFilterWith) == nrow(combinedTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {

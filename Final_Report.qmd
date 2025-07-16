@@ -26,57 +26,59 @@ extrafont::loadfonts()
 dateRangeToShow <- 2025:2051
 
 
+colours <- list()
+
+colours["Breast"] <- "#E1549D"
+colours["Lung"] <- "#404040"
+colours["Colorectal"] <- "#022D89"
+colours["Combined"] <- "#B28CD6"
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
-	dataset$ColumnToShow <- dataset[[variable]]
-	dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
-	return(
-		ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
-			facet_grid(vars(cancertype), scales = "free") +
-			geom_line() +
-			scale_x_continuous("Simulated Year") +
-			scale_y_continuous(yAxisTitle, labels = scales::comma) +
-			scale_colour_discrete("Scenario") +
-			expand_limits(y = 0) +
-			ggtitle(title) +
-			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
-	)
+  dataset$ColumnToShow <- dataset[[variable]]
+  dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
+  return(
+    ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
+      facet_grid(vars(cancertype), scales = "free") +
+      geom_line() +
+      scale_x_continuous("Simulated Year") +
+      scale_y_continuous(yAxisTitle, labels = scales::comma) +
+      scale_colour_discrete("Scenario") +
+      expand_limits(y = 0) +
+      ggtitle(title) +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir", size = 20))
+  )
 }
 
 
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
-	dataset$ColumnToShow <- dataset[[variable]]
-	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
-	return(
-		ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
-			facet_grid(vars(Type), scales = "free") +
-			geom_col(position = "dodge") +
-			scale_x_discrete("Scenario") +
-			scale_y_continuous(yAxisTitle, labels = scales::comma) +
-			scale_fill_discrete("Cancer Type") +
-			expand_limits(y = 0) +
-			ggtitle(title) +
-			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
-	)
+  dataset$ColumnToShow <- dataset[[variable]]
+  dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
+  return(
+    ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
+      facet_grid(vars(Type), scales = "free") +
+      geom_col(position = "dodge") +
+      scale_x_discrete("Scenario") +
+      scale_y_continuous(yAxisTitle, labels = scales::comma) +
+      scale_fill_manual("Cancer Type", values = colours) +
+      expand_limits(y = 0) +
+      ggtitle(title) +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir", size = 20))
+  )
 }
 
 
 timeData <- combinedTables$PrimaryTable
 
-timeData <- timeData %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
+timeData <- timeData # %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
 
 
 timeData$formattedName <- paste(timeData$formattedName, "\n")
 
 totalData <- combinedTables$`PrimaryTable_2025-2051`
-totalData <- totalData %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
+totalData <- totalData # %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
 totalData$formattedName <- paste(totalData$formattedName, "\n")
 
-# visualizeByTime(timeData, "Cancer_Deaths", "Cancer Deaths by Time", "Number of Cancer Deaths")
-# visualizeTotals(totalData, "Cancer_Deaths", "Cancer Deaths", "Number of Cancer Deaths")
-
-# visualizeTotals(totalData, "Cancer_Deaths_Diff", "Difference in Cancer Deaths", "Difference in Number of Cancer Deaths")
 
 ```
 
@@ -100,7 +102,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Screens_Diff", "
 
 visualizeByTime(timeData, "Detected_Cases", "Detected Cases by Time", "Number of Detected Cases")
 visualizeTotals(totalData, "Detected_Cases", "Detected Cases (2025-2051)", "Number of Detected Cases")
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", "Difference in Total Screens (2025-2051)", "Number of Additional Detected Cancers")
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", "Difference in Detected Cases (2025-2051)", "Number of Additional Detected Cancers")
 
 ```
 
@@ -129,5 +131,16 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths
 visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening Cost ($CAD)")
 visualizeTotals(totalData, "Screening_Cost", "Total Screening Costs (2025-2051)", "Screening Cost ($CAD)")
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Total Screening Cost", "Difference in Screening Cost ($CAD)")
+
+```
+
+
+# ICER (Total Cost per Reduction in Cancer Death)
+
+```{r,fig.width=12,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
 
 ```

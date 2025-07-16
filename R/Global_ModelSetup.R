@@ -12,17 +12,6 @@ paramsToAlter["OncoSim-colorectal"] <- list(c(
 	"CrcTestPositivitySuccinct",
 	"CrcScreenCostCanada"
 ))
-paramsToAlter["OncoSim-cervical"] <- list(c(
-	"HpvScreeningLeanProtocolDispatcher",
-	"HpvScreeningPreCancerTreatmentCosts",
-	"CytologyResultCarcino",
-	"FollowUpCytologyProtocol5",
-	"HpvScreeningUseLeanDispatcher",
-	"ProbWomanMayScreenPriorToSexualDebut",
-	"ProbWomanMayScreenWithoutCervix",
-	"CervicalProbWomanMayScreenPriorToResident",
-	"CervicalProbWomanMayScreenAsFormerResident"
-))
 paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungCancerScreenFollowupProtcol",
 	"LcDispatcherDefault",
@@ -56,16 +45,6 @@ outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Screen_Outcome_Modality_Table",
 	"Breast_Cancer_Timing_Of_Last_Screen"
 ))
-outputTables["OncoSim-cervical"] <- list(c(
-	"Cervical_Cancer_Cases_Table",
-	"Cervical_Cancer_Timing_Of_Last_Screen",
-	"Cervical_Cancer_Costs_Table",
-	"Cervical_Cancer_ICER_Table",
-	"Hpv_Screening_Costs_Prov_Table",
-	"HPV_Colposcopy_Results_Table",
-	"Hpv_Screening_Costs_Age_Table",
-	"HPV_DNA_Results_Table"
-))
 outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Cases_Table",
 	"Lung_Cancer_ScreenCases_Year_Table",
@@ -80,13 +59,11 @@ generateModelParameters <- function(modelsToUse) {
 	participationMultipliers = list()
 	participationMultipliers["OncoSim-breast"] = 1
 	participationMultipliers["OncoSim-colorectal"] = 1
-	participationMultipliers["OncoSim-cervical"] = 1
 	participationMultipliers["OncoSim-lung"] = 1
 
 	adherenceMultipliers = list()
 	adherenceMultipliers["OncoSim-breast"] = 1
 	adherenceMultipliers["OncoSim-colorectal"] = 1
-	adherenceMultipliers["OncoSim-cervical"] = 1
 	adherenceMultipliers["OncoSim-lung"] = 1
 
 	testCosts = list()
@@ -108,7 +85,6 @@ generateModelParameters <- function(modelsToUse) {
 	# Using site-specific sensitivity and overall specificity
 	testPerformance["OncoSim-colorectal-Galleri"] = list(c(0.82, 0.995))
 	testPerformance["OncoSim-breast-Galleri"] = list(c(0.305, 0.995))
-	testPerformance["OncoSim-cervical-Galleri"] = list(c(0.80, 0.995))
 	testPerformance["OncoSim-lung-Galleri"] = list(c(0.748, 0.995))
 
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
@@ -117,18 +93,15 @@ generateModelParameters <- function(modelsToUse) {
 	testPerformance["OncoSim-colorectal-CancerSeek"] = list(c(0.649, 0.99))
 	testPerformance["OncoSim-breast-CancerSeek"] = list(c(0.335, 0.99))
 	testPerformance["OncoSim-lung-CancerSeek"] = list(c(0.587, 0.99))
-	# WAS NOT AVAILABLE USING OVERALL FOR CERVICAL
-	testPerformance["OncoSim-cervical-CancerSeek"] = list(c(0.623, 0.99))
 
 	parameterTables = data.frame()
 
 	scenarios <- c()
 
 	for (scenarioType in c("Galleri", "CancerSeek")) {
-		for (startAge in c(45, 50)[1]) {
-			for (testFrequency in c(1, 3)[1]) {
-				for (participation in c(90)) {
-					#(3:9*10)
+		for (startAge in c(45, 50)) {
+			for (testFrequency in c(1, 3)) {
+				for (participation in c(30, 50, 70, 90)) {
 					for (cancerType in modelsToUse) {
 						scenarioName = paste(
 							cancerType,
@@ -150,7 +123,6 @@ generateModelParameters <- function(modelsToUse) {
 
 						currentTable$actualParticipation = currentTable$participation *
 							participationMultipliers[cancerType][[1]]
-						currentTable$actualAdherence = 0.8
 
 						currentTestParameters = testPerformance[paste(
 							cancerType,
@@ -180,6 +152,10 @@ generateModelParameters <- function(modelsToUse) {
 			parameterTables = bind_rows(parameterTables, currentTable)
 		}
 	}
+
+	print(nrow(parameterTables))
+
+	parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
 
 	parameterTables
 }

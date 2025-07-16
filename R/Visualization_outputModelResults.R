@@ -3,7 +3,7 @@ outputAllTables <- function(previousRunOutputs) {
 	if (downloadOncoSimRuns) {
 		openmpp::use_OpenMpp_CPAC()
 		#unlink("Output", recursive = TRUE)
-		models = c("OncoSim-cervical", "OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
+		models = c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
 		#models = c("OncoSim-breast")
 		for (modelToUse in models) {
 			model = load_model(modelToUse)
@@ -59,9 +59,6 @@ outputAllTables <- function(previousRunOutputs) {
 	}
 	for (colonTable in outputTables["OncoSim-colorectal"][[1]]) {
 		allTables[colonTable] = list(getCombinedTable(colonTable, "colorectal"))
-	}
-	for (cervicalTable in outputTables["OncoSim-cervical"][[1]]) {
-		allTables[cervicalTable] = list(getCombinedTable(cervicalTable, "cervical"))
 	}
 	for (lungTable in outputTables["OncoSim-lung"][[1]]) {
 		allTables[lungTable] = list(getCombinedTable(lungTable, "lung"))
