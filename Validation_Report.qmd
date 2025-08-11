@@ -15,6 +15,7 @@ format:
 #| warning: false
 library(tidyverse)
 library(targets)
+library(compareDF)
 
 
 importedData <- tar_read(importedData, store = "store_visualize")
@@ -117,6 +118,7 @@ participation <- importedData$Breast_Cancer_Timing_Of_Last_Screen %>%
 ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
 	scale_y_continuous(labels = scales::number) +
 	geom_line()
+# participation[participation$Shiftable_year == 2020 & participation$sce == "BaseCase",]$percentScreenedWithin3Years
 
 ```
 
@@ -162,6 +164,7 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost)
 	geom_smooth() +
 	ggtitle("Cost_of_screening - Smooth")
 ```
+
 
 # Colorectal - Validation
 
@@ -211,16 +214,23 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = expr_name), data = colon
 
 # Including only 50-75 for simplicity
 participation <- importedData$Colorectal_Cancer_Timing_Of_Last_Screen %>%
-	filter(Colorectal_cancer_family_history == "all", age_group %in% c("[50,60)", "[60,70)", "[70,75)"), Time_of_last_screen_years %in% c("Last_screen_within_0_1", "Last_screen_within_1_2", "Last_screen_within_2_3", "all"), Shiftable_year != "all") %>%
-	group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
+	filter(Colorectal_cancer_family_history == "all", age_group %in% c("[50,60)", "[60,70)", "[70,75)"), Time_of_last_screen_years == "all", Shiftable_year != "all") %>%
+	group_by(Time_of_last_screen_years, Shiftable_year, sce, expr_name) %>%
 	summarize(expr_value = sum(expr_value)) %>%
-	pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
-	mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, Shiftable_year = as.numeric(Shiftable_year))
+	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
+	mutate(percentScreenedWithin2PointFiveYears = Number_of_peop_x_past_2_5_years / Number_of_people, percentScreenedWithin2Years = Number_of_peop_x_in_past_2_years / Number_of_people, Shiftable_year = as.numeric(Shiftable_year))
 
 
-ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin2PointFiveYears, colour = sce), data = participation) +
 	scale_y_continuous(labels = scales::number) +
 	geom_line()
+
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin2Years, colour = sce), data = participation) +
+	scale_y_continuous(labels = scales::number) +
+	geom_line()
+
+
+participation[participation$Shiftable_year == 2020 & participation$sce == "BaseCase", ]$percentScreenedWithin2Years
 
 ```
 
@@ -307,12 +317,21 @@ participation <- importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
 	group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
 	summarize(expr_value = sum(expr_value)) %>%
 	pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
-	mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedEver = 1 - (Never_screened / all), Shiftable_year = as.numeric(Shiftable_year))
+	mutate(
+		percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
+		percentScreenedWithin2Years = (Last_screen_within_0_1 + Last_screen_within_1_2) / all,
+		percentScreenedEver = 1 - (Never_screened / all),
+		Shiftable_year = as.numeric(Shiftable_year)
+	)
 
 
 ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
 	scale_y_continuous(labels = scales::number) +
 	geom_line()
+
+
+participation[participation$Shiftable_year == 2025 & participation$sce == "BaseCase", ]$percentScreenedWithin2Years
+
 
 ```
 

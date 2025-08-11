@@ -15,6 +15,7 @@ library(tidyverse)
 library(targets)
 library(ggplot2)
 library(extrafont)
+library(RColorBrewer)
 
 importedData <- tar_read(importedData, store = "store_visualize")
 combinedTables <- tar_read(combinedTables, store = "store_visualize")
@@ -32,53 +33,80 @@ colours["Breast"] <- "#E1549D"
 colours["Lung"] <- "#404040"
 colours["Colorectal"] <- "#022D89"
 colours["Combined"] <- "#B28CD6"
+
+
+ascendingStageColours <- brewer.pal(5, name = "YlOrRd")
+
+colours["Stage 0"] <- ascendingStageColours[1]
+colours["Stage I"] <- ascendingStageColours[2]
+colours["Stage II"] <- ascendingStageColours[3]
+colours["Stage III"] <- ascendingStageColours[4]
+colours["Stage IV"] <- ascendingStageColours[5]
+
+colours["Limited (Small Cell Lung)"] <- "#818BBB"
+colours["Extensive (Small Cell Lung)"] <- "#741C6D"
+
+
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
-  dataset$ColumnToShow <- dataset[[variable]]
-  dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
-  return(
-    ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
-      facet_grid(vars(cancertype), scales = "free") +
-      geom_line() +
-      scale_x_continuous("Simulated Year") +
-      scale_y_continuous(yAxisTitle, labels = scales::comma) +
-      scale_colour_discrete("Scenario") +
-      expand_limits(y = 0) +
-      ggtitle(title) +
-      theme_minimal() +
-      theme(text = element_text(family = "Avenir", size = 20))
-  )
+	dataset$ColumnToShow <- dataset[[variable]]
+	dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
+	return(
+		ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
+			facet_grid(vars(cancertype), scales = "free") +
+			geom_line() +
+			scale_x_continuous("Simulated Year") +
+			scale_y_continuous(yAxisTitle, labels = scales::comma) +
+			scale_colour_discrete("Scenario") +
+			expand_limits(y = 0) +
+			ggtitle(title) +
+			theme_minimal() +
+			theme(text = element_text(family = "Avenir", size = 20))
+	)
 }
 
 
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
-  dataset$ColumnToShow <- dataset[[variable]]
-  dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
-  return(
-    ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
-      facet_grid(vars(Type), scales = "free") +
-      geom_col(position = "dodge") +
-      scale_x_discrete("Scenario") +
-      scale_y_continuous(yAxisTitle, labels = scales::comma) +
-      scale_fill_manual("Cancer Type", values = colours) +
-      expand_limits(y = 0) +
-      ggtitle(title) +
-      theme_minimal() +
-      theme(text = element_text(family = "Avenir", size = 20))
-  )
+	dataset$ColumnToShow <- dataset[[variable]]
+	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
+	return(
+		ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
+			facet_grid(vars(Type), scales = "free") +
+			geom_col(position = "dodge") +
+			scale_x_discrete("Scenario") +
+			scale_y_continuous(yAxisTitle, labels = scales::comma) +
+			scale_fill_manual("Cancer Type", values = colours) +
+			expand_limits(y = 0) +
+			ggtitle(title) +
+			theme_minimal() +
+			theme(text = element_text(family = "Avenir", size = 20))
+	)
+}
+
+visualizeStages <- function(dataset) {
+	return(
+		ggplot(dataset, aes(x = formattedName, y = expr_value, fill = expr_name)) +
+			facet_grid(vars(cancertype), scales = "free") +
+			geom_col(position = "stack") +
+			scale_x_discrete("Scenario") +
+			scale_fill_manual("Stage", values = colours) +
+			scale_y_continuous("Distribution", labels = scales::percent) +
+			expand_limits(y = 0) +
+			ggtitle("Stage Distribution") +
+			theme_minimal() +
+			theme(text = element_text(family = "Avenir", size = 20))
+	)
 }
 
 
 timeData <- combinedTables$PrimaryTable
-
-timeData <- timeData # %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
-
-
 timeData$formattedName <- paste(timeData$formattedName, "\n")
 
 totalData <- combinedTables$`PrimaryTable_2025-2051`
-totalData <- totalData # %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 1 Years", "BaseCase"))
 totalData$formattedName <- paste(totalData$formattedName, "\n")
 
+
+stageData <- combinedTables$StageDist
+stageData$formattedName <- paste(stageData$formattedName, "\n")
 
 ```
 
@@ -134,6 +162,19 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", 
 
 ```
 
+# Total Cost
+
+```{r,fig.width=12,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeByTime(timeData, "Total_Cost", "Total Cost by Time", "Total Cost ($CAD)")
+visualizeTotals(totalData, "Total_Cost", "Total Costs (2025-2051)", "Total Cost ($CAD)")
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost ($CAD)")
+
+```
+
+
 
 # ICER (Total Cost per Reduction in Cancer Death)
 
@@ -142,5 +183,14 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", 
 #| warning: false
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
+
+```
+
+# Stages
+```{r,fig.width=12,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeStages(stageData)
 
 ```

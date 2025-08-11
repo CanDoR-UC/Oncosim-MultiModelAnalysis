@@ -6,6 +6,25 @@ SetParameters <- function(createdScenarios) {
 	scenario$ReadOnly = FALSE
 
 	if (currentParameters$model == "OncoSim-colorectal") {
+		#Match existing rate
+		screen_param <- scenario$get_param("CrcScreenRecruitCanada")
+
+		screen_param$`0` <- 0
+		screen_param$`1` <- 0
+		screen_param$`3` <- 0
+		screen_param$`4`[
+			screen_param$Overall_program_controls == 'SR_FIRST_PARTICIPATION'
+		] <- 0.50 # Had to set the value to 50% to achieve the proper rate
+		scenario$set_param("CrcScreenRecruitCanada", screen_param)
+
+		modality_param <- scenario$get_param("CrcScreenPlanCanada")
+
+		modality_param$A[
+			modality_param$Screening_modality_plan == 'Adherence_probability'
+		] <- 1
+
+		scenario$set_param("CrcScreenPlanCanada", modality_param)
+
 		if (currentParameters$type != "BaseCase") {
 			#Set MCED Cost
 			costs <- scenario$get_param("CrcScreenCostCanada")
@@ -278,7 +297,11 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-lung") {
-		#Need to alter the follow-up prototocol
+		ReportYearPooled = scenario$get_param("ReportYearPooled")
+		ReportYearPooled$Start_value = 2025
+		ReportYearPooled$End_value = 2051
+		scenario$set_param("ReportYearPooled", ReportYearPooled)
+
 		followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
 		followUpProtocol[[1]] = "Custom"
 		scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
@@ -288,12 +311,13 @@ SetParameters <- function(createdScenarios) {
 		LcDispatcherDefault$`0`[
 			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
 		] = 1
+
 		LcDispatcherDefault$`0`[
 			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
 		] = 1
 		LcDispatcherDefault$`0`[
 			LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
-		] = 0.05
+		] = 0.39
 
 		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 
