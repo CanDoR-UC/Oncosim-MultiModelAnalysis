@@ -52,7 +52,7 @@ SetParameters <- function(createdScenarios) {
 
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'SR_FIRST_PARTICIPATION'
-			] <- currentParameters$actualParticipation
+			] <- currentParameters$participation
 
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'SR_FIRST_PHASEIN'
@@ -62,7 +62,6 @@ SetParameters <- function(createdScenarios) {
 				screen_param$Overall_program_controls == 'Assign_screening_group'
 			] <- 5
 
-			#Trying to achieve 90% ppt
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'Additional_recruitment_attempts'
 			] <- 99
@@ -71,7 +70,7 @@ SetParameters <- function(createdScenarios) {
 			] <- 0
 			screen_param$`5`[
 				screen_param$Overall_program_controls == 'SR_RETRY_PARTICIPATION'
-			] <- currentParameters$actualParticipation
+			] <- currentParameters$participation
 
 			#DISABLE #4 TO ENSURE NO FIT TESTS ARE PERFORMED ANYMORE
 			screen_param$`4`[
@@ -91,7 +90,7 @@ SetParameters <- function(createdScenarios) {
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Adherence_probability'
-			] <- currentParameters$actualParticipation
+			] <- currentParameters$participation
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'SP_FREQUENCY'
@@ -147,6 +146,7 @@ SetParameters <- function(createdScenarios) {
 		)
 		BreastScreeningUseLeanDispatcher$Future_screening_era = FALSE
 		BreastScreeningUseLeanDispatcher$Past_screening_era = FALSE
+
 		scenario$set_param(
 			"BreastScreeningUseLeanDispatcher",
 			BreastScreeningUseLeanDispatcher
@@ -166,6 +166,7 @@ SetParameters <- function(createdScenarios) {
 			reference = screen_param$`3`[
 				screen_param$Screening_era == "Future_screening_era"
 			]
+
 			screen_param$`5`[
 				screen_param$Screening_era == "Future_screening_era"
 			] <- reference
@@ -190,12 +191,12 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Recruitment_rate'
-			] <- currentParameters$actualParticipation
+			] <- currentParameters$participation
 
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Rescreen_rate'
-			] <- currentParameters$actualParticipation * 0.75
+			] <- currentParameters$participation * 0.75
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -391,7 +392,7 @@ SetParameters <- function(createdScenarios) {
 			] = 9999
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
-			] = currentParameters$actualParticipation
+			] = currentParameters$participation
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Rescreen_rate"
 			] = 0.8

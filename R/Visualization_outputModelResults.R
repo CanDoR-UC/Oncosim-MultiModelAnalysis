@@ -6,7 +6,9 @@ outputAllTables <- function(previousRunOutputs) {
 		models = c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
 		#models = c("OncoSim-lung")
 		for (modelToUse in models) {
-			model = load_model(modelToUse)
+			modelDigest = modelDigests[modelToUse][[1]]
+
+			model = load_model(modelDigest)
 
 			outputDirectory <- paste("Output", sep = "")
 			dir.create(outputDirectory, showWarnings = FALSE)
@@ -22,7 +24,7 @@ outputAllTables <- function(previousRunOutputs) {
 			allScenarios <- model$ModelScenarios$Name
 			allScenarios <- allScenarios[grepl(analysisName, allScenarios)]
 			for (scenarioName in allScenarios) {
-				scenario <- load_scenario(modelToUse, scenarioName)
+				scenario <- load_scenario(modelDigest, scenarioName)
 
 				specificScenarioDir <- paste(scenarioDirectory, "/", scenarioName, sep = "")
 				unlink(specificScenarioDir, recursive = TRUE)
@@ -42,7 +44,11 @@ outputAllTables <- function(previousRunOutputs) {
 			allRuns <- allRuns[grepl(analysisName, allRuns)]
 
 			for (runName in allRuns) {
-				model <- load_run(modelToUse, allRunTable[allRunTable$Name == runName, ]$RunDigest)
+				modelDigest = modelDigests[modelToUse][[1]]
+
+				model = load_model(modelDigest)
+
+				model <- load_run(modelDigest, allRunTable[allRunTable$Name == runName, ]$RunDigest)
 
 				specificRunDir <- paste(runDirectory, "/", runName, sep = "")
 				unlink(specificRunDir, recursive = TRUE)

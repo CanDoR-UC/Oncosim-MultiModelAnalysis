@@ -1,3 +1,8 @@
+modelDigests = list()
+modelDigests["OncoSim-lung"] = "07a27aa297b2248b4f01b9300787bb54"
+modelDigests["OncoSim-breast"] = "b7052122a73609179d8dcf40f467ee2e"
+modelDigests["OncoSim-colorectal"] = "03dfd40c7e00f6b95564376a38ad2680"
+
 paramsToAlter <- list()
 paramsToAlter["OncoSim-breast"] <- list(c(
 	"BreastScreeningProtocolDispatcher",
@@ -21,6 +26,7 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 	"SwitchEligibilityRule",
 	"ReportYearPooled"
 ))
+
 
 outputTables <- list()
 
@@ -57,26 +63,16 @@ outputTables["OncoSim-lung"] <- list(c(
 ))
 
 generateModelParameters <- function(modelsToUse) {
-	participationMultipliers = list()
-	participationMultipliers["OncoSim-breast"] = 1
-	participationMultipliers["OncoSim-colorectal"] = 1
-	participationMultipliers["OncoSim-lung"] = 1
-
-	adherenceMultipliers = list()
-	adherenceMultipliers["OncoSim-breast"] = 1
-	adherenceMultipliers["OncoSim-colorectal"] = 1
-	adherenceMultipliers["OncoSim-lung"] = 1
-
 	testCosts = list()
 
 	#https://www.galleri.com/patient/the-galleri-test/cost
-	# $949 USD = 1,298.21
-	testCosts["Galleri"] = 1298.21
+	# $949 USD = 1,312.48
+	testCosts["Galleri"] = 1312.48
 
 	#https://pmc.ncbi.nlm.nih.gov/articles/PMC6080308/
 	# "We estimate the cost of the test to be less than $500,"
-	# $500 USD = $684.04
-	testCosts["CancerSeek"] = 684.04
+	# $500 USD = $691.50
+	testCosts["CancerSeek"] = 691.50
 
 	#Sensitivity THEN specificity
 	testPerformance = list()
@@ -122,9 +118,6 @@ generateModelParameters <- function(modelsToUse) {
 
 						currentTable$participation = participation / 100
 
-						currentTable$actualParticipation = currentTable$participation *
-							participationMultipliers[cancerType][[1]]
-
 						currentTestParameters = testPerformance[paste(
 							cancerType,
 							scenarioType,
@@ -156,7 +149,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
+	#parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = head(parameterTables, 1)
 
 	parameterTables

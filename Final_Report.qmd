@@ -48,53 +48,53 @@ colours["Extensive (Small Cell Lung)"] <- "#741C6D"
 
 
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
-	dataset$ColumnToShow <- dataset[[variable]]
-	dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
-	return(
-		ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
-			facet_grid(vars(cancertype), scales = "free") +
-			geom_line() +
-			scale_x_continuous("Simulated Year") +
-			scale_y_continuous(yAxisTitle, labels = scales::comma) +
-			scale_colour_discrete("Scenario") +
-			expand_limits(y = 0) +
-			ggtitle(title) +
-			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
-	)
+  dataset$ColumnToShow <- dataset[[variable]]
+  dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
+  return(
+    ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
+      facet_grid(vars(cancertype), scales = "free") +
+      geom_line() +
+      scale_x_continuous("Simulated Year") +
+      scale_y_continuous(yAxisTitle, labels = scales::comma) +
+      scale_colour_discrete("Scenario") +
+      expand_limits(y = 0) +
+      ggtitle(title) +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir", size = 20))
+  )
 }
 
 
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
-	dataset$ColumnToShow <- dataset[[variable]]
-	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
-	return(
-		ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
-			facet_grid(vars(Type), scales = "free") +
-			geom_col(position = "dodge") +
-			scale_x_discrete("Scenario") +
-			scale_y_continuous(yAxisTitle, labels = scales::comma) +
-			scale_fill_manual("Cancer Type", values = colours) +
-			expand_limits(y = 0) +
-			ggtitle(title) +
-			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
-	)
+  dataset$ColumnToShow <- dataset[[variable]]
+  dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancertype Specific")
+  return(
+    ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
+      facet_grid(vars(Type), scales = "free") +
+      geom_col(position = "dodge") +
+      scale_x_discrete("Scenario") +
+      scale_y_continuous(yAxisTitle, labels = scales::comma) +
+      scale_fill_manual("Cancer Type", values = colours) +
+      expand_limits(y = 0) +
+      ggtitle(title) +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir", size = 20))
+  )
 }
 
 visualizeStages <- function(dataset) {
-	return(
-		ggplot(dataset, aes(x = formattedName, y = expr_value, fill = expr_name)) +
-			facet_grid(vars(cancertype), scales = "free") +
-			geom_col(position = "stack") +
-			scale_x_discrete("Scenario") +
-			scale_fill_manual("Stage", values = colours) +
-			scale_y_continuous("Distribution", labels = scales::percent) +
-			expand_limits(y = 0) +
-			ggtitle("Stage Distribution") +
-			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
-	)
+  return(
+    ggplot(dataset, aes(x = formattedName, y = expr_value, fill = expr_name)) +
+      facet_grid(vars(cancertype), scales = "free") +
+      geom_col(position = "stack") +
+      scale_x_discrete("Scenario") +
+      scale_fill_manual("Stage", values = colours) +
+      scale_y_continuous("Distribution", labels = scales::percent) +
+      expand_limits(y = 0) +
+      ggtitle("Stage Distribution") +
+      theme_minimal() +
+      theme(text = element_text(family = "Avenir", size = 20))
+  )
 }
 
 

@@ -1,14 +1,15 @@
 CleanUpOldVersions <- function() {
 	for (modelToUse in modelsToUse) {
-		print(modelToUse)
-		model = load_model(modelToUse)
+		modelDigest = modelDigests[modelToUse][[1]]
+
+		model = load_model(modelDigest)
 		allPreviousNames = model$ModelScenarios$Name
 
 		for (oldScenario in allPreviousNames) {
 			if (grepl(analysisName, oldScenario)) {
-				scenarioToRemove = load_scenario(modelToUse, oldScenario)
+				scenarioToRemove = load_scenario(modelDigest, oldScenario)
 				scenarioToRemove$ReadOnly <- FALSE
-				delete_scenario(modelToUse, oldScenario)
+				delete_scenario(modelDigest, oldScenario)
 			}
 		}
 
@@ -17,7 +18,7 @@ CleanUpOldVersions <- function() {
 		]$RunDigest
 
 		for (oldRun in allPreviousRuns) {
-			delete_run(model$ModelDigest, oldRun)
+			delete_run(modelDigest, oldRun)
 		}
 	}
 	unlink("store_oncosim", recursive = TRUE)
@@ -26,8 +27,8 @@ CleanUpOldVersions <- function() {
 
 CreateScenario <- function(currentParameters) {
 	currentParameters = currentParameters[[1]]
-
-	model = load_model(currentParameters$model)
+	modelDigest = modelDigests[currentParameters$model][[1]]
+	model = load_model(modelDigest)
 	baserun_digest = model$ModelRuns$RunDigest[[1]]
 
 	scenarioName <- paste(analysisName, currentParameters$name, sep = "")
@@ -37,9 +38,9 @@ CreateScenario <- function(currentParameters) {
 	matchingPrevious = allPreviousNames[grepl(scenarioName, allPreviousNames)]
 	if (length(matchingPrevious) != 0) {
 		for (name in matchingPrevious) {
-			scenarioToUse = load_scenario(currentParameters$model, name)
+			scenarioToUse = load_scenario(modelDigest, name)
 			scenarioToUse$ReadOnly <- FALSE
-			delete_scenario(currentParameters$model, name)
+			delete_scenario(modelDigest, name)
 		}
 	}
 
@@ -52,11 +53,11 @@ CreateScenario <- function(currentParameters) {
 	}
 
 	scenarioToUse = create_scenario(
-		currentParameters$model,
+		modelDigest,
 		scenarioName,
 		baserun_digest
 	)
-	scenarioToUse = load_scenario(currentParameters$model, scenarioName)
+	scenarioToUse = load_scenario(modelDigest, scenarioName)
 	for (param in paramsToAlter[[currentParameters$model]]) {
 		scenarioToUse$copy_params(param)
 	}
