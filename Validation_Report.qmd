@@ -16,6 +16,7 @@ format:
 library(tidyverse)
 library(targets)
 library(compareDF)
+library(RColorBrewer)
 
 
 importedData <- tar_read(importedData, store = "store_visualize")
@@ -112,13 +113,30 @@ participation <- importedData$Breast_Cancer_Timing_Of_Last_Screen %>%
   group_by(Time_of_last_screen_years, Shiftable_year, sce) %>%
   summarize(expr_value = sum(expr_value)) %>%
   pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
-  mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, Shiftable_year = as.numeric(Shiftable_year))
+  mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
 
 
 ggplot(aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = sce), data = participation) +
   scale_y_continuous(labels = scales::number) +
   geom_line()
 participation[participation$Shiftable_year == 2020 & participation$sce == "BaseCase", ]$percentScreenedWithin3Years
+
+ggplot(aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = sce), data = participation) +
+  scale_y_continuous(labels = scales::number) +
+  geom_line()
+
+```
+
+
+```{r}
+#| warning: false
+
+# Should be 90%
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin1Years
+
+# Should be 30%
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin3Years
+
 
 ```
 
@@ -235,6 +253,19 @@ participation[participation$Shiftable_year == 2020 & participation$sce == "BaseC
 ```
 
 
+```{r}
+#| warning: false
+
+# Should be 90%
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin2Years
+
+# Should be 30%
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin2PointFiveYears
+
+
+```
+
+
 **Cancer detections should be different between Galleri and CancerSeek.**
 
 ```{r}
@@ -320,6 +351,7 @@ participation <- importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
   mutate(
     percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
     percentScreenedWithin2Years = (Last_screen_within_0_1 + Last_screen_within_1_2) / all,
+    percentScreenedWithin1Years = (Last_screen_within_0_1) / all,
     percentScreenedEver = 1 - (Never_screened / all),
     Shiftable_year = as.numeric(Shiftable_year)
   )
@@ -334,6 +366,22 @@ participation[participation$Shiftable_year == 2025 & participation$sce == "BaseC
 
 
 ```
+
+
+
+```{r}
+#| warning: false
+
+# Should be 90%
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin1Years
+
+# Should be 30%
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin3Years
+
+
+```
+
+
 
 
 **Cancer detections should be different between Galleri and CancerSeek. Galleri should be higher**

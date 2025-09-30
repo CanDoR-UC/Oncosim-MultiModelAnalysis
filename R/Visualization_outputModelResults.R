@@ -4,8 +4,9 @@ outputAllTables <- function(previousRunOutputs) {
 		openmpp::use_OpenMpp_CPAC()
 		#unlink("Output", recursive = TRUE)
 		models = c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
-		#models = c("OncoSim-lung")
+		models = c("OncoSim-breast")
 		for (modelToUse in models) {
+			print(modelToUse)
 			modelDigest = modelDigests[modelToUse][[1]]
 
 			model = load_model(modelDigest)
@@ -24,6 +25,7 @@ outputAllTables <- function(previousRunOutputs) {
 			allScenarios <- model$ModelScenarios$Name
 			allScenarios <- allScenarios[grepl(analysisName, allScenarios)]
 			for (scenarioName in allScenarios) {
+				print(scenarioName)
 				scenario <- load_scenario(modelDigest, scenarioName)
 
 				specificScenarioDir <- paste(scenarioDirectory, "/", scenarioName, sep = "")

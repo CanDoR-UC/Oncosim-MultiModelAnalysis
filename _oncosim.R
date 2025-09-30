@@ -10,7 +10,8 @@ purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
 analysisName = "MCEDProject"
 
-modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")
+#modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")
+modelsToUse <- c("OncoSim-breast")
 
 actuallyRun = TRUE
 

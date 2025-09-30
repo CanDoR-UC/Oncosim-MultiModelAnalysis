@@ -90,7 +90,7 @@ SetParameters <- function(createdScenarios) {
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Adherence_probability'
-			] <- currentParameters$participation
+			] <- 1
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'SP_FREQUENCY'
@@ -196,7 +196,7 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'Rescreen_rate'
-			] <- currentParameters$participation * 0.75
+			] <- currentParameters$participation
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -395,7 +395,7 @@ SetParameters <- function(createdScenarios) {
 			] = currentParameters$participation
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Rescreen_rate"
-			] = 0.8
+			] = 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
 			] = 1
