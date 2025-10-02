@@ -40,6 +40,8 @@ stageData$formattedName <- paste(stageData$formattedName, "\n")
 timeData_BreastDouble <- timeData
 timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] <- timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] * 2
 
+participationData <- combinedTables$Participation
+
 ```
 
 
@@ -215,6 +217,16 @@ Parameter|Description|Planned Values|
   + between 24% - 36% within the past 3 years for the 30% scenario
   + between 83 - 89% within the past year for the 90% scenario
 
+
+# Results - Participation
+
+```{r,fig.width=18,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizeParticipation(participationData %>% filter(cancertype == "colorectal"))
+
+```
 
 # Results - Calibration Success
 

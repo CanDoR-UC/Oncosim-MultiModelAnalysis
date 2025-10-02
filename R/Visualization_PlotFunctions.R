@@ -27,7 +27,7 @@ visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
 	return(
 		ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = formattedName)) +
 			facet_grid(vars(cancertype), scales = "free") +
-			geom_line() +
+			geom_line(size = 2) +
 			scale_x_continuous("Simulated Year") +
 			scale_y_continuous(yAxisTitle, labels = scales::comma) +
 			scale_colour_discrete("Scenario") +
@@ -38,13 +38,44 @@ visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
 	)
 }
 
+visualizeParticipation <- function(dataset) {
+	leftPlot <- ggplot(dataset %>% filter(grepl("_1_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = formattedName)) +
+		facet_grid(vars(cancertype), scales = "free") +
+		geom_line(size = 2) +
+		scale_x_continuous("Simulated Year") +
+		scale_y_continuous("Percent Screened Within 1 Year", labels = scales::percent) +
+		scale_colour_discrete("Scenario") +
+		expand_limits(y = c(0, 1)) +
+		ggtitle("One Year Participation") +
+		geom_hline(yintercept = 0.9, linetype = "dashed", colour = "blue") +
+		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
+		theme_minimal() +
+		theme(text = element_text(family = "Avenir", size = 20))
+
+	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = formattedName)) +
+		facet_grid(vars(cancertype), scales = "free") +
+		geom_line(size = 2) +
+		scale_x_continuous("Simulated Year") +
+		scale_y_continuous("Percent Screened Within 1 Year", labels = scales::percent) +
+		scale_colour_discrete("Scenario") +
+		expand_limits(y = c(0, 1)) +
+		ggtitle("Three Year Participation") +
+		geom_hline(yintercept = 0.3, linetype = "dashed", colour = "blue") +
+		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
+		theme_minimal() +
+		theme(text = element_text(family = "Avenir", size = 20))
+
+	#ggarrange(leftPlot, rightPlot, nrow = 1, common.legend = TRUE)
+	leftPlot
+}
+
 visualizeCalibration <- function(dataset, variable, title, yAxisTitle) {
 	dataset$ColumnToShow <- dataset[[variable]]
 	dataset <- dataset %>% filter(Shiftable_year %in% dateRangeToShow)
 
 	firstPlot = ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = cancertype)) +
 		facet_grid(vars(formattedName), scales = "free") +
-		geom_line() +
+		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
 		scale_y_continuous(yAxisTitle, labels = scales::comma) +
 		scale_colour_discrete("Scenario") +
@@ -55,7 +86,7 @@ visualizeCalibration <- function(dataset, variable, title, yAxisTitle) {
 
 	secondPlot = ggplot(dataset, aes(x = Shiftable_year, y = ColumnToShow, colour = cancertype)) +
 		facet_grid(vars(formattedName), scales = "free") +
-		geom_smooth() +
+		geom_smooth(size = 2) +
 		scale_x_continuous("Simulated Year") +
 		scale_y_continuous(yAxisTitle, labels = scales::comma) +
 		scale_colour_discrete("Scenario") +

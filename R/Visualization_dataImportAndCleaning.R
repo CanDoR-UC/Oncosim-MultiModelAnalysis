@@ -92,6 +92,38 @@ extractGeneralMetrics <- function(importedData) {
 	cancerMetricsTable
 }
 
+extractParticipation <- function(importedData) {
+	ageGroups = c("[50,60)", "[60,70)", "[70,75)")
+
+	breastParticipation = importedData$Breast_Cancer_Timing_Of_Last_Screen %>%
+		filter(age_group %in% ageGroups, Shiftable_year != "all") %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		summarize(expr_value = sum(expr_value)) %>%
+		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
+
+	colonParticipation = importedData$Colorectal_Cancer_Timing_Of_Last_Screen %>%
+		filter(Colorectal_cancer_family_history == "all", age_group %in% ageGroups, expr_name == "Number_of_people", Shiftable_year != "all") %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		summarize(expr_value = sum(expr_value)) %>%
+		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
+
+	lungParticipation = importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
+		filter(age_group %in% ageGroups, Shiftable_year != "all") %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		summarize(expr_value = sum(expr_value)) %>%
+		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
+		mutate(
+			percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
+			percentScreenedWithin1Years = (Last_screen_within_0_1) / all,
+			Shiftable_year = as.numeric(Shiftable_year)
+		)
+
+	bind_rows(lungParticipation, colonParticipation, breastParticipation)
+}
+
+
 createCombinedCancerTypesData <- function(cancerMetricsTable) {
 	#Not great, but just multiplying resource usage (Screening Cost, Screen Num) by 2. Add Screening_Cost to total cost to simulate double the screening cost (since males are also theoretically being screened)
 	femaleOnlyTable = cancerMetricsTable %>% filter(cancertype %in% c("breast")) %>% mutate(Total_Screens = Total_Screens * 2, Screening_Cost = Screening_Cost * 2, Total_Cost = Total_Cost + Screening_Cost)
@@ -231,6 +263,7 @@ combineModelTables <- function(importedData) {
 	processedModelResults["PrimaryTable_2025-2051"] = list(cancerMetricsTableCombinedYears)
 
 	processedModelResults["StageDist"] = list(generateStageTables(importedData))
+	processedModelResults["Participation"] = list(extractParticipation(importedData))
 
 	processedModelResults
 }
