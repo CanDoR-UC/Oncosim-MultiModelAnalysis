@@ -95,7 +95,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	scenarios <- c()
 
-	for (scenarioType in c("Galleri", "CancerSeek")) {
+	for (scenarioType in c("Galleri", "CancerSeek", "NonMCED")) {
 		for (startAge in c(45, 50)) {
 			for (testFrequency in c(1, 3)) {
 				for (participation in c(30, 50, 70, 90)) {
@@ -118,15 +118,16 @@ generateModelParameters <- function(modelsToUse) {
 
 						currentTable$participation = participation / 100
 
-						currentTestParameters = testPerformance[paste(
-							cancerType,
-							scenarioType,
-							sep = "-"
-						)][[1]]
-						currentTable$sensitivity = currentTestParameters[1]
-						currentTable$specificity = currentTestParameters[2]
-
-						currentTable$cost = testCosts[scenarioType][[1]]
+						if (scenarioType != "NonMCED") {
+							currentTestParameters = testPerformance[paste(
+								cancerType,
+								scenarioType,
+								sep = "-"
+							)][[1]]
+							currentTable$sensitivity = currentTestParameters[1]
+							currentTable$specificity = currentTestParameters[2]
+							currentTable$cost = testCosts[scenarioType][[1]]
+						}
 
 						parameterTables = bind_rows(parameterTables, currentTable)
 					}
@@ -150,6 +151,8 @@ generateModelParameters <- function(modelsToUse) {
 	print(nrow(parameterTables))
 
 	parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
+	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
+
 	#parameterTables = head(parameterTables, 1)
 
 	parameterTables

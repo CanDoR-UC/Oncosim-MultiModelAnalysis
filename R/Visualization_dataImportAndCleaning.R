@@ -132,14 +132,14 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 	#For MCED, clinical attributes (deaths, cases, TotalCost-ScreeningCost) must be summed. Resource usage (Screening Cost, number of screens) must be averaged
 	cancerMetricsTableAllCancerMCED = bind_rows(femaleOnlyTable, allSexTable) %>%
 		select(-cancertype) %>%
-		filter(sce != "BaseCase") %>%
+		filter(sce != "BaseCase" & sce != "NonMCED") %>%
 		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
 		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = mean(Total_Screens), Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost), Screening_Cost = mean(Screening_Cost)) %>%
 		mutate(cancertype = "Combined")
 
 	cancerMetricsTableAllCancerBaseCase = cancerMetricsTable %>% #Don't need to multiply breast x2 for base case
 		select(-cancertype) %>%
-		filter(sce == "BaseCase") %>%
+		filter(sce == "BaseCase" & sce != "NonMCED") %>%
 		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
 		summarize(Detected_Cases = sum(Detected_Cases), Cancer_Deaths = sum(Cancer_Deaths), Total_Screens = sum(Total_Screens), Total_Cost = sum(Total_Cost), Screening_Cost = sum(Screening_Cost)) %>%
 		mutate(cancertype = "Combined")

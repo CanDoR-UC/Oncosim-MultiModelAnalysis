@@ -6,78 +6,53 @@ SetParameters <- function(createdScenarios) {
 	scenario$ReadOnly = FALSE
 
 	if (currentParameters$model == "OncoSim-colorectal") {
-		#Match existing rate
-		screen_param <- scenario$get_param("CrcScreenRecruitCanada")
-
-		screen_param$`0` <- 0
-		screen_param$`1` <- 0
-		screen_param$`3` <- 0
-		screen_param$`4`[
-			screen_param$Overall_program_controls == 'SR_FIRST_PARTICIPATION'
-		] <- 0.50 # Had to set the value to 50% to achieve the proper rate
-		scenario$set_param("CrcScreenRecruitCanada", screen_param)
-
 		modality_param <- scenario$get_param("CrcScreenPlanCanada")
-
 		modality_param$A[
 			modality_param$Screening_modality_plan == 'Adherence_probability'
 		] <- 1
-
 		scenario$set_param("CrcScreenPlanCanada", modality_param)
 
+		baseCaseParticipationValue = 0.5
+		newParticipationValue = ifelse(currentParameters$type != "BaseCase", currentParameters$participation, baseCaseParticipationValue)
+
+		screen_param <- scenario$get_param("CrcScreenRecruitCanada")
+
+		screen_param$`0` = c(0, 1, 2009, 2009, 50, 74, 123, baseCaseParticipationValue, 2, 0, 99, newParticipationValue, 4)
+		screen_param$`1` = 0
+		screen_param$`2` = 0
+
+		#Add extra recruitment to allow a sharp increase (if needed)
+		if (newParticipationValue > baseCaseParticipationValue) {
+			yearToSelect = 2010
+			ageToSelect = 59
+			yearsBetween = 14
+			for (column in 3:17) {
+				screen_param[[paste(column)]] = c(0, 1, yearToSelect, yearToSelect, 50, ageToSelect, 123, baseCaseParticipationValue, 1, 1, yearsBetween, newParticipationValue, 4)
+				yearToSelect = yearToSelect + 1
+				ageToSelect = ageToSelect + 1
+				yearsBetween = yearsBetween - 1
+			}
+		} else {
+			screen_param$`3` = 0
+			screen_param$`4` = 0
+		}
+		screen_param$`18` = c(0, 1, 2010, 2024, 50, 74, 123, baseCaseParticipationValue, 1, 0, 99, newParticipationValue, 4)
+		screen_param$`19` = c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "NonMCED", 5, 4))
+
+		scenario$set_param("CrcScreenRecruitCanada", screen_param)
+
+		#withinModality <- scenario$get_param("ScreeningRoundWithinModality")
+		#withinModality[[1]] = FALSE
+		#scenario$set_param("ScreeningRoundWithinModality", withinModality)
+
 		if (currentParameters$type != "BaseCase") {
-			#Set MCED Cost
-			costs <- scenario$get_param("CrcScreenCostCanada")
-			costs$FOBT_KIT <- currentParameters$cost
-			costs$FOBT_PROCESSING <- 0
-			scenario$set_param("CrcScreenCostCanada", costs)
-
-			#Set up parameters for how MCED screening works.
-			screen_param <- scenario$get_param("CrcScreenRecruitCanada")
-			screen_param$`5` <- screen_param$`4` #first copy over element 4 to element 5 to make subsequent change easier
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Recruitment_start_year_integer'
-			] <- 2025
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Recruitment_start_age_integer'
-			] <- currentParameters$startAge
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Recruitment_end_year_integer'
-			] <- 9999
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Recruitment_end_age_integer'
-			] <- currentParameters$endAge
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'SR_FIRST_PARTICIPATION'
-			] <- currentParameters$participation
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'SR_FIRST_PHASEIN'
-			] <- 0
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Assign_screening_group'
-			] <- 5
-
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'Additional_recruitment_attempts'
-			] <- 99
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'SR_RETRY_WAITTIME'
-			] <- 0
-			screen_param$`5`[
-				screen_param$Overall_program_controls == 'SR_RETRY_PARTICIPATION'
-			] <- currentParameters$participation
-
-			#DISABLE #4 TO ENSURE NO FIT TESTS ARE PERFORMED ANYMORE
-			screen_param$`4`[
-				screen_param$Overall_program_controls == 'Recruitment_end_year_integer'
-			] <- 2024
-
-			scenario$set_param("CrcScreenRecruitCanada", screen_param)
+			if (currentParameters$type != "NonMCED") {
+				#Set MCED Cost
+				costs <- scenario$get_param("CrcScreenCostCanada")
+				costs$FOBT_KIT <- currentParameters$cost
+				costs$FOBT_PROCESSING <- 0
+				scenario$set_param("CrcScreenCostCanada", costs)
+			}
 
 			#Creating plan to dictate how people are screened with MCED
 			modality_param <- scenario$get_param("CrcScreenPlanCanada")
@@ -86,7 +61,10 @@ SetParameters <- function(createdScenarios) {
 			#Include people who were already recruited
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Screening_group'
-			] <- 345
+			] <- 45
+			modality_param$A[
+				modality_param$Screening_modality_plan == 'Screening_group'
+			] <- 45
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Adherence_probability'
@@ -102,7 +80,7 @@ SetParameters <- function(createdScenarios) {
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Modality'
-			] <- 1 #For MCED scenarios, hack the FOBT modality
+			] <- ifelse(currentParameters$type != "NonMCED", 1, 2) #For MCED scenarios, hack the FOBT modality. Otherwise, leave as 2
 
 			#Enable MCED starting in 2025
 			modality_param$B[
@@ -111,30 +89,32 @@ SetParameters <- function(createdScenarios) {
 
 			modality_param$A[
 				modality_param$Screening_modality_plan == 'Time_end_continuous_time'
-			] <- 2026
+			] <- 2025
 
 			scenario$set_param("CrcScreenPlanCanada", modality_param)
 
-			#Altering effectiveness to emulate MCED
-			fit_param <- scenario$get_param("CrcTestPositivitySuccinct")
-			# 1-Specificity for "No polyp or cancer" and all others. If a polyp is detected, this is a false positive. Sensitivity for cancer
-			otherValues = as.numeric(scales::number(
-				1 - currentParameters$specificity,
-				accuracy = 0.001
-			))
+			if (currentParameters$type != "NonMCED") {
+				#Altering effectiveness to emulate MCED
+				fit_param <- scenario$get_param("CrcTestPositivitySuccinct")
+				# 1-Specificity for "No polyp or cancer" and all others. If a polyp is detected, this is a false positive. Sensitivity for cancer
+				otherValues = as.numeric(scales::number(
+					1 - currentParameters$specificity,
+					accuracy = 0.001
+				))
 
-			effectivenessValues = c(
-				otherValues,
-				otherValues,
-				otherValues,
-				otherValues,
-				currentParameters$sensitivity
-			)
+				effectivenessValues = c(
+					otherValues,
+					otherValues,
+					otherValues,
+					otherValues,
+					currentParameters$sensitivity
+				)
 
-			fit_param$FOBT_guaiac[1:5] <- effectivenessValues
-			fit_param$FOBT_guaiac[11:15] <- effectivenessValues
+				fit_param$FOBT_guaiac[1:5] <- effectivenessValues
+				fit_param$FOBT_guaiac[11:15] <- effectivenessValues
 
-			scenario$set_param("CrcTestPositivitySuccinct", fit_param)
+				scenario$set_param("CrcTestPositivitySuccinct", fit_param)
+			}
 		} else {
 			#Set base parameters here.
 		}
@@ -155,11 +135,13 @@ SetParameters <- function(createdScenarios) {
 		if (currentParameters$type != "BaseCase") {
 			#Set MCED Cost May have to change the other costs too?
 
-			costs <- scenario$get_param("BreastScreeningCosts")
-			costs[
-				costs$Breast_screening_modalities == "Alternative_modality_E",
-			]$Cost_of_screen <- currentParameters$cost
-			scenario$set_param("BreastScreeningCosts", costs)
+			if (currentParameters$type != "NonMCED") {
+				costs <- scenario$get_param("BreastScreeningCosts")
+				costs[
+					costs$Breast_screening_modalities == "Alternative_modality_E",
+				]$Cost_of_screen <- currentParameters$cost
+				scenario$set_param("BreastScreeningCosts", costs)
+			}
 
 			#Set up parameters for how MCED screening works.
 			screen_param <- scenario$get_param("BreastScreeningProtocolDispatcher")
@@ -215,7 +197,7 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'BREAST_SCREENI_x_RTING_APPARATUS'
-			] <- 8 #Alt modality E
+			] <- ifelse(currentParameters$type != "NonMCED", 8, 0) #Alt modality E if MCED. Default otherwise
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -251,49 +233,51 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("BreastScreeningProtocolDispatcher", screen_param)
 
-			specificity_param <- scenario$get_param("BreastScreeningSpecificityNew")
-			specificity = currentParameters$specificity
-			specificity_param[
-				specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-			]$`(-∞,40)` = specificity
+			if (currentParameters$type != "NonMCED") {
+				specificity_param <- scenario$get_param("BreastScreeningSpecificityNew")
+				specificity = currentParameters$specificity
+				specificity_param[
+					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
+				]$`(-∞,40)` = specificity
 
-			specificity_param[
-				specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-			]$`[40,50)` = specificity
+				specificity_param[
+					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
+				]$`[40,50)` = specificity
 
-			specificity_param[
-				specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-			]$`[50,60)` = specificity
+				specificity_param[
+					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
+				]$`[50,60)` = specificity
 
-			specificity_param[
-				specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-			]$`[60,70)` = specificity
+				specificity_param[
+					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
+				]$`[60,70)` = specificity
 
-			specificity_param[
-				specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-			]$`[70,∞)` = specificity
+				specificity_param[
+					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
+				]$`[70,∞)` = specificity
 
-			scenario$set_param("BreastScreeningSpecificityNew", specificity_param)
+				scenario$set_param("BreastScreeningSpecificityNew", specificity_param)
 
-			sensitivity_param <- scenario$get_param("BreastScreeningSensitivity")
-			sensitivity = currentParameters$sensitivity
-			for (column in c(
-				"Tumor_size_data_point_1",
-				"Tumor_size_data_point_2",
-				"Tumor_size_data_point_3",
-				"Tumor_size_data_point_4",
-				"Tumor_size_data_point_5",
-				"Tumor_size_data_point_6",
-				"Tumor_size_data_point_7",
-				"Tumor_size_data_point_8",
-				"Tumor_size_data_point_9",
-				"Tumor_size_data_point_10"
-			)) {
-				sensitivity_param[
-					sensitivity_param$Breast_screening_modalities == "Alternative_modality_E",
-				][[column]] = sensitivity
+				sensitivity_param <- scenario$get_param("BreastScreeningSensitivity")
+				sensitivity = currentParameters$sensitivity
+				for (column in c(
+					"Tumor_size_data_point_1",
+					"Tumor_size_data_point_2",
+					"Tumor_size_data_point_3",
+					"Tumor_size_data_point_4",
+					"Tumor_size_data_point_5",
+					"Tumor_size_data_point_6",
+					"Tumor_size_data_point_7",
+					"Tumor_size_data_point_8",
+					"Tumor_size_data_point_9",
+					"Tumor_size_data_point_10"
+				)) {
+					sensitivity_param[
+						sensitivity_param$Breast_screening_modalities == "Alternative_modality_E",
+					][[column]] = sensitivity
+				}
+				scenario$set_param("BreastScreeningSensitivity", sensitivity_param)
 			}
-			scenario$set_param("BreastScreeningSensitivity", sensitivity_param)
 		}
 	}
 
@@ -327,11 +311,6 @@ SetParameters <- function(createdScenarios) {
 			SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
 			scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
 
-			LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
-			LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
-			LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
-			scenario$set_param("LcScreenCost", LcScreenCost)
-
 			LcScreenEligibilityRiskThreshold = scenario$get_param("LcScreenEligibilityRiskThreshold") # Make sure anyone can be screened
 			LcScreenEligibilityRiskThreshold$High_risk_threshold = 0
 			LcScreenEligibilityRiskThreshold$Very_high_risk_threshold = 0
@@ -339,31 +318,38 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("LcScreenEligibilityRiskThreshold", LcScreenEligibilityRiskThreshold)
 
-			#Cancer detectable - 6(Highest risk) = True positive ~ Sensitivity
-			# Cancer detectable - 1(Lowest risk) = False negative ~ 1 - Sensitivity
-			# No cancer detectable - 6(Highest risk) = False positive ~ 1 - Specificity
-			# No cancer detectable - 1(Lowest risk) = True negative ~ Specificity
+			if (currentParameters$type != "NonMCED") {
+				LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
+				LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
+				LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
+				scenario$set_param("LcScreenCost", LcScreenCost)
 
-			LungRadsScreenRegularDist = scenario$get_param(
-				"LungRadsScreenRegularDist"
-			)
+				#Cancer detectable - 6(Highest risk) = True positive ~ Sensitivity
+				# Cancer detectable - 1(Lowest risk) = False negative ~ 1 - Sensitivity
+				# No cancer detectable - 6(Highest risk) = False positive ~ 1 - Specificity
+				# No cancer detectable - 1(Lowest risk) = True negative ~ Specificity
 
-			LungRadsScreenRegularDist[4:9] = 0
-			LungRadsScreenRegularDist[
-				LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
-			]$X_1 = currentParameters$specificity
-			LungRadsScreenRegularDist[
-				LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
-			]$X_6 = 1 - currentParameters$specificity
+				LungRadsScreenRegularDist = scenario$get_param(
+					"LungRadsScreenRegularDist"
+				)
 
-			LungRadsScreenRegularDist[
-				LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
-			]$X_1 = 1 - currentParameters$sensitivity
-			LungRadsScreenRegularDist[
-				LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
-			]$X_6 = currentParameters$sensitivity
+				LungRadsScreenRegularDist[4:9] = 0
+				LungRadsScreenRegularDist[
+					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
+				]$X_1 = currentParameters$specificity
+				LungRadsScreenRegularDist[
+					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
+				]$X_6 = 1 - currentParameters$specificity
 
-			scenario$set_param("LungRadsScreenRegularDist", LungRadsScreenRegularDist)
+				LungRadsScreenRegularDist[
+					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
+				]$X_1 = 1 - currentParameters$sensitivity
+				LungRadsScreenRegularDist[
+					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
+				]$X_6 = currentParameters$sensitivity
+
+				scenario$set_param("LungRadsScreenRegularDist", LungRadsScreenRegularDist)
+			}
 
 			LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 

@@ -4,7 +4,8 @@ RunScenario <- function(parametersAltered) {
 	currentScenario$ReadOnly <- TRUE
 
 	fullSampleSize = 32000000
-	testSampleSize = 3000004
+	#testSampleSize = 3000004
+	testSampleSize = 300004
 
 	if (actuallyRun) {
 		#Change to 4

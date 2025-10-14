@@ -224,7 +224,7 @@ Parameter|Description|Planned Values|
 #| echo: false
 #| warning: false
 
-visualizeParticipation(participationData %>% filter(cancertype == "colorectal"))
+visualizeParticipation(participationData)
 
 ```
 

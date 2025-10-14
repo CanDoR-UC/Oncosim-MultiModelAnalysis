@@ -1,4 +1,4 @@
-dateRangeToShow <- 2025:2051
+dateRangeToShow <- 2020:2051
 
 
 colours <- list()
@@ -65,8 +65,7 @@ visualizeParticipation <- function(dataset) {
 		theme_minimal() +
 		theme(text = element_text(family = "Avenir", size = 20))
 
-	#ggarrange(leftPlot, rightPlot, nrow = 1, common.legend = TRUE)
-	leftPlot
+	ggarrange(leftPlot, rightPlot, nrow = 1, common.legend = TRUE)
 }
 
 visualizeCalibration <- function(dataset, variable, title, yAxisTitle) {
