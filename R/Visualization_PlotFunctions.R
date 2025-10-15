@@ -56,7 +56,7 @@ visualizeParticipation <- function(dataset) {
 		facet_grid(vars(cancertype), scales = "free") +
 		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
-		scale_y_continuous("Percent Screened Within 1 Year", labels = scales::percent) +
+		scale_y_continuous("Percent Screened Within 3 Year", labels = scales::percent) +
 		scale_colour_discrete("Scenario") +
 		expand_limits(y = c(0, 1)) +
 		ggtitle("Three Year Participation") +
@@ -65,7 +65,7 @@ visualizeParticipation <- function(dataset) {
 		theme_minimal() +
 		theme(text = element_text(family = "Avenir", size = 20))
 
-	ggarrange(leftPlot, rightPlot, nrow = 1, common.legend = TRUE)
+	ggarrange(leftPlot, rightPlot, nrow = 1)
 }
 
 visualizeCalibration <- function(dataset, variable, title, yAxisTitle) {

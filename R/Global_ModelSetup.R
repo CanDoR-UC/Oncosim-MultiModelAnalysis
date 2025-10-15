@@ -15,7 +15,8 @@ paramsToAlter["OncoSim-colorectal"] <- list(c(
 	"CrcScreenRecruitCanada",
 	"CrcScreenPlanCanada",
 	"CrcTestPositivitySuccinct",
-	"CrcScreenCostCanada"
+	"CrcScreenCostCanada",
+	"TimeToRegularScreeningAfterColonoscopy"
 ))
 paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungCancerScreenFollowupProtcol",
