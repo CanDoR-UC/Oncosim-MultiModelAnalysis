@@ -151,7 +151,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
+	#parameterTables = parameterTables[grepl("45_1_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
 
 	#parameterTables = head(parameterTables, 1)

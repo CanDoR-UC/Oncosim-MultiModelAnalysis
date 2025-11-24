@@ -18,7 +18,6 @@ library(extrafont)
 library(RColorBrewer)
 library(ggpubr)
 
-importedData <- tar_read(importedData, store = "store_visualize")
 combinedTables <- tar_read(combinedTables, store = "store_visualize")
 
 source("R/Visualization_PlotFunctions.R")
@@ -26,15 +25,16 @@ source("R/Visualization_PlotFunctions.R")
 # extrafont::font_import()
 extrafont::loadfonts()
 
+scenariosToVisualize <- c("45_1_30_CancerSeek", "45_1_30_Galleri", "45_1_30_NonMCED", "45_1_90_CancerSeek", "45_1_90_Galleri", "45_1_90_NonMCED", "BaseCase")
 
-timeData <- combinedTables$PrimaryTable
+timeData <- combinedTables$PrimaryTable %>% filter(sce %in% scenariosToVisualize)
 timeData$formattedName <- paste(timeData$formattedName, "\n")
 
-totalData <- combinedTables$`PrimaryTable_2025-2051`
+totalData <- combinedTables$`PrimaryTable_2025-2051` %>% filter(sce %in% scenariosToVisualize)
 totalData$formattedName <- paste(totalData$formattedName, "\n")
 
 
-stageData <- combinedTables$StageDist
+stageData <- combinedTables$StageDist %>% filter(sce %in% scenariosToVisualize)
 stageData$formattedName <- paste(stageData$formattedName, "\n")
 
 timeData_BreastDouble <- timeData
@@ -44,6 +44,22 @@ participationData <- combinedTables$Participation
 
 ```
 
+
+# NOTE
+
+* These have been generated with only 300K simulation cases (We plan to use 46 Million) for efficiency
+  + The contained results WILL change before the final project
+* Let me know whatever other visuals should be generated
+* The NonMCED scenarios (using existing screening, with the programming of MCED) seems to always be more efficient, so they have been excluded from those visuals
+* The efficiency frontiers very likely have issues. We will need to discuss the best way to make them
+
+# Changes to Make
+
+* Switch to using HAPY per person for efficiency frontiers
+  + Results seem counterintuitive when doing this. Will explain when we meet
+* Refine existing visuals
+* Generate further visuals using feedback
+* Run with full simulation cases
 
 # Outline
 
@@ -128,7 +144,7 @@ participationData <- combinedTables$Participation
 Parameter|Description|Planned Values|
 |--------|-----------|--------------|
 |Participation|Probability that an eligible patient will participate in MCED screening.|Values ranging between 30% and 90% |
-|MCED Test|Specific MCED test sensitivity/specificity and cost.|Galleri and CancerSEEK|
+|MCED Test|Specific MCED test sensitivity/specificity and cost.|Galleri and CancerSEEK. Plus a NonMCED scenario|
 |Minimum Screening Age|Minimum age when patients will be recruited for MCED screening.|45 and 50 years of age|
 |Screening Interval|How many years between each MCED screen performed, per patient.|1 years and 3 years|
 
@@ -136,12 +152,12 @@ Parameter|Description|Planned Values|
 
 - For each cancer type (Colorectal, Breast, Lung)
   + 4 Participation values (30%, 50%, 70%, 90%)
-  + 2 MCED Tests (Galleri and CancerSeek)
+  + 2 MCED Tests (Galleri and CancerSeek) + a Fake MCED Test (NonMCED)
   + 2 Minimum Screening Ages (45 and 50 years old)
   + 2 Screening Intervals (1 year and 3 years)
   + Plus one base case scenario
-  + (7*2*2*2) + 1 = 33
-- A total of 99 scenarios for the entire project.
+  + (4*3*2*2) + 1 = 49
+- A total of 147 scenarios for the entire project.
 
 
 # Methods Parameters
@@ -160,6 +176,17 @@ Parameter|Description|Planned Values|
   + Specificity and sensitivity parameters are not available for every type of every cancer, so some simplifications must be used.
 - Base Case covers screening as it is, with comparable intervals, participation and age groups
 - MCED begins in 2025 and replaces all previous forms of screening within the 3 cancer types
+
+# Methods - Sources for Information
+
+- "Clinical validation of a targeted methylation-based multi-cancer early detection test using an independent validation set" Klein et. al
+	+ Galleri Sensitivity and Specificty values
+- "Detection and localization of surgically resectable cancers with a multi-analyte blood test" Cohen et. al
+	+ CancerSeek Sensitivity and Specificity Values
+-	Galleri Website
+	+ "$949 USD"
+-	Multiple outlets (regarding cancerseek)
+	+ "$500 USD"
 
 # Methods - Colorectal Assumptions
 
@@ -218,25 +245,154 @@ Parameter|Description|Planned Values|
   + between 83 - 89% within the past year for the 90% scenario
 
 
-# Results - Participation
+# Calibration - Participation (Breast)
 
-```{r,fig.width=18,fig.height=8}
+```{r,fig.width=18,fig.height=12}
 #| echo: false
 #| warning: false
 
-visualizeParticipation(participationData)
+visualizeParticipation(participationData %>% filter(cancertype == "Breast"))
 
 ```
 
-# Results - Calibration Success
+# Calibration - Participation (Lung)
 
-```{r,fig.width=24,fig.height=12}
+```{r,fig.width=18,fig.height=12}
 #| echo: false
 #| warning: false
 
-visualizeCalibration(timeData_BreastDouble, "Total_Screens", "Total Screens by Time", "Number of Cancer Screens (Breast Doubled)")
+visualizeParticipation(participationData %>% filter(cancertype == "Lung"))
 
 ```
+
+
+# Calibration - Participation (Colorectal)
+
+```{r,fig.width=18,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeParticipation(participationData %>% filter(cancertype == "Colorectal"))
+
+```
+
+# Efficiency Frontier (Excluding NonMCED) Breast
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizeFrontier(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Breast", testType != "NonMCED")
+)
+
+```
+
+# Deaths VS Cost Breast
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizePoints(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Breast"),
+	"Total_Cost",
+	"Cancer_Deaths"
+)
+
+```
+
+
+# Efficiency Frontier (Excluding NonMCED) Colorectal
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizeFrontier(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Colorectal", testType != "NonMCED")
+)
+
+```
+
+# Deaths VS Cost Colorectal
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizePoints(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Colorectal"),
+	"Total_Cost",
+	"Cancer_Deaths"
+)
+
+```
+
+
+# Efficiency Frontier (Excluding NonMCED) Lung
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizeFrontier(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Lung", testType != "NonMCED")
+)
+
+```
+
+# Deaths VS Cost Lung
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizePoints(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Lung"),
+	"Total_Cost",
+	"Cancer_Deaths"
+)
+
+```
+
+
+
+# Efficiency Frontier (Excluding NonMCED) Combined
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizeFrontier(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Combined", testType != "NonMCED")
+)
+
+```
+
+
+# Deaths VS Cost Combined
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+visualizePoints(
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Combined"),
+	"Total_Cost",
+	"Cancer_Deaths"
+)
+
+```
+
 
 # Results - Number of MCED Screens - Time
 
@@ -246,11 +402,12 @@ visualizeCalibration(timeData_BreastDouble, "Total_Screens", "Total Screens by T
 
 visualizeByTime(timeData, "Total_Screens", "Total Screens by Time", "Number of Cancer Screens")
 
+
 ```
 
 # Results - Number of MCED Screens - Additional
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Screens_Diff", "Difference in Total Screens (2025-2051)", "Number of Additional Cancer Screens")
 
@@ -258,14 +415,14 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Screens_Diff", "
 
 # Results - Number of Detected Cancers - Time
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeByTime(timeData, "Detected_Cases", "Detected Cases by Time", "Number of Detected Cases")
 ```
 
 # Results - Number of Detected Cancers - Additional
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", "Difference in Detected Cases (2025-2051)", "Number of Additional Detected Cancers")
@@ -275,7 +432,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", 
 
 # Results - Number of Deaths - Time
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeByTime(timeData, "Cancer_Deaths", "Deaths by Time", "Number of Deaths")
@@ -283,7 +440,7 @@ visualizeByTime(timeData, "Cancer_Deaths", "Deaths by Time", "Number of Deaths")
 
 # Results - Number of Deaths - Averted
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=18,fig.height=8}
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths_Diff = Cancer_Deaths_Diff * -1), "Cancer_Deaths_Diff", "Difference in Deaths Averted (2025-2051)", "Number of Averted Deaths")
@@ -294,14 +451,14 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths
 
 # Results - Screening Cost - Time
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening Cost ($CAD)")
 ```
 
 # Results - Screening Cost - Additional
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Total Screening Cost", "Additional Screening Cost ($CAD)")
@@ -309,25 +466,25 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", 
 
 # Results - Total Cost - Time
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeByTime(timeData, "Total_Cost", "Total Cost by Time", "Total Cost ($CAD)")
 ```
 
 # Results - Total Cost - Additional
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=18,fig.height=8}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost ($CAD)")
+visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Total_Cost_Diff = Total_Cost_Diff / 1000000000), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost ($CAD in Billions)")
 
 ```
 
 
 
-# Results - ICER (Total Cost per Reduction in Cancer Death)
+# Results - ICER (Difference in Cost per Reduction in Cancer Death)
 
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 
@@ -336,11 +493,35 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "
 ```
 
 # Results - Stages
-```{r,fig.width=12,fig.height=12}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 
 visualizeStages(stageData)
+
+```
+
+
+# Linear Modelling (Combined)
+
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
+	filter(cancertype == "Combined")
+
+currentTable$Label <- paste(currentTable$testType, "\nFreq: ", currentTable$frequency, " Years", sep = "")
+currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
+
+ggplot(
+	currentTable,
+	aes(x = Total_Screens, y = Detected_Cases, colour = Label, shape = testType)
+) +
+	geom_point() +
+	geom_smooth() +
+	theme_minimal()
 
 ```
 

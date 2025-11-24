@@ -32,11 +32,10 @@ combinedTables <- tar_read(combinedTables, store = "store_visualize")
 ```{r}
 #| echo: false
 #| warning: false
-modelSpecs <- tar_read(scenarioSpecifications, store = "store_oncosim") %>% select(-name)
-library(kableExtra)
+# modelSpecs <- tar_read(scenarioSpecifications, store = "store_oncosim") %>% select(-name)
+# library(kableExtra)
 
-
-kable(modelSpecs) %>% kable_material()
+# kable(modelSpecs) %>% kable_material()
 
 ```
 
@@ -45,7 +44,7 @@ kable(modelSpecs) %>% kable_material()
 ```{r}
 #| echo: false
 #| warning: false
-tar_visnetwork(targets_only = TRUE, store = "store_oncosim", script = "_oncosim.R")
+# tar_visnetwork(targets_only = TRUE, store = "store_oncosim", script = "_oncosim.R")
 ```
 
 ## Visualization Targets Pipeline (store_visualize)
