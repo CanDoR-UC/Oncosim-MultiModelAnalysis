@@ -4,8 +4,8 @@ dateRangeToShow <- 2020:2051
 colours <- list()
 
 colours["Breast"] <- "#E1549D"
-colours["Lung"] <- "#404040"
-colours["Colorectal"] <- "#022D89"
+colours["Lung"] <- "#818181"
+colours["Colorectal"] <- "#0046de"
 colours["Combined"] <- "#B28CD6"
 
 
@@ -84,17 +84,40 @@ visualizeParticipation <- function(dataset) {
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 	dataset$ColumnToShow <- dataset[[variable]]
 	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancer Types")
+
+	position = "dodge"
+	text_position = position_dodge(width = 0.9)
+	text_position_divide = 2
+	if (abs(sum(dataset$ColumnToShow[dataset$Type == "Combined"]) - sum(dataset$ColumnToShow[dataset$Type != "Combined"])) < 1) {
+		dataset = dataset %>% filter(Type != "Combined")
+		position = "stack"
+		text_position = position_stack(vjust = 0.5)
+		text_position_divide = 1
+	}
+	billion = 1000000000
+	million = 1000000
+	thousand = 1000
+	if (mean(dataset$ColumnToShow) > billion) {
+		dataset$Label = scales::comma(dataset$ColumnToShow / billion, accuracy = 0.1, suffix = "B")
+	} else if (mean(dataset$ColumnToShow) > million) {
+		dataset$Label = scales::comma(dataset$ColumnToShow / million, accuracy = 0.1, suffix = "M")
+	} else if (mean(dataset$ColumnToShow) > thousand) {
+		dataset$Label = scales::comma(dataset$ColumnToShow / thousand, accuracy = 0.1, suffix = "K")
+	}
+
 	return(
-		ggplot(dataset, aes(x = formattedName, y = ColumnToShow, fill = cancertype)) +
-			facet_grid(vars(Type), scales = "free") +
-			geom_col(position = "dodge") +
+		ggplot(dataset, aes(x = formattedName_NoTest, y = ColumnToShow, fill = cancertype)) +
+			geom_hline(yintercept = 0, linetype = "dashed") +
+			geom_col(position = position) +
+			facet_grid(rows = vars(testType), scales = "free_x") +
 			scale_x_discrete("Scenario") +
 			scale_y_continuous(yAxisTitle, labels = scales::comma) +
 			scale_fill_manual("Cancer Type", values = colours) +
+			geom_text(aes(label = Label, y = ColumnToShow / text_position_divide), colour = "black", family = "Avenir", size = 8, position = text_position) +
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
+			theme(text = element_text(family = "Avenir", size = 25))
 	)
 }
 
@@ -117,7 +140,7 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierData <- frontierData %>%
 		mutate(Type = "Cost-efficient")
 
-	variableToUse = "Health_adjusted_person_years"
+	variableToUse = "Person_years"
 
 	if (variableToUse == "HAPY_PerPerson_WithDeaths") {
 		yLabel = "Health Adjusted Person Years Per Person (+ Deaths)"
@@ -128,6 +151,9 @@ visualizeFrontier <- function(frontierData, type) {
 	if (variableToUse == "Health_adjusted_person_years") {
 		yLabel = "Health Adjusted Person Years"
 	}
+	if (variableToUse == "Person_years") {
+		yLabel = "Person Years"
+	}
 
 	frontierData$yVar = frontierData[[variableToUse]]
 
@@ -137,7 +163,7 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierCount <- 1
 	continueDominateChecking <- TRUE
 
-	while (continueDominateChecking & frontierCount < 30 & nrow(frontierData) > 2) {
+	while (continueDominateChecking & frontierCount < 30 & nrow(frontierData) > 1) {
 		frontierData$delta_cost <- 0
 		frontierData$delta_HAPY <- 0
 		for (r in 2:nrow(frontierData)) {
@@ -167,14 +193,21 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierPlotData <- bind_rows(frontierData, frontierDominated)
 	million <- 1000000
 
-	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", frontierPlotData$sce, "")
+	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", frontierPlotData$formattedName, "")
+	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
+
 	ggplot(frontierPlotData, aes(y = yVar, x = Total_Cost / million, colour = Type, shape = testType)) +
 		geom_point(size = 3) +
-		geom_line(data = frontierData %>% filter(Type == "Cost-efficient"), aes(group = Type)) +
-		geom_text(aes(
-			label = Labels,
-			y = 1.000005 * yVar
-		)) +
+		geom_line(data = frontierData %>% filter(Type == "Cost-efficient"), aes(group = Type), colour = "black", size = 2) +
+		geom_label_repel(
+			aes(
+				label = Labels,
+				y = 1.000005 * yVar
+			),
+			size = 7,
+			family = "Nunito",
+			colour = "black"
+		) +
 		scale_y_continuous(
 			yLabel,
 			labels = scales::comma

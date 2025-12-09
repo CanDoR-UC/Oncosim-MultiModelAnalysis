@@ -9,14 +9,18 @@ paramsToAlter["OncoSim-breast"] <- list(c(
 	"BreastScreeningUseLeanDispatcher",
 	"BreastScreeningSpecificityNew",
 	"BreastScreeningSensitivity",
-	"BreastScreeningCosts"
+	"BreastScreeningCosts",
+	"BreastCancerCosts",
+	"BreastCancerCosts2"
 ))
 paramsToAlter["OncoSim-colorectal"] <- list(c(
 	"CrcScreenRecruitCanada",
 	"CrcScreenPlanCanada",
 	"CrcTestPositivitySuccinct",
 	"CrcScreenCostCanada",
-	"TimeToRegularScreeningAfterColonoscopy"
+	"TimeToRegularScreeningAfterColonoscopy",
+	"ColonCancerTreatmentCosts",
+	"RectalCancerTreatmentCosts"
 ))
 paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungCancerScreenFollowupProtcol",
@@ -25,8 +29,11 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 	"LcScreenCost",
 	"LcScreenEligibilityRiskThreshold",
 	"SwitchEligibilityRule",
-	"ReportYearPooled"
+	"ReportYearPooled",
+	"LungCancerTreatmentCosts"
 ))
+
+treatmentCostMultiplier = 1.5
 
 
 outputTables <- list()

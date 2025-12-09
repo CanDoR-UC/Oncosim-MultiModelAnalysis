@@ -21,6 +21,15 @@ SetParameters <- function(createdScenarios) {
 		screen_param$`1` = 0
 		screen_param$`2` = 0
 
+		rectum_costs <- scenario$get_param("RectalCancerTreatmentCosts")
+		colon_costs <- scenario$get_param("ColonCancerTreatmentCosts")
+
+		rectum_costs[4:11] = rectum_costs[4:11] * treatmentCostMultiplier
+		colon_costs[4:11] = colon_costs[4:11] * treatmentCostMultiplier
+
+		scenario$set_param("RectalCancerTreatmentCosts", rectum_costs)
+		scenario$set_param("ColonCancerTreatmentCosts", colon_costs)
+
 		#Add extra recruitment to allow a sharp increase (if needed)
 		if (newParticipationValue > baseCaseParticipationValue) {
 			yearToSelect = 2010
@@ -135,6 +144,15 @@ SetParameters <- function(createdScenarios) {
 			"BreastScreeningUseLeanDispatcher",
 			BreastScreeningUseLeanDispatcher
 		)
+
+		cost_1 <- scenario$get_param("BreastCancerCosts")
+		cost_2 <- scenario$get_param("BreastCancerCosts2")
+
+		cost_1$Cost = cost_1$Cost * treatmentCostMultiplier
+		cost_2$Cost = cost_2$Cost * treatmentCostMultiplier
+
+		scenario$set_param("BreastCancerCosts", cost_1)
+		scenario$set_param("BreastCancerCosts2", cost_2)
 
 		if (currentParameters$type != "BaseCase") {
 			#Set MCED Cost May have to change the other costs too?
@@ -309,6 +327,12 @@ SetParameters <- function(createdScenarios) {
 		] = 0.39
 
 		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
+
+		costs <- scenario$get_param("LungCancerTreatmentCosts")
+
+		costs[5:12] = costs[5:12] * treatmentCostMultiplier
+
+		scenario$set_param("LungCancerTreatmentCosts", costs)
 
 		if (currentParameters$type != "BaseCase") {
 			SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")

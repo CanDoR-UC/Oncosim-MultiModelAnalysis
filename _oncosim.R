@@ -2,8 +2,7 @@ library(targets)
 library(tarchetypes)
 library(openmpp)
 
-
-use_OpenMpp_CPAC()
+openmpp::use_OpenMpp_CPAC()
 
 ## Source R files ----
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)

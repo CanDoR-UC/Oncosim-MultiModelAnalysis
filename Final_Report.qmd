@@ -17,6 +17,7 @@ library(ggplot2)
 library(extrafont)
 library(RColorBrewer)
 library(ggpubr)
+library(ggrepel)
 
 combinedTables <- tar_read(combinedTables, store = "store_visualize")
 
@@ -25,7 +26,10 @@ source("R/Visualization_PlotFunctions.R")
 # extrafont::font_import()
 extrafont::loadfonts()
 
-scenariosToVisualize <- c("45_1_30_CancerSeek", "45_1_30_Galleri", "45_1_30_NonMCED", "45_1_90_CancerSeek", "45_1_90_Galleri", "45_1_90_NonMCED", "BaseCase")
+scenariosToVisualize <- c("50_3_70_CancerSeek", "50_3_70_Galleri", "50_3_70_NonMCED", "45_1_90_CancerSeek", "45_1_90_Galleri", "45_1_90_NonMCED", "BaseCase")
+
+
+# scenariosToVisualize <- c("50_3_30_CancerSeek", "45_1_90_CancerSeek", "BaseCase")
 
 timeData <- combinedTables$PrimaryTable %>% filter(sce %in% scenariosToVisualize)
 timeData$formattedName <- paste(timeData$formattedName, "\n")
@@ -278,7 +282,7 @@ visualizeParticipation(participationData %>% filter(cancertype == "Colorectal"))
 
 # Efficiency Frontier (Excluding NonMCED) Breast
 
-```{r,fig.width=12,fig.height=8}
+```{r,fig.width=20,fig.height=9}
 #| echo: false
 #| warning: false
 
@@ -307,7 +311,7 @@ visualizePoints(
 
 # Efficiency Frontier (Excluding NonMCED) Colorectal
 
-```{r,fig.width=12,fig.height=8}
+```{r,fig.width=20,fig.height=9}
 #| echo: false
 #| warning: false
 
@@ -336,7 +340,7 @@ visualizePoints(
 
 # Efficiency Frontier (Excluding NonMCED) Lung
 
-```{r,fig.width=12,fig.height=8}
+```{r,fig.width=20,fig.height=9}
 #| echo: false
 #| warning: false
 
@@ -366,7 +370,7 @@ visualizePoints(
 
 # Efficiency Frontier (Excluding NonMCED) Combined
 
-```{r,fig.width=12,fig.height=8}
+```{r,fig.width=20,fig.height=9}
 #| echo: false
 #| warning: false
 
@@ -440,7 +444,7 @@ visualizeByTime(timeData, "Cancer_Deaths", "Deaths by Time", "Number of Deaths")
 
 # Results - Number of Deaths - Averted
 
-```{r,fig.width=18,fig.height=8}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths_Diff = Cancer_Deaths_Diff * -1), "Cancer_Deaths_Diff", "Difference in Deaths Averted (2025-2051)", "Number of Averted Deaths")
@@ -473,10 +477,38 @@ visualizeByTime(timeData, "Total_Cost", "Total Cost by Time", "Total Cost ($CAD)
 ```
 
 # Results - Total Cost - Additional
-```{r,fig.width=18,fig.height=8}
+```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Total_Cost_Diff = Total_Cost_Diff / 1000000000), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost ($CAD in Billions)")
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost")
+
+```
+
+
+# Results - Screening Cost - Time
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening Cost ($CAD)")
+```
+
+# Results - Screening Cost - Additional
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Screening Cost", "Difference in Screening Cost")
+
+```
+
+
+# Results - ICER (Difference in Cost per Additional Cancer Detection)
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_DetectedCases", "ICER: Difference in Cost Per Additional Detection", "Difference in Cost Per Additional Cancer Detection ($CAD/AdditionalDetection)")
 
 ```
 
@@ -491,6 +523,19 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Total_Cost_Di
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
 
 ```
+
+# Results - ICER (Difference in Cost per Additional Life Year)
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+
+visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_PersonYears", "ICER: Difference in Cost Per Additional Life Year", "Difference in Cost Per Additional Life Year ($CAD/AdditionalLifeYear)")
+
+```
+
+
+
 
 # Results - Stages
 ```{r,fig.width=24,fig.height=12}

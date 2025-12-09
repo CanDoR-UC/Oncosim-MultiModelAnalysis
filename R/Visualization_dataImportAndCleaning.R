@@ -30,6 +30,7 @@ getOncoSimTables <- function(tableName, modelType) {
 				currentTable$participation <- nameSplit[3]
 				currentTable$testType <- nameSplit[4]
 				currentTable$formattedName = paste(currentTable$testType, "\n PPT: ", currentTable$participation, "%\n", "MinAge: ", currentTable$minAge, "\nFreq: ", currentTable$frequency, " Years", sep = "")
+				currentTable$formattedName_NoTest = paste("PPT: ", currentTable$participation, "%\n", "MinAge: ", currentTable$minAge, "\nFreq: ", currentTable$frequency, " Years", sep = "")
 			} else {
 				currentTable$minAge <- "BaseCase"
 				currentTable$frequency <- "BaseCase"
@@ -68,6 +69,7 @@ extractGeneralMetrics <- function(importedData) {
 	exprRename["Cost_of_screen_x_tected_cancers"] = "Screening_Cost"
 
 	exprRename["Health_adjusted_person_years"] = "Health_adjusted_person_years"
+	exprRename["Person_years"] = "Person_years"
 
 	exprRename["Persons"] = "Persons"
 
@@ -80,15 +82,15 @@ extractGeneralMetrics <- function(importedData) {
 		mutate(Shiftable_year = as.numeric(Shiftable_year)) %>%
 		select(-c(Hackable_province, Breast_screening_modalities, Age))
 
-	breastICERTable = importedData$Breast_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_as_x_and_treatment", "Cost_of_screening", "Person_years", "Health_adjusted_person_years", "Persons"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
+	breastICERTable = importedData$Breast_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_as_x_and_treatment", "Cost_of_screening", "Person_years", "Health_adjusted_person_years", "Person_years", "Persons"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
 
 	colorectalScreenTable = importedData$Colorectal_Cancer_Screen_Table %>% filter(expr_name %in% c("Screen_detected_cancers", "Total_screens_x_iple_per_visit"), Hackable_province == "all", Shiftable_year != "all") %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-Hackable_province)
 	colorectalCasesTable = importedData$Colorectal_Cancer_Cases_Table %>% filter(expr_name %in% c("Deaths_cause_specific"), Province == "all", Sex == "all", Colorectal_cancer_site == "all") %>% mutate(Shiftable_year = as.numeric(Shiftable_year)) %>% select(-c(Colorectal_cancer_site, Province, Sex))
-	colorectalICERTable = importedData$Colorectal_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_sc_x_ng_treatment", "Cost_of_screen_x_reen_positives", "Person_years", "Health_adjusted_person_years", "Persons"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
+	colorectalICERTable = importedData$Colorectal_Cancer_ICER_Table %>% filter(expr_name %in% c("Total_cost_sc_x_ng_treatment", "Cost_of_screen_x_reen_positives", "Person_years", "Health_adjusted_person_years", "Person_years", "Persons"), Province == "all", Shiftable_year %in% 2015:2051) %>% select(-Province)
 
 	lungCasesTable = importedData$Lung_Cancer_ScreenCases_Year_Table %>% filter(expr_name %in% c("Screen_detecte_x_over_detected", "Lung_cancer_deaths", "Total_screens_attended", "Persons"), Hackable_province == "all", Year != "all") %>% mutate(Shiftable_year = as.numeric(Year)) %>% select(-c(Hackable_province, Year))
 	lungICERTable = importedData$Lung_Cancer_ICER_Table %>%
-		filter(expr_name %in% c("Total_cost", "Cost_of_screen_x_tected_cancers", "Person_years", "Health_adjusted_person_years"), Province == "all", Shiftable_year %in% 2015:2051, lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all") %>%
+		filter(expr_name %in% c("Total_cost", "Cost_of_screen_x_tected_cancers", "Person_years", "Health_adjusted_person_years", "Person_years"), Province == "all", Shiftable_year %in% 2015:2051, lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all") %>%
 		select(-c(Province, lc_screen_participated_ever, lc_cessation_p_x_rticipated_ever))
 
 	cancerMetricsTable = bind_rows(breastCasesTable, breastScreenTable, breastICERTable, colorectalCasesTable, colorectalScreenTable, colorectalICERTable, lungCasesTable, lungICERTable)
@@ -105,21 +107,21 @@ extractParticipation <- function(importedData) {
 
 	breastParticipation = importedData$Breast_Cancer_Timing_Of_Last_Screen %>%
 		filter(age_group %in% ageGroups, Shiftable_year != "all") %>%
-		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, formattedName_NoTest, cancertype) %>%
 		summarize(expr_value = sum(expr_value)) %>%
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
 		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
 
 	colonParticipation = importedData$Colorectal_Cancer_Timing_Of_Last_Screen %>%
 		filter(Colorectal_cancer_family_history == "all", age_group %in% ageGroups, expr_name == "Number_of_people", Shiftable_year != "all") %>%
-		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, formattedName_NoTest, cancertype) %>%
 		summarize(expr_value = sum(expr_value)) %>%
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
 		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
 
 	lungParticipation = importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
 		filter(age_group %in% ageGroups, Shiftable_year != "all") %>%
-		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, cancertype) %>%
+		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, formattedName_NoTest, cancertype) %>%
 		summarize(expr_value = sum(expr_value)) %>%
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
 		mutate(
@@ -141,14 +143,14 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 	cancerMetricsTableAllCancerMCED = bind_rows(femaleOnlyTable, allSexTable) %>%
 		select(-cancertype) %>%
 		filter(sce != "BaseCase" & !grepl("NonMCED", sce)) %>%
-		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
+		group_by(Shiftable_year, sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType) %>%
 		summarize(
 			Detected_Cases = sum(Detected_Cases),
 			Cancer_Deaths = sum(Cancer_Deaths),
 			Total_Screens = mean(Total_Screens),
 			Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost),
 			Screening_Cost = mean(Screening_Cost),
-			Health_adjusted_person_years = sum(Health_adjusted_person_years),
+			Person_years = sum(Person_years),
 			Persons = sum(Persons)
 		) %>%
 		mutate(cancertype = "Combined")
@@ -156,14 +158,14 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 	cancerMetricsTableAllCancerBaseCase = cancerMetricsTable %>% #Don't need to multiply breast x2 for base case
 		select(-cancertype) %>%
 		filter(sce == "BaseCase" | grepl("NonMCED", sce)) %>%
-		group_by(Shiftable_year, sce, formattedName, minAge, frequency, participation, testType) %>%
+		group_by(Shiftable_year, sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType) %>%
 		summarize(
 			Detected_Cases = sum(Detected_Cases),
 			Cancer_Deaths = sum(Cancer_Deaths),
 			Total_Screens = sum(Total_Screens),
 			Total_Cost = sum(Total_Cost),
 			Screening_Cost = sum(Screening_Cost),
-			Health_adjusted_person_years = sum(Health_adjusted_person_years),
+			Person_years = sum(Person_years),
 			Persons = sum(Persons)
 		) %>%
 		mutate(cancertype = "Combined")
@@ -182,7 +184,7 @@ generateStageTables <- function(importedData) {
 		mutate(expr_value = expr_value * cases) %>% # Make into full number
 		filter(Age == "all", Shiftable_year %in% yearsToFilterWith) %>%
 		select(-c("Age", "Shiftable_year")) %>%
-		group_by(sce, cancertype, formattedName, minAge, frequency, participation, testType, expr_name) %>%
+		group_by(sce, cancertype, formattedName, formattedName_NoTest, minAge, frequency, participation, testType, expr_name) %>%
 		summarize(expr_value = sum(expr_value), cases = sum(cases)) %>% # Get sum of totals
 		mutate(expr_value = expr_value / cases) %>% #Turn back into ratio
 		select(-cases)
@@ -194,7 +196,7 @@ generateStageTables <- function(importedData) {
 		mutate(expr_value = expr_value * cases) %>% # Make into full number
 		filter(Age == "all", Sex == "all", Colorectal_cancer_site == "all", Shiftable_year %in% yearsToFilterWith) %>%
 		select(-c("Age", "Sex", "Colorectal_cancer_site", "Shiftable_year")) %>%
-		group_by(sce, cancertype, formattedName, minAge, frequency, participation, testType, expr_name) %>%
+		group_by(sce, cancertype, formattedName, formattedName_NoTest, minAge, frequency, participation, testType, expr_name) %>%
 		summarize(expr_value = sum(expr_value), cases = sum(cases)) %>% # Get sum of totals
 		mutate(expr_value = expr_value / cases) %>% #Turn back into ratio
 		select(-cases)
@@ -239,7 +241,7 @@ combineModelTables <- function(importedData) {
 	cancerMetricsTable$cancertype <- str_to_title(cancerMetricsTable$cancertype)
 	cancerMetricsTable$cancertype <- factor(cancerMetricsTable$cancertype, levels = c("Breast", "Colorectal", "Lung", "Combined"))
 
-	cancerMetricsTableBaseCase <- cancerMetricsTable %>% filter(sce == "BaseCase") %>% select(-c(sce, formattedName, minAge, frequency, participation, testType))
+	cancerMetricsTableBaseCase <- cancerMetricsTable %>% filter(sce == "BaseCase") %>% select(-c(sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType))
 	names(cancerMetricsTableBaseCase) = paste("BASECASE", names(cancerMetricsTableBaseCase), sep = "_")
 	names(cancerMetricsTableBaseCase) = gsub("BASECASE_Shiftable_year", "Shiftable_year", names(cancerMetricsTableBaseCase))
 	names(cancerMetricsTableBaseCase) = gsub("BASECASE_cancertype", "cancertype", names(cancerMetricsTableBaseCase))
@@ -248,7 +250,7 @@ combineModelTables <- function(importedData) {
 		group_by(Shiftable_year, cancertype) %>%
 		left_join(cancerMetricsTableBaseCase)
 
-	createDifference = c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost")
+	createDifference = c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost", "Person_years")
 
 	for (variable in createDifference) {
 		cancerMetricsTable[[paste(variable, "Diff", sep = "_")]] = cancerMetricsTable[[variable]] - cancerMetricsTable[[paste("BASECASE", variable, sep = "_")]]
@@ -259,7 +261,7 @@ combineModelTables <- function(importedData) {
 	processedModelResults["PrimaryTable"] = list(cancerMetricsTable)
 
 	cancerMetricsTableCombinedYears = cancerMetricsTable %>%
-		group_by(sce, formattedName, minAge, frequency, participation, testType, cancertype) %>%
+		group_by(sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType, cancertype) %>%
 		filter(Shiftable_year %in% yearsToFilterWith) %>%
 		select(-Shiftable_year) %>%
 		summarize(
@@ -274,14 +276,16 @@ combineModelTables <- function(importedData) {
 			Total_Cost_Diff = sum(Total_Cost_Diff),
 			Screening_Cost_Diff = sum(Screening_Cost_Diff),
 			Health_adjusted_person_years = sum(Health_adjusted_person_years),
+			Person_years = sum(Person_years),
+			Person_years_Diff = sum(Person_years_Diff),
+
 			Persons = sum(Persons)
 		)
 	#Add stage analysis.
 
 	cancerMetricsTableCombinedYears$ICER_ReducedDeaths = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Cancer_Deaths_Diff * -1)
 	cancerMetricsTableCombinedYears$ICER_DetectedCases = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Detected_Cases_Diff)
-	cancerMetricsTableCombinedYears$HAPY_PerPerson = length(yearsToFilterWith) * (cancerMetricsTableCombinedYears$Health_adjusted_person_years / (cancerMetricsTableCombinedYears$Persons))
-	cancerMetricsTableCombinedYears$HAPY_PerPerson_WithDeaths = length(yearsToFilterWith) * (cancerMetricsTableCombinedYears$Health_adjusted_person_years / (cancerMetricsTableCombinedYears$Persons + cancerMetricsTableCombinedYears$Cancer_Deaths))
+	cancerMetricsTableCombinedYears$ICER_PersonYears = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Person_years_Diff)
 
 	#One row per set of years
 	if (!(nrow(cancerMetricsTableCombinedYears) * length(yearsToFilterWith) == nrow(cancerMetricsTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {
