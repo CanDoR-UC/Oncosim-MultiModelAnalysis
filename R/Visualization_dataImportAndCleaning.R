@@ -27,14 +27,14 @@ getOncoSimTables <- function(tableName, modelType) {
 				nameSplit <- strsplit(name, "_")[[1]]
 				currentTable$minAge <- nameSplit[1]
 				currentTable$frequency <- nameSplit[2]
-				currentTable$participation <- nameSplit[3]
+				currentTable$participation <- as.numeric(nameSplit[3])
 				currentTable$testType <- nameSplit[4]
 				currentTable$formattedName = paste(currentTable$testType, "\n PPT: ", currentTable$participation, "%\n", "MinAge: ", currentTable$minAge, "\nFreq: ", currentTable$frequency, " Years", sep = "")
 				currentTable$formattedName_NoTest = paste("PPT: ", currentTable$participation, "%\n", "MinAge: ", currentTable$minAge, "\nFreq: ", currentTable$frequency, " Years", sep = "")
 			} else {
 				currentTable$minAge <- "BaseCase"
 				currentTable$frequency <- "BaseCase"
-				currentTable$participation <- "BaseCase"
+				currentTable$participation <- 0
 				currentTable$testType <- "BaseCase"
 			}
 			totalTable = bind_rows(totalTable, currentTable)

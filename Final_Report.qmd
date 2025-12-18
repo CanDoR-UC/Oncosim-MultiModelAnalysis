@@ -31,14 +31,14 @@ scenariosToVisualize <- c("50_3_70_CancerSeek", "50_3_70_Galleri", "50_3_70_NonM
 
 # scenariosToVisualize <- c("50_3_30_CancerSeek", "45_1_90_CancerSeek", "BaseCase")
 
-timeData <- combinedTables$PrimaryTable %>% filter(sce %in% scenariosToVisualize)
+timeData <- combinedTables$PrimaryTable # %>% filter(sce %in% scenariosToVisualize)
 timeData$formattedName <- paste(timeData$formattedName, "\n")
 
-totalData <- combinedTables$`PrimaryTable_2025-2051` %>% filter(sce %in% scenariosToVisualize)
+totalData <- combinedTables$`PrimaryTable_2025-2051` # %>% filter(sce %in% scenariosToVisualize)
 totalData$formattedName <- paste(totalData$formattedName, "\n")
 
 
-stageData <- combinedTables$StageDist %>% filter(sce %in% scenariosToVisualize)
+stageData <- combinedTables$StageDist # %>% filter(sce %in% scenariosToVisualize)
 stageData$formattedName <- paste(stageData$formattedName, "\n")
 
 timeData_BreastDouble <- timeData
@@ -280,6 +280,34 @@ visualizeParticipation(participationData %>% filter(cancertype == "Colorectal"))
 
 ```
 
+
+# Model Specific Results (Breast)
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData, "Breast")
+
+```
+
+# Model Specific Results (Colorectal)
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData, "Colorectal")
+
+```
+
+# Model Specific Results (Lung)
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData, "Lung")
+
+```
+
 # Efficiency Frontier (Excluding NonMCED) Breast
 
 ```{r,fig.width=20,fig.height=9}
@@ -293,22 +321,6 @@ visualizeFrontier(
 
 ```
 
-# Deaths VS Cost Breast
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizePoints(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Breast"),
-	"Total_Cost",
-	"Cancer_Deaths"
-)
-
-```
-
-
 # Efficiency Frontier (Excluding NonMCED) Colorectal
 
 ```{r,fig.width=20,fig.height=9}
@@ -318,21 +330,6 @@ visualizePoints(
 visualizeFrontier(
 	combinedTables$`PrimaryTable_2025-2051` %>%
 		filter(cancertype == "Colorectal", testType != "NonMCED")
-)
-
-```
-
-# Deaths VS Cost Colorectal
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizePoints(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Colorectal"),
-	"Total_Cost",
-	"Cancer_Deaths"
 )
 
 ```
@@ -351,22 +348,6 @@ visualizeFrontier(
 
 ```
 
-# Deaths VS Cost Lung
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizePoints(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Lung"),
-	"Total_Cost",
-	"Cancer_Deaths"
-)
-
-```
-
-
 
 # Efficiency Frontier (Excluding NonMCED) Combined
 
@@ -381,23 +362,6 @@ visualizeFrontier(
 
 ```
 
-
-# Deaths VS Cost Combined
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizePoints(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Combined"),
-	"Total_Cost",
-	"Cancer_Deaths"
-)
-
-```
-
-
 # Results - Number of MCED Screens - Time
 
 ```{r,fig.width=24,fig.height=12}
@@ -408,6 +372,20 @@ visualizeByTime(timeData, "Total_Screens", "Total Screens by Time", "Number of C
 
 
 ```
+
+
+# Results - Number of MCED Screens - Total
+
+```{r,fig.width=24,fig.height=12}
+
+MCEDScreenNum <- totalData
+
+MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] * 2
+
+visualizeTotals(MCEDScreenNum, "Total_Screens", "Number of Total Screens (2025-2051)", "Number of Cancer Screens (Breast MCED Doubled)")
+
+```
+
 
 # Results - Number of MCED Screens - Additional
 
@@ -460,6 +438,22 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths
 #| warning: false
 visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening Cost ($CAD)")
 ```
+
+
+# Results - Number of MCED Screens - Total
+
+```{r,fig.width=24,fig.height=12}
+
+MCEDTestCost <- totalData
+
+MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] <- MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] * 2
+
+visualizeTotals(MCEDScreenNum, "Screening_Cost", "Screening Cost (2025-2051)", "Screening Cost (Breast MCED Doubled)")
+
+```
+
+
+
 
 # Results - Screening Cost - Additional
 ```{r,fig.width=24,fig.height=12}
@@ -547,28 +541,50 @@ visualizeStages(stageData)
 ```
 
 
-# Linear Modelling (Combined)
+# Linear Modelling - CancerSeek Participation
 
 
 ```{r,fig.width=12,fig.height=8}
 #| echo: false
 #| warning: false
 
-currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
-	filter(cancertype == "Combined")
-
-currentTable$Label <- paste(currentTable$testType, "\nFreq: ", currentTable$frequency, " Years", sep = "")
-currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
-
-ggplot(
-	currentTable,
-	aes(x = Total_Screens, y = Detected_Cases, colour = Label, shape = testType)
-) +
-	geom_point() +
-	geom_smooth() +
-	theme_minimal()
+# visualizeLinearModel(combinedTables, "CancerSeek", "Detected_Cases", "participation")
 
 ```
+
+# Linear Modelling - Galleri Participation
+
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+# visualizeLinearModel(combinedTables, "Galleri", "Detected_Cases", "participation")
+
+```
+
+# Linear Modelling - CancerSeek Test Number
+
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+# visualizeLinearModel(combinedTables, "CancerSeek", "Detected_Cases", "Total_Screens")
+
+```
+
+# Linear Modelling - Galleri Test Number
+
+
+```{r,fig.width=12,fig.height=8}
+#| echo: false
+#| warning: false
+
+# visualizeLinearModel(combinedTables, "Galleri", "Detected_Cases", "Total_Screens")
+
+```
+
 
 
 # Questions?

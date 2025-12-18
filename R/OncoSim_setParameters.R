@@ -24,8 +24,8 @@ SetParameters <- function(createdScenarios) {
 		rectum_costs <- scenario$get_param("RectalCancerTreatmentCosts")
 		colon_costs <- scenario$get_param("ColonCancerTreatmentCosts")
 
-		rectum_costs[4:11] = rectum_costs[4:11] * treatmentCostMultiplier
-		colon_costs[4:11] = colon_costs[4:11] * treatmentCostMultiplier
+		rectum_costs[4:11] = rectum_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
+		colon_costs[4:11] = colon_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
 
 		scenario$set_param("RectalCancerTreatmentCosts", rectum_costs)
 		scenario$set_param("ColonCancerTreatmentCosts", colon_costs)
@@ -148,8 +148,8 @@ SetParameters <- function(createdScenarios) {
 		cost_1 <- scenario$get_param("BreastCancerCosts")
 		cost_2 <- scenario$get_param("BreastCancerCosts2")
 
-		cost_1$Cost = cost_1$Cost * treatmentCostMultiplier
-		cost_2$Cost = cost_2$Cost * treatmentCostMultiplier
+		cost_1$Cost = cost_1$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
+		cost_2$Cost = cost_2$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
 
 		scenario$set_param("BreastCancerCosts", cost_1)
 		scenario$set_param("BreastCancerCosts2", cost_2)
@@ -330,7 +330,7 @@ SetParameters <- function(createdScenarios) {
 
 		costs <- scenario$get_param("LungCancerTreatmentCosts")
 
-		costs[5:12] = costs[5:12] * treatmentCostMultiplier
+		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 
@@ -352,10 +352,11 @@ SetParameters <- function(createdScenarios) {
 				LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
 				scenario$set_param("LcScreenCost", LcScreenCost)
 
-				#Cancer detectable - 6(Highest risk) = True positive ~ Sensitivity
+				#Cancer detectable - 4(Highest risk) = True positive ~ Sensitivity
 				# Cancer detectable - 1(Lowest risk) = False negative ~ 1 - Sensitivity
-				# No cancer detectable - 6(Highest risk) = False positive ~ 1 - Specificity
+				# No cancer detectable - 4(Highest risk) = False positive ~ 1 - Specificity
 				# No cancer detectable - 1(Lowest risk) = True negative ~ Specificity
+				# 1 means return to regular screening. 4 means do a follow-up scan
 
 				LungRadsScreenRegularDist = scenario$get_param(
 					"LungRadsScreenRegularDist"
@@ -367,16 +368,30 @@ SetParameters <- function(createdScenarios) {
 				]$X_1 = currentParameters$specificity
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
-				]$X_6 = 1 - currentParameters$specificity
+				]$X_4 = 1 - currentParameters$specificity
 
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
 				]$X_1 = 1 - currentParameters$sensitivity
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
-				]$X_6 = currentParameters$sensitivity
+				]$X_4 = currentParameters$sensitivity
 
 				scenario$set_param("LungRadsScreenRegularDist", LungRadsScreenRegularDist)
+
+				#Set follow-up time to 0 for 4
+				LungRadsScreenRegularTimeToNext = scenario$get_param(
+					"LungRadsScreenRegularTimeToNext"
+				)
+				LungRadsScreenRegularTimeToNext$X_4 = 0
+				scenario$set_param("LungRadsScreenRegularTimeToNext", LungRadsScreenRegularTimeToNext)
+
+				#Return to regular screening after screen
+				LungRadsScreenFollowupTimeToNextScanAfterFP = scenario$get_param(
+					"LungRadsScreenFollowupTimeToNextScanAfterFP"
+				)
+				LungRadsScreenFollowupTimeToNextScanAfterFP[[1]] = currentParameters$frequency
+				scenario$set_param("LungRadsScreenFollowupTimeToNextScanAfterFP", LungRadsScreenFollowupTimeToNextScanAfterFP)
 			}
 
 			LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher

@@ -44,7 +44,7 @@ visualizeParticipation <- function(dataset) {
 	dataset$Label = paste(dataset$minAge, dataset$testType, sep = "\n")
 
 	oneYearData = dataset %>% filter(grepl("_1_", sce) | grepl("BaseCase", sce))
-	leftPlot <- ggplot(oneYearData, aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = participation)) +
+	leftPlot <- ggplot(oneYearData, aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
@@ -61,7 +61,7 @@ visualizeParticipation <- function(dataset) {
 		theme(text = element_text(family = "Avenir", size = 20))
 
 	threeYearData = dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce))
-	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = participation)) +
+	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
@@ -81,6 +81,21 @@ visualizeParticipation <- function(dataset) {
 }
 
 
+formatNumber <- function(values) {
+	billion = 1000000000
+	million = 1000000
+	thousand = 1000
+	if (mean(values) > billion) {
+		return(scales::comma(values / billion, accuracy = 0.1, suffix = "B"))
+	} else if (mean(values) > million) {
+		return(scales::comma(values / million, accuracy = 0.1, suffix = "M"))
+	} else if (mean(values) > thousand) {
+		return(scales::comma(values / thousand, accuracy = 0.1, suffix = "K"))
+	}
+	return(scales::comma(values, accuracy = 0.1))
+}
+
+
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 	dataset$ColumnToShow <- dataset[[variable]]
 	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancer Types")
@@ -94,16 +109,8 @@ visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 		text_position = position_stack(vjust = 0.5)
 		text_position_divide = 1
 	}
-	billion = 1000000000
-	million = 1000000
-	thousand = 1000
-	if (mean(dataset$ColumnToShow) > billion) {
-		dataset$Label = scales::comma(dataset$ColumnToShow / billion, accuracy = 0.1, suffix = "B")
-	} else if (mean(dataset$ColumnToShow) > million) {
-		dataset$Label = scales::comma(dataset$ColumnToShow / million, accuracy = 0.1, suffix = "M")
-	} else if (mean(dataset$ColumnToShow) > thousand) {
-		dataset$Label = scales::comma(dataset$ColumnToShow / thousand, accuracy = 0.1, suffix = "K")
-	}
+
+	dataset$formattedName_NoTest[dataset$testType == "BaseCase"] = "BaseCase"
 
 	return(
 		ggplot(dataset, aes(x = formattedName_NoTest, y = ColumnToShow, fill = cancertype)) +
@@ -113,7 +120,7 @@ visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 			scale_x_discrete("Scenario") +
 			scale_y_continuous(yAxisTitle, labels = scales::comma) +
 			scale_fill_manual("Cancer Type", values = colours) +
-			geom_text(aes(label = Label, y = ColumnToShow / text_position_divide), colour = "black", family = "Avenir", size = 8, position = text_position) +
+			geom_text(aes(label = formatNumber(ColumnToShow), y = ColumnToShow / text_position_divide), colour = "black", family = "Avenir", size = 8, position = text_position) +
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
@@ -242,4 +249,73 @@ visualizePoints <- function(totalData, x_var, y_var) {
 		scale_shape_discrete("Test Type") +
 		scale_colour_discrete("") +
 		theme_minimal(13, "Nunito")
+}
+
+visualizeSpecificCancerType <- function(totalData, typeToShow) {
+	currentDataToVisualize <- totalData %>%
+		filter(cancertype == typeToShow, testType != "BaseCase") %>%
+		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
+
+	plotsToCombine <- list()
+
+	for (variable in unique(currentDataToVisualize$name)) {
+		variableName <- str_to_title(gsub("_", " ", variable))
+		plotsToCombine[variable] <- list(
+			ggplot(currentDataToVisualize %>% filter(name == variable), aes(x = formattedName, y = value, fill = testType)) +
+				geom_bar(stat = "identity") +
+				theme_minimal(16, "Avenir") +
+				geom_text(aes(label = formatNumber(value), y = value / 2), colour = "black", family = "Avenir", size = 5) +
+				scale_y_continuous(variableName) +
+				scale_x_discrete("Scenario") +
+				scale_fill_discrete("Test Type")
+		)
+	}
+	ggarrange(plotlist = plotsToCombine, common.legend = TRUE)
+}
+
+visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) {
+	currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(cancertype == "Combined")
+
+	currentTable$Label <- paste(currentTable$testType, "\nFreq: ", currentTable$frequency, " Years", sep = "")
+	currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
+
+	currentTable$ExposureVar <- currentTable[[exposure]]
+	currentTable$OutcomeVar <- currentTable[[outcome]]
+
+	outcomeTitle <- str_to_title(gsub("_", " ", outcome))
+	exposureTitle <- str_to_title(gsub("_", " ", exposure))
+
+	linearRegressionResults <- data.frame()
+
+	baseCaseValue <- currentTable[currentTable$testType == "BaseCase", ]$OutcomeVar
+
+	for (label in unique(currentTable$Label)) {
+		for (age in unique(currentTable$minAge)) {
+			if (age != "BaseCase" & label != "BaseCase" & grepl(testToShow, label)) {
+				filteredTable <- currentTable %>% filter(minAge == age, Label == label)
+				model <- lm(OutcomeVar ~ ExposureVar, data = filteredTable)
+
+				currentResults <- data.frame(Label = label, minAge = age)
+				currentResults$intercept <- coef(model)[1]
+				currentResults$slope <- coef(model)[2]
+
+				currentResults$BaseCaseIntercept <- (baseCaseValue - currentResults$intercept) / currentResults$slope
+
+				linearRegressionResults <- bind_rows(linearRegressionResults, currentResults)
+			}
+		}
+	}
+
+	ggplot(
+		currentTable %>% filter(testType == testToShow),
+		aes(x = ExposureVar, y = OutcomeVar, colour = Label)
+	) +
+		geom_point() +
+		geom_smooth(method = "lm", aes(linetype = minAge)) +
+		scale_y_continuous(outcomeTitle, label = scales::number) +
+		scale_x_continuous(exposureTitle, label = scales::number) +
+		geom_hline(yintercept = baseCaseValue) +
+		geom_label_repel(data = linearRegressionResults, aes(label = scales::number(BaseCaseIntercept, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir") +
+		theme_minimal(16, "Avenir")
 }
