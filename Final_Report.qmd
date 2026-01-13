@@ -326,13 +326,14 @@ visualizeSpecificCancerType(totalData, "Lung")
 
 # Efficiency Frontier (Excluding NonMCED) Breast
 
-```{r,fig.width=20,fig.height=9}
+```{r,fig.width=12,fig.height=8}
 #| echo: false
 #| warning: false
 
 visualizeFrontier(
   combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(cancertype == "Breast", testType != "NonMCED")
+    filter(testType != "NonMCED"),
+  "Breast"
 )
 
 ```
@@ -345,7 +346,8 @@ visualizeFrontier(
 
 visualizeFrontier(
   combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(cancertype == "Colorectal", testType != "NonMCED")
+    filter(testType != "NonMCED"),
+  "Colorectal"
 )
 
 ```
@@ -359,7 +361,8 @@ visualizeFrontier(
 
 visualizeFrontier(
   combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(cancertype == "Lung", testType != "NonMCED")
+    filter(testType != "NonMCED"),
+  "Lung"
 )
 
 ```
@@ -373,7 +376,8 @@ visualizeFrontier(
 
 visualizeFrontier(
   combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(cancertype == "Combined", testType != "NonMCED")
+    filter(testType != "NonMCED"),
+  "Combined"
 )
 
 ```
@@ -553,51 +557,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_PersonYears", "IC
 #| warning: false
 
 visualizeStages(stageData)
-
-```
-
-
-# Linear Modelling - CancerSeek Participation
-
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizeLinearModel(combinedTables, "CancerSeek", "Detected_Cases", "participation")
-
-```
-
-# Linear Modelling - Galleri Participation
-
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizeLinearModel(combinedTables, "Galleri", "Detected_Cases", "participation")
-
-```
-
-# Linear Modelling - CancerSeek Test Number
-
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizeLinearModel(combinedTables, "CancerSeek", "Detected_Cases", "Total_Screens")
-
-```
-
-# Linear Modelling - Galleri Test Number
-
-
-```{r,fig.width=12,fig.height=8}
-#| echo: false
-#| warning: false
-
-visualizeLinearModel(combinedTables, "Galleri", "Detected_Cases", "Total_Screens")
 
 ```
 

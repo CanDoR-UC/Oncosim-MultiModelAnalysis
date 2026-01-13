@@ -93,14 +93,14 @@ generateModelParameters <- function(modelsToUse) {
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://www.annalsofoncology.org/article/S0923-7534(21)02046-9/fulltext CCGA3
 	# Using site-specific sensitivity and overall specificity
-	testPerformance["OncoSim-colorectal-Galleri"] = list(c(0.82, 0.995))
+	testPerformance["OncoSim-colorectal-Galleri"] = list(c(0.82, 0.995)) #Better than FIT (75)
 	testPerformance["OncoSim-breast-Galleri"] = list(c(0.305, 0.995))
 	testPerformance["OncoSim-lung-Galleri"] = list(c(0.748, 0.995))
 
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://pmc.ncbi.nlm.nih.gov/articles/PMC6080308/
 	# The specificity of CancerSEEK was greater than 99%
-	testPerformance["OncoSim-colorectal-CancerSeek"] = list(c(0.649, 0.99))
+	testPerformance["OncoSim-colorectal-CancerSeek"] = list(c(0.649, 0.99)) # Worse than FIT (75)
 	testPerformance["OncoSim-breast-CancerSeek"] = list(c(0.335, 0.99))
 	testPerformance["OncoSim-lung-CancerSeek"] = list(c(0.587, 0.99))
 

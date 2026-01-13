@@ -20,6 +20,8 @@ list(
 	tar_target(combinedTables, combineModelTables(importedData)),
 	tar_target(validationReportQuarto, "Validation_Report.qmd", format = "file"),
 	tar_target(finalReportQuarto, "Final_Report.qmd", format = "file"),
+	tar_target(manuscriptVisualsQuarto, "Manuscript_Visuals.qmd", format = "file"),
 	tar_target(generateValidationReport, generateQuarto(validationReportQuarto, combinedTables)),
-	tar_target(generateFinalReport, generateQuarto(finalReportQuarto, combinedTables))
+	tar_target(generateFinalReport, generateQuarto(finalReportQuarto, combinedTables)),
+	tar_target(generateManuscriptVisuals, generateQuarto(manuscriptVisualsQuarto, combinedTables))
 )

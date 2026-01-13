@@ -1,13 +1,23 @@
 dateRangeToShow <- 2020:2051
-
+scenariosToVisualize <- c("50_3_70_CancerSeek", "50_3_70_Galleri", "50_3_70_NonMCED", "45_2_90_CancerSeek", "45_2_90_Galleri", "45_2_90_NonMCED", "BaseCase")
 
 colours <- list()
 
 colours["Breast"] <- "#E1549D"
-colours["Lung"] <- "#818181"
+colours["Lung"] <- "#ffe645"
 colours["Colorectal"] <- "#0046de"
 colours["Combined"] <- "#B28CD6"
 
+colours["Visualized"] <- "#1c9326"
+colours["Not Visualized"] <- "#000000"
+
+colours["Freq: 2 Years"] <- "#00394c"
+colours["Freq: 3 Years"] <- "#00ace6"
+
+
+colours["Cost-efficient"] = "#1c9326"
+colours["Rejected due to dominance"] = "#c52929"
+colours["Rejected due to extended dominance"] = "#d1a237"
 
 ascendingStageColours <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026") #brewer.pal(5, name = "YlOrRd")
 
@@ -19,6 +29,11 @@ colours["Stage IV"] <- ascendingStageColours[5]
 
 colours["Limited (Small Cell Lung)"] <- "#818BBB"
 colours["Extensive (Small Cell Lung)"] <- "#741C6D"
+
+
+colours["CancerSeek"] = "#ac5ed6"
+colours["Galleri"] = "#b89536"
+colours["NonMCED"] = "#a6a6a6"
 
 
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
@@ -85,11 +100,12 @@ formatNumber <- function(values) {
 	billion = 1000000000
 	million = 1000000
 	thousand = 1000
-	if (median(abs(values)) > billion) {
+	medianValue = median(abs(values[!is.na(values)]))
+	if (medianValue > billion / 10) {
 		return(scales::comma(values / billion, accuracy = 0.1, suffix = "B"))
-	} else if (abs(median(values)) > million) {
+	} else if (medianValue > million / 10) {
 		return(scales::comma(values / million, accuracy = 0.1, suffix = "M"))
-	} else if (abs(median(values)) > thousand) {
+	} else if (medianValue > thousand / 10) {
 		return(scales::comma(values / thousand, accuracy = 0.1, suffix = "K"))
 	}
 	return(scales::comma(values, accuracy = 0.1))
@@ -145,7 +161,8 @@ visualizeStages <- function(dataset) {
 
 visualizeFrontier <- function(frontierData, type) {
 	frontierData <- frontierData %>%
-		mutate(Type = "Cost-efficient")
+		mutate(Type = "Cost-efficient", ToVisualize = ifelse(sce %in% scenariosToVisualize, "Visualized", "Not Visualized")) %>%
+		filter(cancertype == type)
 
 	variableToUse = "Person_years"
 
@@ -180,11 +197,15 @@ visualizeFrontier <- function(frontierData, type) {
 				frontierData$Total_Cost[r - 1]
 		}
 
+		dominanceType = "Rejected due to extended dominance"
+		if (frontierCount == 1) {
+			dominanceType = "Rejected due to dominance"
+		}
 		frontierDominated <- bind_rows(
 			frontierDominated,
 			frontierData %>%
 				filter((delta_HAPY < 0 & delta_cost > 0)) %>%
-				mutate(Type = paste("Rejected due to dominance (Round ", frontierCount, ")", sep = ""))
+				mutate(Type = dominanceType)
 		)
 		currentLength <- nrow(frontierData)
 		frontierData <- frontierData %>%
@@ -204,14 +225,15 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
 
 	ggplot(frontierPlotData, aes(y = yVar, x = Total_Cost / million, colour = Type, shape = testType)) +
-		geom_point(size = 3) +
+		geom_point(size = 5) +
 		geom_line(data = frontierData %>% filter(Type == "Cost-efficient"), aes(group = Type), colour = "black", size = 2) +
 		geom_label_repel(
 			aes(
 				label = Labels,
-				y = 1.000005 * yVar
+				y = 1.000005 * yVar #,
+				#	colour = ToVisualize
 			),
-			size = 7,
+			size = 3.5,
 			family = "Nunito",
 			colour = "black"
 		) +
@@ -224,8 +246,9 @@ visualizeFrontier <- function(frontierData, type) {
 			labels = scales::dollar
 		) +
 		scale_shape_discrete("Test Type") +
-		scale_colour_discrete("") +
-		theme_minimal(13, "Nunito")
+		scale_colour_manual("", values = colours) +
+		theme_minimal(16, "Nunito") +
+		ggtitle(type)
 }
 
 visualizePoints <- function(totalData, x_var, y_var) {
@@ -251,6 +274,19 @@ visualizePoints <- function(totalData, x_var, y_var) {
 		theme_minimal(13, "Nunito")
 }
 
+generateMaxToUse <- function(values) {
+	maximumVal = max(values, na.rm = TRUE)
+	secondMax = max(values[values != maximumVal], na.rm = TRUE)
+
+	valueToUseAsMax = maximumVal
+
+	if (maximumVal > secondMax * 5) {
+		valueToUseAsMax = secondMax
+	}
+
+	return(valueToUseAsMax)
+}
+
 visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	currentDataToVisualize <- totalData %>%
 		filter(cancertype == typeToShow, testType != "BaseCase") %>%
@@ -259,33 +295,45 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	plotsToCombine <- list()
 
 	variableNames = list()
-	variableNames["Detected_Cases_Diff"] = "Difference in\nDetected Cases"
-	variableNames["ICER_ReducedDeaths"] = "Difference in Cost\nPer Reduction in Cancer Deaths"
-	variableNames["Cancer_Deaths_Diff"] = "Difference in\nCancer Deaths"
-	variableNames["ICER_DetectedCases"] = "Difference in Cost\nPer Additional Detection"
-	variableNames["ICER_PersonYears"] = "Difference in Cost\nPer Additional Person Year"
-	variableNames["Total_Cost_Diff"] = "Difference in\nTotal Cost"
+	variableNames["Detected_Cases_Diff"] = "Difference in Detected Cases"
+	variableNames["ICER_ReducedDeaths"] = "Difference in Cost Per\nReduction in Cancer Deaths"
+	variableNames["Cancer_Deaths_Diff"] = "Difference in Cancer Deaths"
+	variableNames["ICER_DetectedCases"] = "Difference in Cost Per\nAdditional Detection"
+	variableNames["ICER_PersonYears"] = "Difference in Cost Per\nAdditional Person Year"
+	variableNames["Total_Cost_Diff"] = "Difference in Total Cost"
 
+	plotCount = 1
 	for (variable in unique(currentDataToVisualize$name)) {
 		variableName <- variableNames[variable][[1]]
+
+		if (plotCount %in% 1:4) {
+			textTheme = element_blank()
+		} else {
+			textTheme = element_text()
+		}
+		dataToUse = currentDataToVisualize %>% filter(name == variable)
+
 		plotsToCombine[variable] <- list(
-			ggplot(currentDataToVisualize %>% filter(name == variable), aes(x = formattedName, y = value, fill = testType)) +
-				geom_bar(stat = "identity") +
-				theme_minimal(16, "Avenir") +
-				geom_text(aes(label = formatNumber(value), y = value / 2), colour = "black", family = "Avenir", size = 5) +
-				scale_y_continuous(variableName) +
-				scale_x_discrete("Scenario") +
-				scale_fill_discrete("Test Type")
+			ggplot(dataToUse, aes(x = formattedName_NoTest, y = value, fill = testType)) +
+				geom_bar(position = "dodge", stat = "identity") +
+				theme_minimal(24, "Avenir") +
+				geom_text(aes(label = formatNumber(value), y = value / 2), colour = "black", family = "Avenir", size = 7, position = position_dodge(width = 0.9)) +
+				scale_y_continuous("", label = formatNumber) +
+				scale_x_discrete("") +
+				scale_fill_manual("Test Type", values = colours) +
+				theme(axis.text.x = textTheme) +
+				ggtitle(variableName)
 		)
+		plotCount = plotCount + 1
 	}
-	ggarrange(plotlist = plotsToCombine, common.legend = TRUE)
+	ggarrange(plotlist = plotsToCombine, common.legend = TRUE, nrow = 3, ncol = 2)
 }
 
 visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) {
 	currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Combined")
+		filter(cancertype == "Combined", testType %in% c(testToShow, "BaseCase"))
 
-	currentTable$Label <- paste(currentTable$testType, "\nFreq: ", currentTable$frequency, " Years", sep = "")
+	currentTable$Label <- paste("Freq: ", currentTable$frequency, " Years", sep = "")
 	currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
 
 	currentTable$ExposureVar <- currentTable[[exposure]]
@@ -300,7 +348,7 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 
 	for (label in unique(currentTable$Label)) {
 		for (age in unique(currentTable$minAge)) {
-			if (age != "BaseCase" & label != "BaseCase" & grepl(testToShow, label)) {
+			if (age != "BaseCase" & label != "BaseCase") {
 				filteredTable <- currentTable %>% filter(minAge == age, Label == label)
 				model <- lm(OutcomeVar ~ ExposureVar, data = filteredTable)
 
@@ -320,10 +368,13 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 		aes(x = ExposureVar, y = OutcomeVar, colour = Label)
 	) +
 		geom_point() +
+		scale_colour_manual("Interval", values = colours) +
 		geom_smooth(method = "lm", aes(linetype = minAge)) +
 		scale_y_continuous(outcomeTitle, label = scales::number) +
 		scale_x_continuous(exposureTitle, label = scales::number) +
 		geom_hline(yintercept = baseCaseValue) +
-		geom_label_repel(data = linearRegressionResults, aes(label = scales::number(BaseCaseIntercept, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir") +
-		theme_minimal(16, "Avenir")
+		geom_text_repel(data = linearRegressionResults, aes(label = scales::number(BaseCaseIntercept, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir", size = 8) +
+		theme_minimal(16, "Avenir") +
+		scale_linetype_discrete("Minimum Age") +
+		ggtitle(testToShow)
 }

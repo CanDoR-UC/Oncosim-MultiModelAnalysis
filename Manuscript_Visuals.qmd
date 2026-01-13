@@ -1,0 +1,143 @@
+---
+title: "Should we use Multi-Cancer Early Detection Testing in Canada?"
+author: "John Hutchinson - Thesis Project"
+format: 
+  html:
+    embed-resources: true
+---
+
+
+```{r}
+#| echo: false
+#| warning: false
+library(tidyverse)
+library(targets)
+library(ggplot2)
+library(extrafont)
+library(RColorBrewer)
+library(ggpubr)
+library(ggrepel)
+
+combinedTables <- tar_read(combinedTables, store = "store_visualize")
+
+source("R/Visualization_PlotFunctions.R")
+
+# extrafont::font_import()
+extrafont::loadfonts()
+
+
+timeData <- combinedTables$PrimaryTable
+timeData$formattedName <- paste(timeData$formattedName, "\n")
+
+totalData <- combinedTables$`PrimaryTable_2025-2051`
+totalData$formattedName <- paste(totalData$formattedName, "\n")
+
+
+stageData <- combinedTables$StageDist
+stageData$formattedName <- paste(stageData$formattedName, "\n")
+
+timeData_BreastDouble <- timeData
+timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] <- timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] * 2
+
+participationData <- combinedTables$Participation
+
+```
+
+# Cancer Type Specific Scenarios
+
+ - Main results: Lung and Colorectal cancer seem to benefit from MCED (at high participation), however, it is far less effective with breast cancer
+ - MCED does not work well until it surpasses ~60% participation
+ - Overall interpretation: MCED is best suited to cancer types with insufficient screening, or when the tests have worse sensitivity/sensitivity. Lung cancer shows that underscreened types benefit, but well-screened types like breast will see a worsening of outcomes.
+## Efficiency Frontier
+
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+
+efficiencyPlots <- list()
+
+for (type in c("Breast", "Colorectal", "Lung", "Combined")) {
+	efficiencyPlots[type] <- list(visualizeFrontier(
+		combinedTables$`PrimaryTable_2025-2051` %>%
+			filter(testType != "NonMCED"),
+		type
+	))
+}
+print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
+
+
+```
+
+- Breast does not seem to benefit from MCED at all
+- Otherwise, several scenarios lead to cost efficiency when person years are the main metric examined
+
+## Breast
+
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Breast")
+
+```
+
+
+- The selected MCED scenarios generally lead to worse performance (fewer detected cases, more deaths, more cost)
+- Overall: MCED never works well for breast
+
+
+## Colorectal
+
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Colorectal")
+
+```
+
+- Galleri with 90% participation is the only MCED scenario that results in fewer cancer deaths.
+- It appears in terms of sensitivity, Galleri is better than FIT, and CancerSEEK is worse.
+- Overall: MCED only works well for colorectal if it is Galleri and high participation
+
+## Lung
+
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Lung")
+
+```
+
+- Beside the NonMCED scenarios, 90% Galleri leads to the lowest increase in cost per additional detection. However, CancerSeek leads to the lowest increase in cost per death averted.
+- Overall: MCED always helps with lung (largely due to lack of existing screening)
+
+## Combined
+
+- Beside the NonMCED scenario, CancerSeek 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")
+
+```
+
+
+## Linear Modelling
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+
+linearPlots <- list()
+
+for (testType in c("Galleri", "CancerSeek", "NonMCED")) {
+	linearPlots[testType] <- list(visualizeLinearModel(combinedTables, testType, "Detected_Cases", "participation"))
+}
+print(ggarrange(plotlist = linearPlots, common.legend = TRUE, nrow = 3, ncol = 1))
+
+```
+
