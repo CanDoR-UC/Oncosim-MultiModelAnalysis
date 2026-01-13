@@ -110,14 +110,24 @@ extractParticipation <- function(importedData) {
 		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, formattedName_NoTest, cancertype) %>%
 		summarize(expr_value = sum(expr_value)) %>%
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
-		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
+		mutate(
+			percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
+			percentScreenedWithin2Years = (Last_screen_within_0_1 + Last_screen_within_1_2) / all,
+			percentScreenedWithin1Years = (Last_screen_within_0_1) / all,
+			Shiftable_year = as.numeric(Shiftable_year)
+		)
 
 	colonParticipation = importedData$Colorectal_Cancer_Timing_Of_Last_Screen %>%
 		filter(Colorectal_cancer_family_history == "all", age_group %in% ageGroups, expr_name == "Number_of_people", Shiftable_year != "all") %>%
 		group_by(Time_of_last_screen_years, Shiftable_year, sce, minAge, frequency, participation, testType, formattedName, formattedName_NoTest, cancertype) %>%
 		summarize(expr_value = sum(expr_value)) %>%
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
-		mutate(percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all, percentScreenedWithin1Years = (Last_screen_within_0_1) / all, Shiftable_year = as.numeric(Shiftable_year))
+		mutate(
+			percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
+			percentScreenedWithin2Years = (Last_screen_within_0_1 + Last_screen_within_1_2) / all,
+			percentScreenedWithin1Years = (Last_screen_within_0_1) / all,
+			Shiftable_year = as.numeric(Shiftable_year)
+		)
 
 	lungParticipation = importedData$Lung_Cancer_Timing_Of_Last_Screen %>%
 		filter(age_group %in% ageGroups, Shiftable_year != "all") %>%
@@ -126,6 +136,7 @@ extractParticipation <- function(importedData) {
 		pivot_wider(names_from = Time_of_last_screen_years, values_from = expr_value) %>%
 		mutate(
 			percentScreenedWithin3Years = (Last_screen_within_0_1 + Last_screen_within_1_2 + Last_screen_within_2_3) / all,
+			percentScreenedWithin2Years = (Last_screen_within_0_1 + Last_screen_within_1_2) / all,
 			percentScreenedWithin1Years = (Last_screen_within_0_1) / all,
 			Shiftable_year = as.numeric(Shiftable_year)
 		)

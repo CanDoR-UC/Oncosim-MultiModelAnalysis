@@ -11,8 +11,8 @@ analysisName = "MCEDProject"
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
 
-#If OncoSim runs need to be downloaded. Disable this if they have been deleted from the server.
-downloadOncoSimRuns = TRUE
+#If OncoSim runs need to be downloaded. Disable this if they have been deleted from the server or have already been downloaded.
+downloadOncoSimRuns = FALSE
 
 list(
 	tar_target(previousRunOutputs, "Placeholder"),

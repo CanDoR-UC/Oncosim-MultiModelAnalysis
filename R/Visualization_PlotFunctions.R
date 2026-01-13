@@ -43,15 +43,15 @@ visualizeParticipation <- function(dataset) {
 
 	dataset$Label = paste(dataset$minAge, dataset$testType, sep = "\n")
 
-	oneYearData = dataset %>% filter(grepl("_1_", sce) | grepl("BaseCase", sce))
-	leftPlot <- ggplot(oneYearData, aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = as.character(participation))) +
+	twoYearData = dataset %>% filter(grepl("_2_", sce) | grepl("BaseCase", sce))
+	leftPlot <- ggplot(twoYearData, aes(x = Shiftable_year, y = percentScreenedWithin2Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
-		scale_y_continuous("Percent Screened Within 1 Year", labels = scales::percent, breaks = c(0.3, 0.5, 0.7, 0.9)) +
+		scale_y_continuous("Percent Screened Within 2 Year", labels = scales::percent, breaks = c(0.3, 0.5, 0.7, 0.9)) +
 		scale_colour_discrete("Scenario") +
 		expand_limits(y = c(0, 1)) +
-		ggtitle("One Year Participation") +
+		ggtitle("Two Year Participation") +
 		geom_hline(yintercept = 0.9, linetype = "dashed", colour = "blue") +
 		geom_hline(yintercept = 0.7, linetype = "dashed", colour = "blue") +
 		geom_hline(yintercept = 0.5, linetype = "dashed", colour = "blue") +
@@ -85,11 +85,11 @@ formatNumber <- function(values) {
 	billion = 1000000000
 	million = 1000000
 	thousand = 1000
-	if (mean(values) > billion) {
+	if (median(abs(values)) > billion) {
 		return(scales::comma(values / billion, accuracy = 0.1, suffix = "B"))
-	} else if (mean(values) > million) {
+	} else if (abs(median(values)) > million) {
 		return(scales::comma(values / million, accuracy = 0.1, suffix = "M"))
-	} else if (mean(values) > thousand) {
+	} else if (abs(median(values)) > thousand) {
 		return(scales::comma(values / thousand, accuracy = 0.1, suffix = "K"))
 	}
 	return(scales::comma(values, accuracy = 0.1))
@@ -258,8 +258,16 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 
 	plotsToCombine <- list()
 
+	variableNames = list()
+	variableNames["Detected_Cases_Diff"] = "Difference in\nDetected Cases"
+	variableNames["ICER_ReducedDeaths"] = "Difference in Cost\nPer Reduction in Cancer Deaths"
+	variableNames["Cancer_Deaths_Diff"] = "Difference in\nCancer Deaths"
+	variableNames["ICER_DetectedCases"] = "Difference in Cost\nPer Additional Detection"
+	variableNames["ICER_PersonYears"] = "Difference in Cost\nPer Additional Person Year"
+	variableNames["Total_Cost_Diff"] = "Difference in\nTotal Cost"
+
 	for (variable in unique(currentDataToVisualize$name)) {
-		variableName <- str_to_title(gsub("_", " ", variable))
+		variableName <- variableNames[variable][[1]]
 		plotsToCombine[variable] <- list(
 			ggplot(currentDataToVisualize %>% filter(name == variable), aes(x = formattedName, y = value, fill = testType)) +
 				geom_bar(stat = "identity") +
