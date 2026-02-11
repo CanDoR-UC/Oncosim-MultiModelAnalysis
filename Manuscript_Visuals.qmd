@@ -1,9 +1,7 @@
 ---
 title: "Should we use Multi-Cancer Early Detection Testing in Canada?"
 author: "John Hutchinson - Thesis Project"
-format: 
-  html:
-    embed-resources: true
+format: docx
 ---
 
 
@@ -48,6 +46,8 @@ participationData <- combinedTables$Participation
  - Main results: Lung and Colorectal cancer seem to benefit from MCED (at high participation), however, it is far less effective with breast cancer
  - MCED does not work well until it surpasses ~60% participation
  - Overall interpretation: MCED is best suited to cancer types with insufficient screening, or when the tests have worse sensitivity/sensitivity. Lung cancer shows that underscreened types benefit, but well-screened types like breast will see a worsening of outcomes.
+
+
 ## Efficiency Frontier
 
 
@@ -116,7 +116,6 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 
 ## Combined
 
-- Beside the NonMCED scenario, CancerSeek 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
 
 ```{r,fig.width=16,fig.height=14}
 #| echo: false
@@ -124,6 +123,8 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")
 
 ```
+
+- Beside the NonMCED scenario, CancerSeek 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
 
 
 ## Linear Modelling

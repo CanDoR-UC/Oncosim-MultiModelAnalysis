@@ -290,7 +290,8 @@ generateMaxToUse <- function(values) {
 visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	currentDataToVisualize <- totalData %>%
 		filter(cancertype == typeToShow, testType != "BaseCase") %>%
-		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
+		#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
+		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_DetectedCases, ICER_PersonYears))
 
 	plotsToCombine <- list()
 
@@ -306,11 +307,11 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	for (variable in unique(currentDataToVisualize$name)) {
 		variableName <- variableNames[variable][[1]]
 
-		if (plotCount %in% 1:4) {
-			textTheme = element_blank()
-		} else {
-			textTheme = element_text()
-		}
+		#if (plotCount %in% 1:4) {
+		#		textTheme = element_blank()
+		#} else {
+		textTheme = element_text()
+		#}
 		dataToUse = currentDataToVisualize %>% filter(name == variable)
 
 		plotsToCombine[variable] <- list(
