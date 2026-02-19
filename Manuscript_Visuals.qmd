@@ -48,6 +48,20 @@ participationData <- combinedTables$Participation
  - Overall interpretation: MCED is best suited to cancer types with insufficient screening, or when the tests have worse sensitivity/sensitivity. Lung cancer shows that underscreened types benefit, but well-screened types like breast will see a worsening of outcomes.
 
 
+
+## Total Screens (Calibration)
+
+
+```{r,fig.width=24,fig.height=12}
+
+MCEDScreenNum <- totalData
+
+MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("Galleri", "CancerSeek")] * 2
+
+visualizeTotals(MCEDScreenNum %>% filter(sce %in% scenariosToVisualize), "Total_Screens", "Number of Total Screens (2025-2051)", "Number of Cancer Screens (Breast MCED Doubled)")
+
+```
+
 ## Efficiency Frontier
 
 
@@ -58,11 +72,11 @@ participationData <- combinedTables$Participation
 efficiencyPlots <- list()
 
 for (type in c("Breast", "Colorectal", "Lung", "Combined")) {
-	efficiencyPlots[type] <- list(visualizeFrontier(
-		combinedTables$`PrimaryTable_2025-2051` %>%
-			filter(testType != "NonMCED"),
-		type
-	))
+  efficiencyPlots[type] <- list(visualizeFrontier(
+    combinedTables$`PrimaryTable_2025-2051` %>%
+      filter(testType != "NonMCED"),
+    type
+  ))
 }
 print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 
@@ -136,7 +150,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 linearPlots <- list()
 
 for (testType in c("Galleri", "CancerSeek", "NonMCED")) {
-	linearPlots[testType] <- list(visualizeLinearModel(combinedTables, testType, "Detected_Cases", "participation"))
+  linearPlots[testType] <- list(visualizeLinearModel(combinedTables, testType, "Person_years", "participation"))
 }
 print(ggarrange(plotlist = linearPlots, common.legend = TRUE, nrow = 3, ncol = 1))
 

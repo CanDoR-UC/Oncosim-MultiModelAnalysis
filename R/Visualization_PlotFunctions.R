@@ -291,12 +291,17 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	currentDataToVisualize <- totalData %>%
 		filter(cancertype == typeToShow, testType != "BaseCase") %>%
 		#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
-		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_DetectedCases, ICER_PersonYears))
+		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_DetectedCases, ICER_PersonYears, Health_adjusted_person_years_Diff)) %>%
+		filter(!is.na(value))
 
 	plotsToCombine <- list()
 
 	variableNames = list()
 	variableNames["Detected_Cases_Diff"] = "Difference in Detected Cases"
+	if (typeToShow != "Combined") {
+		variableNames["Health_adjusted_person_years_Diff"] = "Difference in Health\nAdjusted Person Years"
+	}
+
 	variableNames["ICER_ReducedDeaths"] = "Difference in Cost Per\nReduction in Cancer Deaths"
 	variableNames["Cancer_Deaths_Diff"] = "Difference in Cancer Deaths"
 	variableNames["ICER_DetectedCases"] = "Difference in Cost Per\nAdditional Detection"

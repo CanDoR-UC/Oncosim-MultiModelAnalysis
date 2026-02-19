@@ -261,7 +261,7 @@ combineModelTables <- function(importedData) {
 		group_by(Shiftable_year, cancertype) %>%
 		left_join(cancerMetricsTableBaseCase)
 
-	createDifference = c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost", "Person_years")
+	createDifference = c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost", "Person_years", "Health_adjusted_person_years")
 
 	for (variable in createDifference) {
 		cancerMetricsTable[[paste(variable, "Diff", sep = "_")]] = cancerMetricsTable[[variable]] - cancerMetricsTable[[paste("BASECASE", variable, sep = "_")]]
@@ -287,6 +287,7 @@ combineModelTables <- function(importedData) {
 			Total_Cost_Diff = sum(Total_Cost_Diff),
 			Screening_Cost_Diff = sum(Screening_Cost_Diff),
 			Health_adjusted_person_years = sum(Health_adjusted_person_years),
+			Health_adjusted_person_years_Diff = sum(Health_adjusted_person_years_Diff),
 			Person_years = sum(Person_years),
 			Person_years_Diff = sum(Person_years_Diff),
 
