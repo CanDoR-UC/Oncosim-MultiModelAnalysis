@@ -1,8 +1,8 @@
 modelDigests = list()
-modelDigests["OncoSim-lung"] = "07a27aa297b2248b4f01b9300787bb54"
-modelDigests["OncoSim-breast"] = "b7052122a73609179d8dcf40f467ee2e"
-modelDigests["OncoSim-colorectal"] = "03dfd40c7e00f6b95564376a38ad2680"
-modelDigests["OncoSim-allcancers"] = "c2650ffa5e64cb0bb4fd3dcfb82575f5"
+modelDigests["OncoSim-lung"] = "361bc9283e954a392aee3d4b0569aeb3"
+modelDigests["OncoSim-breast"] = "f3c2d5330103e5bc41c253256507db0c"
+modelDigests["OncoSim-colorectal"] = "0832127dd0045abd29bf6f1ca5941f23"
+modelDigests["OncoSim-allcancers"] = "fe7c0e930312efb7ab2087c9e88c1741"
 
 paramsToAlter <- list()
 paramsToAlter["OncoSim-breast"] <- list(c(
@@ -163,7 +163,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	#parameterTables = parameterTables[grepl("45_2_90", parameterTables$name) | grepl("50_3_30", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
+	#parameterTables = parameterTables[grepl("45_2_90", parameterTables$name) | grepl("50_3_70", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
 
 	#parameterTables = head(parameterTables, 1)
