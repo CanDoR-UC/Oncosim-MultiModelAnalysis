@@ -27,14 +27,13 @@ sourceDir <- "Output/Scenarios/"
 library(daff)
 
 sourceDir <- "../Output/Scenarios/"
-model <- "OncoSim-lung"
-specificScenario <- "lung_45_3_90_CancerSeek"
-referenceScenario <- "lung_BaseCase"
+specificScenario <- "breast_45_3_90_CancerSeek"
+referenceScenario <- "breast_BaseCase"
 
 scenarioDirectories <- list.dirs(sourceDir)
 
-specificScenarioPath <- scenarioDirectories[grepl(specificScenario, scenarioDirectories)]
-referenceScenarioPath <- scenarioDirectories[grepl(referenceScenario, scenarioDirectories)]
+specificScenarioPath <- scenarioDirectories[grepl(specificScenario, scenarioDirectories)][1]
+referenceScenarioPath <- scenarioDirectories[grepl(referenceScenario, scenarioDirectories)][1]
 
 
 for (parameter in list.files(specificScenarioPath)) {

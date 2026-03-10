@@ -1,69 +1,9 @@
+source("_oncosim.R")
 modelDigests = list()
-modelDigests["OncoSim-lung"] = "07a27aa297b2248b4f01b9300787bb54"
-modelDigests["OncoSim-breast"] = "b7052122a73609179d8dcf40f467ee2e"
-modelDigests["OncoSim-colorectal"] = "03dfd40c7e00f6b95564376a38ad2680"
-modelDigests["OncoSim-allcancers"] = "c2650ffa5e64cb0bb4fd3dcfb82575f5"
-
-
-#Colorectal
-
-colorectalScenario = load_scenario(modelDigests["OncoSim-colorectal"][[1]], "Default")
-rectalDefaultCosts = colorectalScenario$get_param("RectalCancerTreatmentCosts")
-colonDefaultCosts = colorectalScenario$get_param("ColonCancerTreatmentCosts")
-
-rectalDefaultCosts = rectalDefaultCosts %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = gsub("_incurable", "", gsub("_curable", "", Stage_for_treatment))) %>%
-	group_by(Stage) %>%
-	summarize(Rectal_Default = sum(sum))
-
-totalTable = rectalDefaultCosts
-
-colonDefaultCosts = colonDefaultCosts %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = gsub("_incurable", "", gsub("_curable", "", Stage_for_treatment))) %>%
-	group_by(Stage) %>%
-	summarize(Colon_Default = sum(sum))
-
-totalTable = full_join(totalTable, colonDefaultCosts)
-
-rectalAdjustedCosts = read.csv("Output/Scenarios/MCEDProjectOncoSim-colorectal_BaseCase/RectalCancerTreatmentCosts.csv")
-colonAdjustedCosts = read.csv("Output/Scenarios/MCEDProjectOncoSim-colorectal_BaseCase/ColonCancerTreatmentCosts.csv")
-
-rectalAdjustedCosts = rectalAdjustedCosts %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = gsub("_incurable", "", gsub("_curable", "", Stage_for_treatment))) %>%
-	group_by(Stage) %>%
-	summarize(Rectal_NewCosts = sum(sum))
-
-colonAdjustedCosts = colonAdjustedCosts %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = gsub("_incurable", "", gsub("_curable", "", Stage_for_treatment))) %>%
-	group_by(Stage) %>%
-	summarize(Colon_NewCosts = sum(sum))
-totalTable = full_join(totalTable, rectalAdjustedCosts)
-totalTable = full_join(totalTable, colonAdjustedCosts)
-
-# Breast
-
-breastScenario = load_scenario(modelDigests["OncoSim-breast"][[1]], "Default")
-stageDict = list()
-stageDict["Stage_1"] = "Stage_I"
-stageDict["Stage_2"] = "Stage_II"
-stageDict["Stage_3"] = "Stage_III"
-stageDict["Stage_4"] = "Stage_IV"
-
-breastDefaultCost1 = breastScenario$get_param("BreastCancerCosts") %>% filter(Breast_cancer_costs %in% names(stageDict)) %>% mutate(Stage = as.character(stageDict[Breast_cancer_costs]))
-breastDefaultCost2 = breastScenario$get_param("BreastCancerCosts2") %>% filter(Breast_cancer_costs %in% names(stageDict)) %>% mutate(Stage = as.character(stageDict[Breast_cancer_costs]))
-
-breastData = breastDefaultCost1 %>% filter(Age_group == "(-∞,70)") %>% mutate(BreastBelow70_Default = Cost) %>% select(Stage, BreastBelow70_Default)
-breastData = full_join(breastData, breastDefaultCost1 %>% filter(Age_group == "[70,∞)") %>% mutate(BreastAbove70_Default = Cost) %>% select(Stage, BreastAbove70_Default))
-breastData = full_join(breastData, breastDefaultCost2 %>% filter(Age_group == "[70,∞)") %>% mutate(BreastHormonal_Default = Cost) %>% select(Stage, BreastHormonal_Default))
-
-BreastAdjustedCosts1 = read.csv("Output/Scenarios/MCEDProjectOncoSim-breast_BaseCase/BreastCancerCosts.csv") %>% filter(Breast_cancer_costs %in% names(stageDict)) %>% mutate(Stage = as.character(stageDict[Breast_cancer_costs]))
-BreastAdjustedCosts2 = read.csv("Output/Scenarios/MCEDProjectOncoSim-breast_BaseCase/BreastCancerCosts2.csv") %>% filter(Breast_cancer_costs %in% names(stageDict)) %>% mutate(Stage = as.character(stageDict[Breast_cancer_costs]))
-
-breastData = full_join(breastData, BreastAdjustedCosts1 %>% filter(Age_group == "(-∞,70)") %>% mutate(BreastBelow70_Adjusted = Cost) %>% select(Stage, BreastBelow70_Adjusted))
-breastData = full_join(breastData, BreastAdjustedCosts1 %>% filter(Age_group == "[70,∞)") %>% mutate(BreastAbove70_Adjusted = Cost) %>% select(Stage, BreastAbove70_Adjusted))
-breastData = full_join(breastData, BreastAdjustedCosts2 %>% filter(Age_group == "[70,∞)") %>% mutate(BreastHormonal_Adjusted = Cost) %>% select(Stage, BreastHormonal_Adjusted))
-
-totalTable = full_join(totalTable, breastData)
+modelDigests["OncoSim-lung"] = "361bc9283e954a392aee3d4b0569aeb3"
+modelDigests["OncoSim-breast"] = "f3c2d5330103e5bc41c253256507db0c"
+modelDigests["OncoSim-colorectal"] = "0832127dd0045abd29bf6f1ca5941f23"
+modelDigests["OncoSim-allcancers"] = "fe7c0e930312efb7ab2087c9e88c1741"
 
 
 stageDict = list()
@@ -78,26 +18,47 @@ stageDict["Relapse_non_small_cell"] = "Relapse_Non_Small_Cell"
 stageDict["Relapse_small_cell"] = "Relapse_Small_Cell"
 
 
-lungScenario = load_scenario(modelDigests["OncoSim-lung"][[1]], "Default")
-lungDefaultCosts = lungScenario$get_param("LungCancerTreatmentCosts") %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = as.character(stageDict[Stage])) %>%
-	filter(Current_practice_vs_Intervention == "Current_practice") %>%
-	group_by(Stage) %>%
-	summarize(Lung_Default = sum(sum))
+totalYears = 2015:2051
 
-totalTable = full_join(totalTable, lungDefaultCosts)
-
-lungAdjustedCosts = read.csv("Output/Scenarios/MCEDProjectOncoSim-lung_BaseCase/LungCancerTreatmentCosts.csv") %>%
-	mutate(sum = rowSums(across(where(is.numeric)), na.rm = TRUE), Stage = as.character(stageDict[Stage])) %>%
-	filter(Current_practice_vs_Intervention == "Current_practice") %>%
-	group_by(Stage) %>%
-	summarize(Lung_Adjusted = sum(sum))
-totalTable = full_join(totalTable, lungAdjustedCosts)
+lungModelRuns = load_model(modelDigests["OncoSim-lung"][[1]])$ModelRuns
+defaultLung = load_run(modelDigests["OncoSim-lung"][[1]], lungModelRuns$RunDigest[lungModelRuns$Name == "Default_first_run_48M_cases_12_subs"])
+defaultLungCost = defaultLung$get_table("LungCancer_TreatmentCost_Table") %>% mutate(Type = "Default")
+baseCaseLungCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_BaseCase/LungCancer_TreatmentCost_Table.csv") %>% mutate(Type = "MCEDScenarios")
 
 
-for (column in names(totalTable)) {
-	if (column != "Stage") {
-		totalTable[[column]] = scales::dollar(totalTable[[column]], accuracy = 0.01)
-	}
-}
-write.csv(t(totalTable), "CostTable.csv")
+defaultLungCostFiltered = bind_rows(defaultLungCost, baseCaseLungCost) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
+	summarize(AverageTreatmentCost = sum(Cost) / max(Number_of_patients_treated), .by = c("Stage_at_diagnosis_or_recurrence", "Type")) %>%
+	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
+	mutate(Ratio = `MCEDScenarios` / Default)
+
+
+breastModelRuns = load_model(modelDigests["OncoSim-breast"][[1]])$ModelRuns
+defaultBreast = load_run(modelDigests["OncoSim-breast"][[1]], breastModelRuns$RunDigest[breastModelRuns$Name == "Default_first_run_48M_cases_12_subs"])
+defaultBreastCost = defaultBreast$get_table("Breast_Cancer_TreatmentCost_Table") %>% mutate(Type = "Default")
+baseCaseBreastCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-breast_BaseCase/Breast_Cancer_TreatmentCost_Table.csv") %>% mutate(Type = "MCEDScenarios")
+
+
+defaultBreastCostFiltered = bind_rows(defaultBreastCost, baseCaseBreastCost) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
+	mutate(Number_of_patients = Treatment_cost / Average_treatm_x_r_person_year) %>%
+	summarize(AverageTreatmentCost = sum(Treatment_cost) / max(Number_of_patients), .by = c("Stage", "Type")) %>%
+	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
+	mutate(Ratio = `MCEDScenarios` / Default)
+
+colorectalModelRuns = load_model(modelDigests["OncoSim-colorectal"][[1]])$ModelRuns
+defaultColorectal = load_run(modelDigests["OncoSim-colorectal"][[1]], colorectalModelRuns$RunDigest[colorectalModelRuns$Name == "Default_first_run_48M_cases_12_subs"])
+defaultColorectalCost = defaultColorectal$get_table("ColorectalCancer_TreatmentCost_Table") %>% mutate(Type = "Default")
+baseCaseColorectalCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-colorectal_BaseCase/ColorectalCancer_TreatmentCost_Table.csv") %>% mutate(Type = "MCEDScenarios")
+
+
+defaultColorectalCostFiltered = bind_rows(defaultColorectalCost, baseCaseColorectalCost) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
+	mutate(Treatment_cost = Average_treatm_x_patient_treated * Number_of_patients_treated) %>%
+	mutate(Treatment_cost = ifelse(Number_of_patients_treated == 0, 0, Treatment_cost)) %>%
+	summarize(AverageTreatmentCost = sum(Treatment_cost) / max(Number_of_patients_treated), .by = c("Stage_of_invasive_cancer_TNM", "Type")) %>%
+	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
+	mutate(Ratio = `MCEDScenarios` / Default)

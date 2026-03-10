@@ -304,37 +304,78 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-lung") {
-		ReportYearPooled = scenario$get_param("ReportYearPooled")
-		ReportYearPooled$Start_value = 2025
-		ReportYearPooled$End_value = 2051
-		scenario$set_param("ReportYearPooled", ReportYearPooled)
+		calibratingCosts = FALSE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
+		if (!calibratingCosts) {
+			ReportYearPooled = scenario$get_param("ReportYearPooled")
+			ReportYearPooled$Start_value = 2025
+			ReportYearPooled$End_value = 2051
+			scenario$set_param("ReportYearPooled", ReportYearPooled)
 
-		followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
-		followUpProtocol[[1]] = "Custom"
-		scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
+			followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
+			followUpProtocol[[1]] = "Custom"
+			scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
 
-		LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
+			LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
-		] = 1
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
+			] = 1
 
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
-		] = 1
-		LcDispatcherDefault$`0`[
-			LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
-		] = 0.39
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
+			] = 1
+			LcDispatcherDefault$`0`[
+				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
+			] = 0.39
 
-		scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
+			scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
+		}
 
 		costs <- scenario$get_param("LungCancerTreatmentCosts")
+
+		stageMultiplierRefTable = read.csv("InputParameters/LungCost_Multipliers.csv")
+		stageDrugMultipliers = stageMultiplierRefTable[stageMultiplierRefTable$Type == "Medication_Ratio", ]
+		stageRadioMultipliers = stageMultiplierRefTable[stageMultiplierRefTable$Type == "Radiation_Ratio", ]
+
+		stageOneCost = costs %>% filter(Stage == "Non_small_cell_stage_I")
+		stageOneDrug = stageOneCost$Drug
+		stageOneRadio = stageOneCost$Radiotherapy
+
+		costs[costs$Stage == "Non_small_cell_stage_II", ]$Drug = stageOneDrug * stageDrugMultipliers$II
+
+		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Drug = stageOneDrug * stageDrugMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Drug = stageOneDrug * stageDrugMultipliers$III
+
+		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Drug = stageOneDrug * stageDrugMultipliers$IV
+		costs[costs$Stage == "Relapse_non_small_cell", ]$Drug = stageOneDrug * stageDrugMultipliers$IV
+
+		costs[costs$Stage == "Small_cell_limited", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_extensive", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Relapse_small_cell", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+
+		costs[costs$Stage == "Non_small_cell_stage_II", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$II
+
+		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$III
+
+		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$IV
+		costs[costs$Stage == "Relapse_non_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$IV
+
+		costs[costs$Stage == "Small_cell_limited", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_extensive", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+
+		#2022 vs 2008
+		cpiMultiplier = 134.1 / 107.5 #https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401&pickMembers%5B0%5D=1.2&cubeTimeFrame.startMonth=01&cubeTimeFrame.startYear=2008&cubeTimeFrame.endMonth=01&cubeTimeFrame.endYear=2026&referencePeriods=20080101%2C20260101
+
+		otherColumnsToAdjust = c("Diagnostics", "Hospital", "Physician", "Other_institution", "Other_professional", "Other")
+		costs[, names(costs) %in% otherColumnsToAdjust] = costs[, names(costs) %in% otherColumnsToAdjust] * cpiMultiplier
 
 		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 
-		if (currentParameters$type != "BaseCase") {
+		if (currentParameters$type != "BaseCase" && !calibratingCosts) {
 			SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")
 			SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
 			scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)

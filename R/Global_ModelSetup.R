@@ -39,7 +39,7 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 treatmentCostMultiplier = list()
 treatmentCostMultiplier["OncoSim-colorectal"] = 1.637795
 treatmentCostMultiplier["OncoSim-breast"] = 1.145763
-treatmentCostMultiplier["OncoSim-lung"] = 3.582084
+treatmentCostMultiplier["OncoSim-lung"] = 3.004773 #SETTING AT 1 FOR NOW
 
 
 outputTables <- list()
@@ -52,7 +52,8 @@ outputTables["OncoSim-colorectal"] <- list(c(
 	"Colorectal_Cancer_ICER_Table_Discounted",
 	"Colorectal_Cancer_StageDist_Table",
 	"Colorectal_Cancer_Screen_Table_By_FH",
-	"Colorectal_Cancer_Timing_Of_Last_Screen"
+	"Colorectal_Cancer_Timing_Of_Last_Screen",
+	"ColorectalCancer_TreatmentCost_Table"
 ))
 outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Cases_Table",
@@ -64,7 +65,8 @@ outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Costs_Table",
 	"Breast_Cancer_ICER_Table_Discounted",
 	"Breast_Cancer_Screen_Outcome_Modality_Table",
-	"Breast_Cancer_Timing_Of_Last_Screen"
+	"Breast_Cancer_Timing_Of_Last_Screen",
+	"Breast_Cancer_TreatmentCost_Table"
 ))
 outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Cases_Table",
@@ -73,7 +75,8 @@ outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_ICER_Table",
 	"Lung_Cancer_Smoking_Cessation_Table",
 	"Lung_Cancer_StageDist_Table",
-	"Lung_Cancer_Timing_Of_Last_Screen"
+	"Lung_Cancer_Timing_Of_Last_Screen",
+	"LungCancer_TreatmentCost_Table"
 ))
 
 generateModelParameters <- function(modelsToUse) {
@@ -163,7 +166,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	#parameterTables = parameterTables[grepl("45_2_90", parameterTables$name) | grepl("50_3_70", parameterTables$name) | grepl("BaseCase", parameterTables$name), ]
+	parameterTables = parameterTables[grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
 
 	#parameterTables = head(parameterTables, 1)
