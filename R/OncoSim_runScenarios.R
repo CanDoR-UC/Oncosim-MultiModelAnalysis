@@ -13,7 +13,7 @@ RunScenario <- function(parametersAltered) {
 			paste("AutomatedRun_", analysisName, parametersAltered$name),
 			opts = opts_run(
 				Tables = outputTables[currentScenario$ModelName][[1]],
-				SimulationCases = testSampleSize,
+				SimulationCases = fullSampleSize / 10,
 				Mpi = list(Np = 4, IsNotOnRoot = TRUE),
 				Opts = list(OpenM.Threads = "4")
 			)

@@ -9,9 +9,9 @@ purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
 analysisName = "MCEDProject"
 
-modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")
+modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")[1]
 
-actuallyRun = TRUE
+actuallyRun = FALSE
 
 tar_option_set(packages = c("openmpp", "tidyverse"), workspace_on_error = TRUE)
 

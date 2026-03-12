@@ -155,8 +155,6 @@ SetParameters <- function(createdScenarios) {
 		scenario$set_param("BreastCancerCosts2", cost_2)
 
 		if (currentParameters$type != "BaseCase") {
-			#Set MCED Cost May have to change the other costs too?
-
 			if (currentParameters$type != "NonMCED") {
 				costs <- scenario$get_param("BreastScreeningCosts")
 				costs[
@@ -366,9 +364,9 @@ SetParameters <- function(createdScenarios) {
 		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 
 		#2022 vs 2008
-		cpiMultiplier = 134.1 / 107.5 #https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401&pickMembers%5B0%5D=1.2&cubeTimeFrame.startMonth=01&cubeTimeFrame.startYear=2008&cubeTimeFrame.endMonth=01&cubeTimeFrame.endYear=2026&referencePeriods=20080101%2C20260101
+		cpiMultiplier = 138 / 108.8 #https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000501&pickMembers%5B0%5D=1.2&cubeTimeFrame.startYear=2008&cubeTimeFrame.endYear=2025&referencePeriods=20080101%2C20250101
 
-		otherColumnsToAdjust = c("Diagnostics", "Hospital", "Physician", "Other_institution", "Other_professional", "Other")
+		otherColumnsToAdjust = c("Diagnostics", "Hospital", "Physician", "Other_institution", "Other_professional", "Other", "Radiotherapy", "Drug")
 		costs[, names(costs) %in% otherColumnsToAdjust] = costs[, names(costs) %in% otherColumnsToAdjust] * cpiMultiplier
 
 		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]

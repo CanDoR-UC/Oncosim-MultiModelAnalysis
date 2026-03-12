@@ -1,8 +1,8 @@
 modelDigests = list()
-modelDigests["OncoSim-lung"] = "361bc9283e954a392aee3d4b0569aeb3"
-modelDigests["OncoSim-breast"] = "f3c2d5330103e5bc41c253256507db0c"
-modelDigests["OncoSim-colorectal"] = "0832127dd0045abd29bf6f1ca5941f23"
-modelDigests["OncoSim-allcancers"] = "fe7c0e930312efb7ab2087c9e88c1741"
+modelDigests["OncoSim-lung"] = "201e47e22502a6f0ec0593f7f539970c"
+modelDigests["OncoSim-breast"] = "7b6012a86dcbfce878eca24e4845736a"
+modelDigests["OncoSim-colorectal"] = "5af0eb8d41728e927b1e21e97f5434f1"
+modelDigests["OncoSim-allcancers"] = "c2cc80bad8c67abf432029f62682e97f"
 
 paramsToAlter <- list()
 paramsToAlter["OncoSim-breast"] <- list(c(
@@ -39,7 +39,7 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 treatmentCostMultiplier = list()
 treatmentCostMultiplier["OncoSim-colorectal"] = 1.637795
 treatmentCostMultiplier["OncoSim-breast"] = 1.145763
-treatmentCostMultiplier["OncoSim-lung"] = 3.004773 #SETTING AT 1 FOR NOW
+treatmentCostMultiplier["OncoSim-lung"] = 2.780313
 
 
 outputTables <- list()
@@ -53,7 +53,11 @@ outputTables["OncoSim-colorectal"] <- list(c(
 	"Colorectal_Cancer_StageDist_Table",
 	"Colorectal_Cancer_Screen_Table_By_FH",
 	"Colorectal_Cancer_Timing_Of_Last_Screen",
-	"ColorectalCancer_TreatmentCost_Table"
+	"ColorectalCancer_TreatmentCost_Table",
+	"Colorectal_Cancer_Cases_PASY_Table",
+	"Colorectal_Cancer_Survival_Table",
+	"Colorectal_Cancer_Costs_Table",
+	"Colorectal_Cancer_Outcomes_GASY_UP_Table"
 ))
 outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Cases_Table",
@@ -66,7 +70,8 @@ outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_ICER_Table_Discounted",
 	"Breast_Cancer_Screen_Outcome_Modality_Table",
 	"Breast_Cancer_Timing_Of_Last_Screen",
-	"Breast_Cancer_TreatmentCost_Table"
+	"Breast_Cancer_TreatmentCost_Table",
+	"Breast_Cancer_Table_By_Density"
 ))
 outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Cases_Table",
@@ -76,7 +81,10 @@ outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Smoking_Cessation_Table",
 	"Lung_Cancer_StageDist_Table",
 	"Lung_Cancer_Timing_Of_Last_Screen",
-	"LungCancer_TreatmentCost_Table"
+	"LungCancer_TreatmentCost_Table",
+	"Lung_Cancer_Survival_Table",
+	"Lung_Cancer_ScreenCases_Year_Table_Filtered",
+	"Lung_Cancer_Time_Table_ScreenCohort"
 ))
 
 generateModelParameters <- function(modelsToUse) {
@@ -166,7 +174,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	parameterTables = parameterTables[grepl("BaseCase", parameterTables$name), ]
+	#parameterTables = parameterTables[grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
 
 	#parameterTables = head(parameterTables, 1)

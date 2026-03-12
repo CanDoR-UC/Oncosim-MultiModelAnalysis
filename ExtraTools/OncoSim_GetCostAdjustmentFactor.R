@@ -1,8 +1,8 @@
 modelDigests = list()
-modelDigests["OncoSim-lung"] = "361bc9283e954a392aee3d4b0569aeb3"
-modelDigests["OncoSim-breast"] = "f3c2d5330103e5bc41c253256507db0c"
-modelDigests["OncoSim-colorectal"] = "0832127dd0045abd29bf6f1ca5941f23"
-modelDigests["OncoSim-allcancers"] = "fe7c0e930312efb7ab2087c9e88c1741"
+modelDigests["OncoSim-lung"] = "201e47e22502a6f0ec0593f7f539970c"
+modelDigests["OncoSim-breast"] = "7b6012a86dcbfce878eca24e4845736a"
+modelDigests["OncoSim-colorectal"] = "5af0eb8d41728e927b1e21e97f5434f1"
+modelDigests["OncoSim-allcancers"] = "c2cc80bad8c67abf432029f62682e97f"
 
 
 allCancerModelRuns = load_model(modelDigests["OncoSim-allcancers"][[1]])$ModelRuns
