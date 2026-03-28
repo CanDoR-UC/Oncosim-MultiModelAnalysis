@@ -302,7 +302,7 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-lung") {
-		calibratingCosts = TRUE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
+		calibratingCosts = FALSE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
 		if (!calibratingCosts) {
 			ReportYearPooled = scenario$get_param("ReportYearPooled")
 			ReportYearPooled$Start_value = 2025
@@ -363,13 +363,9 @@ SetParameters <- function(createdScenarios) {
 		costs[costs$Stage == "Small_cell_extensive", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 
-		print(costs)
-		print(stageOneRadio * stageRadioMultipliers$Small_Cell_Combined)
-		print(costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy)
-
 		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
 
-		costs[grepl("Surveillance", costs$Treatment_state), ]$Diagnostics = 21633.785
+		costs[grepl("Surveillance", costs$Treatment_state), ]$Diagnostics = 21633.785 # May disable
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 

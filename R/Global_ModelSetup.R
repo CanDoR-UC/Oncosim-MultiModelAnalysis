@@ -37,8 +37,8 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 ))
 
 treatmentCostMultiplier = list()
-treatmentCostMultiplier["OncoSim-colorectal"] = 1.637795
-treatmentCostMultiplier["OncoSim-breast"] = 1.145763
+treatmentCostMultiplier["OncoSim-colorectal"] = 1.597179
+treatmentCostMultiplier["OncoSim-breast"] = 1
 treatmentCostMultiplier["OncoSim-lung"] = 3
 
 
