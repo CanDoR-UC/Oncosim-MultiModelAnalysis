@@ -48,6 +48,34 @@ participationData <- combinedTables$Participation
  - Overall interpretation: MCED is best suited to cancer types with insufficient screening, or when the tests have worse sensitivity/sensitivity. Lung cancer shows that underscreened types benefit, but well-screened types like breast will see a worsening of outcomes.
 
 
+## Participation
+
+```{r}
+#| echo: false
+#| warning: false
+library(kableExtra)
+
+kableExtra::kable(
+  participationData %>%
+    filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+    ungroup() %>%
+    mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
+    select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
+)
+
+kableExtra::kable(
+  participationData %>%
+    filter(Shiftable_year %in% c(2020, 2025, 2035, 2045), grepl("50_2_", sce) & grepl("Galleri", sce) | grepl("BaseCase", sce)) %>%
+    ungroup() %>%
+    mutate(percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years, accuracy = 0.1)) %>%
+    select(Shiftable_year, participation, cancertype, percentScreenedWithin2Years) %>%
+    pivot_wider(values_from = percentScreenedWithin2Years, names_from = Shiftable_year)
+)
+
+
+```
+
+
 
 ## Total Screens (Calibration)
 

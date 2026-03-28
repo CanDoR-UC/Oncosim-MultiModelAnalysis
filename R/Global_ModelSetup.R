@@ -39,7 +39,7 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 treatmentCostMultiplier = list()
 treatmentCostMultiplier["OncoSim-colorectal"] = 1.637795
 treatmentCostMultiplier["OncoSim-breast"] = 1.145763
-treatmentCostMultiplier["OncoSim-lung"] = 2.780313
+treatmentCostMultiplier["OncoSim-lung"] = 3
 
 
 outputTables <- list()
@@ -84,7 +84,8 @@ outputTables["OncoSim-lung"] <- list(c(
 	"LungCancer_TreatmentCost_Table",
 	"Lung_Cancer_Survival_Table",
 	"Lung_Cancer_ScreenCases_Year_Table_Filtered",
-	"Lung_Cancer_Time_Table_ScreenCohort"
+	"Lung_Cancer_Time_Table_ScreenCohort",
+	"LungCancer_TreatmentCostPhase_Table" # Will want to add for other types
 ))
 
 generateModelParameters <- function(modelsToUse) {
@@ -174,7 +175,7 @@ generateModelParameters <- function(modelsToUse) {
 
 	print(nrow(parameterTables))
 
-	#parameterTables = parameterTables[grepl("BaseCase", parameterTables$name), ]
+	parameterTables = parameterTables[grepl("BaseCase", parameterTables$name), ]
 	#parameterTables = parameterTables[grepl("NonMCED", parameterTables$name), ]
 
 	#parameterTables = head(parameterTables, 1)

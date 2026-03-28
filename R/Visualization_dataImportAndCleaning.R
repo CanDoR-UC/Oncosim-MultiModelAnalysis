@@ -16,7 +16,7 @@ getOncoSimTables <- function(tableName, modelType) {
 
 	totalTable = data.frame()
 	for (scenario in allScenarioNames) {
-		if (grepl(modelType, scenario)) {
+		if (grepl(modelType, scenario) & file.exists(file.path(scenario, tableName))) {
 			currentTable = read.csv(file.path(scenario, tableName))
 			name = strsplit(scenario, paste("OncoSim-", modelType, "_", sep = ""))[[1]][2]
 			currentTable$sce = name

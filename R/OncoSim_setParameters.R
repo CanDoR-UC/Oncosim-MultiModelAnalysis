@@ -302,7 +302,7 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-lung") {
-		calibratingCosts = FALSE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
+		calibratingCosts = TRUE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
 		if (!calibratingCosts) {
 			ReportYearPooled = scenario$get_param("ReportYearPooled")
 			ReportYearPooled$Start_value = 2025
@@ -363,13 +363,13 @@ SetParameters <- function(createdScenarios) {
 		costs[costs$Stage == "Small_cell_extensive", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 
-		#2022 vs 2008
-		cpiMultiplier = 138 / 108.8 #https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000501&pickMembers%5B0%5D=1.2&cubeTimeFrame.startYear=2008&cubeTimeFrame.endYear=2025&referencePeriods=20080101%2C20250101
-
-		otherColumnsToAdjust = c("Diagnostics", "Hospital", "Physician", "Other_institution", "Other_professional", "Other", "Radiotherapy", "Drug")
-		costs[, names(costs) %in% otherColumnsToAdjust] = costs[, names(costs) %in% otherColumnsToAdjust] * cpiMultiplier
+		print(costs)
+		print(stageOneRadio * stageRadioMultipliers$Small_Cell_Combined)
+		print(costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy)
 
 		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
+
+		costs[grepl("Surveillance", costs$Treatment_state), ]$Diagnostics = 21633.785
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 

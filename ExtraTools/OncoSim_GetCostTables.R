@@ -27,7 +27,7 @@ baseCaseLungCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_
 
 
 defaultLungCostFiltered = bind_rows(defaultLungCost, baseCaseLungCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
 	summarize(AverageTreatmentCost = sum(Cost) / max(Number_of_patients_treated), .by = c("Stage_at_diagnosis_or_recurrence", "Type")) %>%
 	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
@@ -41,7 +41,7 @@ baseCaseBreastCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-bre
 
 
 defaultBreastCostFiltered = bind_rows(defaultBreastCost, baseCaseBreastCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
 	mutate(Number_of_patients = Treatment_cost / Average_treatm_x_r_person_year) %>%
 	summarize(AverageTreatmentCost = sum(Treatment_cost) / max(Number_of_patients), .by = c("Stage", "Type")) %>%
@@ -55,7 +55,7 @@ baseCaseColorectalCost = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim
 
 
 defaultColorectalCostFiltered = bind_rows(defaultColorectalCost, baseCaseColorectalCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2022) %>%
+	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
 	mutate(Treatment_cost = Average_treatm_x_patient_treated * Number_of_patients_treated) %>%
 	mutate(Treatment_cost = ifelse(Number_of_patients_treated == 0, 0, Treatment_cost)) %>%
