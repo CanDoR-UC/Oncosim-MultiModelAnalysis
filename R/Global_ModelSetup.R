@@ -57,7 +57,10 @@ outputTables["OncoSim-colorectal"] <- list(c(
 	"Colorectal_Cancer_Cases_PASY_Table",
 	"Colorectal_Cancer_Survival_Table",
 	"Colorectal_Cancer_Costs_Table",
-	"Colorectal_Cancer_Outcomes_GASY_UP_Table"
+	"Colorectal_Cancer_Outcomes_GASY_UP_Table",
+	"Population_Year_Table",
+	"mgCanadiansPerCase",
+	"mgPopulation"
 ))
 outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Cases_Table",
@@ -71,7 +74,13 @@ outputTables["OncoSim-breast"] <- list(c(
 	"Breast_Cancer_Screen_Outcome_Modality_Table",
 	"Breast_Cancer_Timing_Of_Last_Screen",
 	"Breast_Cancer_TreatmentCost_Table",
-	"Breast_Cancer_Table_By_Density"
+	"Breast_Cancer_Table_By_Density",
+	"Breast_Cancer_Cases_PAY_Table",
+	"Breast_Cancer_StageDist_Table",
+	"Breast_Cancer_Cost_ByStage_Table",
+	"Population_Year_Table",
+	"mgCanadiansPerCase",
+	"mgPopulation"
 ))
 outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Cases_Table",
@@ -85,7 +94,10 @@ outputTables["OncoSim-lung"] <- list(c(
 	"Lung_Cancer_Survival_Table",
 	"Lung_Cancer_ScreenCases_Year_Table_Filtered",
 	"Lung_Cancer_Time_Table_ScreenCohort",
-	"LungCancer_TreatmentCostPhase_Table" # Will want to add for other types
+	"LungCancer_TreatmentCostPhase_Table",
+	"Population_Year_Table",
+	"mgCanadiansPerCase",
+	"mgPopulation"
 ))
 
 generateModelParameters <- function(modelsToUse) {
