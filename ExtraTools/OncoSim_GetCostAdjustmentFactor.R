@@ -50,13 +50,13 @@ breastRatio = referenceBreastValue / breastValue$averageCostPer
 # THIS METHODOLOGY DIFFERS!!!!!! This value will not be inputted directly into the model
 
 #NOTE. Because we are using some modified costs for the lung model, we need to re-import the tables. This should eventually equal 1
-defaultLungICER = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_BaseCase/Lung_Cancer_ICER_Table.csv")
-defaultLungCases = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_BaseCase/Lung_Cancer_Cases_Table.csv")
+#defaultLungICER = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_BaseCase/Lung_Cancer_ICER_Table.csv")
+#defaultLungCases = read.csv("Output/Runs/AutomatedRun_ MCEDProject OncoSim-lung_BaseCase/Lung_Cancer_Cases_Table.csv")
 
 lungModelRuns = load_model(modelDigests["OncoSim-lung"][[1]])$ModelRuns
 defaultLung = load_run(modelDigests["OncoSim-lung"][[1]], lungModelRuns$RunDigest[lungModelRuns$Name == "Default_first_run_48M_cases_12_subs"])
-#defaultLungICER = defaultLung$get_table("Lung_Cancer_ICER_Table")
-#defaultLungCases = defaultLung$get_table("Lung_Cancer_Cases_Table")
+defaultLungICER = defaultLung$get_table("Lung_Cancer_ICER_Table")
+defaultLungCases = defaultLung$get_table("Lung_Cancer_Cases_Table")
 
 lungCost = defaultLungICER %>%
 	filter(Province == "all", lc_screen_participated_ever == "all", lc_cessation_p_x_rticipated_ever == "all", Shiftable_year %in% 2015:2051, expr_name %in% c("Cost_of_cancer_x_ent_treatment")) %>%

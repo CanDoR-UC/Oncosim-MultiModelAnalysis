@@ -9,16 +9,16 @@ purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
 analysisName = "MCEDProject"
 
-modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")[1]
+modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")
 
-actuallyRun = TRUE
+actuallyRun = FALSE
 
 tar_option_set(packages = c("openmpp", "tidyverse"), workspace_on_error = TRUE)
 
 
 list(
 	tar_target(models, modelsToUse),
-	tar_target(scenarioSpecifications, generateModelParameters(models)),
+	tar_target(scenarioSpecifications, generateModelParameters(models)), #49 per model
 	tar_target(scenarioSpecificationsSplit, setNames(split(scenarioSpecifications, seq(nrow(scenarioSpecifications))), scenarioSpecifications$name)),
 	tar_target(createdScenarios, CreateScenario(scenarioSpecificationsSplit), pattern = map(scenarioSpecificationsSplit), iteration = "list"),
 	tar_target(parametersAltered, SetParameters(createdScenarios), pattern = map(createdScenarios), iteration = "list"),
