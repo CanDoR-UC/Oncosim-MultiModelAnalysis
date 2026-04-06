@@ -1,7 +1,7 @@
 ---
 title: "Should we use Multi-Cancer Early Detection Testing in Canada?"
 author: "John Hutchinson - Thesis Project"
-format: docx
+format: html
 ---
 
 
@@ -93,7 +93,7 @@ visualizeTotals(MCEDScreenNum %>% filter(sce %in% scenariosToVisualize), "Total_
 ## Efficiency Frontier
 
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=12,fig.height=12}
 #| echo: false
 #| warning: false
 
@@ -105,11 +105,21 @@ for (type in c("Breast", "Colorectal", "Lung", "Combined")) {
       filter(testType != "NonMCED"),
     type
   ))
+  print(efficiencyPlots[type][[1]] + theme(legend.position = "top"))
 }
+
+
+```
+
+```{r,fig.width=16,fig.height=14}
+#| echo: false
+#| warning: false
+
 print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 
 
 ```
+
 
 - Breast does not seem to benefit from MCED at all
 - Otherwise, several scenarios lead to cost efficiency when person years are the main metric examined
@@ -117,7 +127,7 @@ print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 ## Breast
 
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=16,fig.height=16}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Breast")
@@ -132,7 +142,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Colorectal
 
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=16,fig.height=16}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Colorectal")
@@ -146,7 +156,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Lung
 
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=16,fig.height=16}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Lung")
@@ -159,19 +169,19 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Combined
 
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=16,fig.height=12}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")
 
 ```
 
-- Beside the NonMCED scenario, CancerSeek 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
+- Beside the NonMED scenario, CancerSeek 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
 
 
 ## Linear Modelling
 
-```{r,fig.width=16,fig.height=14}
+```{r,fig.width=12,fig.height=12}
 #| echo: false
 #| warning: false
 

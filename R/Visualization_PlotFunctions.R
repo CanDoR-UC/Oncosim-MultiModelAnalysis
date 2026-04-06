@@ -288,11 +288,21 @@ generateMaxToUse <- function(values) {
 }
 
 visualizeSpecificCancerType <- function(totalData, typeToShow) {
-	currentDataToVisualize <- totalData %>%
-		filter(cancertype == typeToShow, testType != "BaseCase") %>%
-		#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
-		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_DetectedCases, ICER_PersonYears, Health_adjusted_person_years_Diff)) %>%
-		filter(!is.na(value))
+	rowCount = 4
+	if (typeToShow != "Combined") {
+		currentDataToVisualize <- totalData %>%
+			filter(cancertype == typeToShow, testType != "BaseCase") %>%
+			#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
+			pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, Health_adjusted_person_years_Diff, Person_years_Diff, ICER_DetectedCases, ICER_PersonYears, ICER_HAPY)) %>%
+			filter(!is.na(value))
+	} else {
+		currentDataToVisualize <- totalData %>%
+			filter(cancertype == typeToShow, testType != "BaseCase") %>%
+			#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
+			pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, Person_years_Diff, ICER_DetectedCases, ICER_PersonYears)) %>%
+			filter(!is.na(value))
+		rowCount = 3
+	}
 
 	plotsToCombine <- list()
 
@@ -301,11 +311,14 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	if (typeToShow != "Combined") {
 		variableNames["Health_adjusted_person_years_Diff"] = "Difference in Health\nAdjusted Person Years"
 	}
+	variableNames["Person_years_Diff"] = "Difference in Person Years"
 
 	variableNames["ICER_ReducedDeaths"] = "Difference in Cost Per\nReduction in Cancer Deaths"
 	variableNames["Cancer_Deaths_Diff"] = "Difference in Cancer Deaths"
 	variableNames["ICER_DetectedCases"] = "Difference in Cost Per\nAdditional Detection"
 	variableNames["ICER_PersonYears"] = "Difference in Cost Per\nAdditional Person Year"
+	variableNames["ICER_HAPY"] = "Difference in Cost Per Additional\nHealth Adjusted Person Year"
+
 	variableNames["Total_Cost_Diff"] = "Difference in Total Cost"
 
 	plotCount = 1
@@ -328,16 +341,19 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 				scale_x_discrete("") +
 				scale_fill_manual("Test Type", values = colours) +
 				theme(axis.text.x = textTheme) +
+				geom_hline(aes(yintercept = 0), linetype = 2) +
 				ggtitle(variableName)
 		)
 		plotCount = plotCount + 1
 	}
-	ggarrange(plotlist = plotsToCombine, common.legend = TRUE, nrow = 3, ncol = 2)
+	ggarrange(plotlist = plotsToCombine, common.legend = TRUE, nrow = rowCount, ncol = 2)
 }
 
 visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) {
+	cancerType = "Combined"
+
 	currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == "Combined", testType %in% c(testToShow, "BaseCase"))
+		filter(cancertype == cancerType, testType %in% c(testToShow, "BaseCase"))
 
 	currentTable$Label <- paste("Freq: ", currentTable$frequency, " Years", sep = "")
 	currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
@@ -369,18 +385,20 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 		}
 	}
 
+	write.csv(linearRegressionResults, paste("Tables/RegressionResults_", testToShow, "_", cancerType, ".csv", sep = ""))
+
 	ggplot(
 		currentTable %>% filter(testType == testToShow),
 		aes(x = ExposureVar, y = OutcomeVar, colour = Label)
 	) +
-		geom_point() +
-		scale_colour_manual("Interval", values = colours) +
-		geom_smooth(method = "lm", aes(linetype = minAge)) +
-		scale_y_continuous(outcomeTitle, label = scales::number) +
-		scale_x_continuous(exposureTitle, label = scales::number) +
+		geom_point(size = 2) +
+		geom_smooth(method = "lm", aes(linetype = minAge), se = FALSE, linewidth = 2) +
+		scale_y_continuous(outcomeTitle, label = scales::comma, expand = c(0, 0)) +
+		scale_x_continuous(exposureTitle, label = scales::comma) +
 		geom_hline(yintercept = baseCaseValue) +
-		geom_text_repel(data = linearRegressionResults, aes(label = scales::number(BaseCaseIntercept, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir", size = 8) +
-		theme_minimal(16, "Avenir") +
+		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir", size = 6, colour = "black") +
+		scale_colour_manual("Interval", values = colours) +
+		theme_minimal(20, "Avenir") +
 		scale_linetype_discrete("Minimum Age") +
 		ggtitle(testToShow)
 }

@@ -298,6 +298,7 @@ combineModelTables <- function(importedData) {
 	cancerMetricsTableCombinedYears$ICER_ReducedDeaths = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Cancer_Deaths_Diff * -1)
 	cancerMetricsTableCombinedYears$ICER_DetectedCases = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Detected_Cases_Diff)
 	cancerMetricsTableCombinedYears$ICER_PersonYears = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Person_years_Diff)
+	cancerMetricsTableCombinedYears$ICER_HAPY = cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Health_adjusted_person_years_Diff)
 
 	#One row per set of years
 	if (!(nrow(cancerMetricsTableCombinedYears) * length(yearsToFilterWith) == nrow(cancerMetricsTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {
