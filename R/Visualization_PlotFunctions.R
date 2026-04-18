@@ -233,7 +233,7 @@ visualizeFrontier <- function(frontierData, type) {
 				y = 1.000005 * yVar #,
 				#	colour = ToVisualize
 			),
-			size = 3.5,
+			size = 5,
 			family = "Nunito",
 			colour = "black"
 		) +
@@ -248,7 +248,8 @@ visualizeFrontier <- function(frontierData, type) {
 		scale_shape_discrete("Test Type") +
 		scale_colour_manual("", values = colours) +
 		theme_minimal(16, "Nunito") +
-		ggtitle(type)
+		ggtitle(type) +
+		guides(colour = guide_legend(nrow = 2, byrow = TRUE), shape = guide_legend(nrow = 2, byrow = TRUE))
 }
 
 visualizePoints <- function(totalData, x_var, y_var) {

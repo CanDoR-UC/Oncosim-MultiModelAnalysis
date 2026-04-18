@@ -257,11 +257,11 @@ Parameter|Description|Planned Values|
 library(kableExtra)
 
 kableExtra::kable(
-  participationData %>%
-    filter(Shiftable_year == 2024, sce == "BaseCase") %>%
-    ungroup() %>%
-    mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
-    select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
+	participationData %>%
+		filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+		ungroup() %>%
+		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
+		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
 )
 ```
 
@@ -331,9 +331,9 @@ visualizeSpecificCancerType(totalData, "Lung")
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "NonMCED"),
-  "Breast"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "NonMCED"),
+	"Breast"
 )
 
 ```
@@ -345,9 +345,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "NonMCED"),
-  "Colorectal"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "NonMCED"),
+	"Colorectal"
 )
 
 ```
@@ -360,9 +360,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "NonMCED"),
-  "Lung"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "NonMCED"),
+	"Lung"
 )
 
 ```
@@ -375,9 +375,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "NonMCED"),
-  "Combined"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "NonMCED"),
+	"Combined"
 )
 
 ```
