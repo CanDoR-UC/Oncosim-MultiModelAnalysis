@@ -46,7 +46,7 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`4` = 0
 		}
 		screen_param$`18` = c(0, 1, 2010, 2024, 50, 74, 123, baseCaseParticipationValue, 1, 0, 99, newParticipationValue, 4)
-		screen_param$`19` = c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "NonMCED", 5, 4))
+		screen_param$`19` = c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "Non-MC", 5, 4))
 
 		scenario$set_param("CrcScreenRecruitCanada", screen_param)
 
@@ -59,7 +59,7 @@ SetParameters <- function(createdScenarios) {
 			timeToReturn[[1]] <- 0
 			scenario$set_param("TimeToRegularScreeningAfterColonoscopy", timeToReturn)
 
-			if (currentParameters$type != "NonMCED") {
+			if (currentParameters$type != "Non-MC") {
 				#Set MCED Cost
 				costs <- scenario$get_param("CrcScreenCostCanada")
 				costs$FOBT_KIT <- currentParameters$cost
@@ -93,7 +93,7 @@ SetParameters <- function(createdScenarios) {
 
 			modality_param$B[
 				modality_param$Screening_modality_plan == 'Modality'
-			] <- ifelse(currentParameters$type != "NonMCED", 1, 2) #For MCED scenarios, hack the FOBT modality. Otherwise, leave as 2
+			] <- ifelse(currentParameters$type != "Non-MC", 1, 2) #For MCED scenarios, hack the FOBT modality. Otherwise, leave as 2
 
 			#Enable MCED starting in 2025
 			modality_param$B[
@@ -106,7 +106,7 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("CrcScreenPlanCanada", modality_param)
 
-			if (currentParameters$type != "NonMCED") {
+			if (currentParameters$type != "Non-MC") {
 				#Altering effectiveness to emulate MCED
 				fit_param <- scenario$get_param("CrcTestPositivitySuccinct")
 				# 1-Specificity for "No polyp or cancer" and all others. If a polyp is detected, this is a false positive. Sensitivity for cancer
@@ -155,7 +155,7 @@ SetParameters <- function(createdScenarios) {
 		scenario$set_param("BreastCancerCosts2", cost_2)
 
 		if (currentParameters$type != "BaseCase") {
-			if (currentParameters$type != "NonMCED") {
+			if (currentParameters$type != "Non-MC") {
 				costs <- scenario$get_param("BreastScreeningCosts")
 				costs[
 					costs$Breast_screening_modalities == "Alternative_modality_E",
@@ -217,7 +217,7 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`5`[
 				futureScreeningEra &
 					screen_param$BREAST_SCREENI_x_CHARACTERISTICS == 'BREAST_SCREENI_x_RTING_APPARATUS'
-			] <- ifelse(currentParameters$type != "NonMCED", 8, 0) #Alt modality E if MCED. Default otherwise
+			] <- ifelse(currentParameters$type != "Non-MC", 8, 0) #Alt modality E if MCED. Default otherwise
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -253,7 +253,7 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("BreastScreeningProtocolDispatcher", screen_param)
 
-			if (currentParameters$type != "NonMCED") {
+			if (currentParameters$type != "Non-MC") {
 				specificity_param <- scenario$get_param("BreastScreeningSpecificityNew")
 				specificity = currentParameters$specificity
 				specificity_param[
@@ -381,7 +381,7 @@ SetParameters <- function(createdScenarios) {
 
 			scenario$set_param("LcScreenEligibilityRiskThreshold", LcScreenEligibilityRiskThreshold)
 
-			if (currentParameters$type != "NonMCED") {
+			if (currentParameters$type != "Non-MC") {
 				LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
 				LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
 				LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0

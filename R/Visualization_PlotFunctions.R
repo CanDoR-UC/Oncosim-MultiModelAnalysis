@@ -1,5 +1,5 @@
 dateRangeToShow <- 2020:2051
-scenariosToVisualize <- c("50_3_70_CancerSeek", "50_3_70_Galleri", "50_3_70_NonMCED", "45_2_90_CancerSeek", "45_2_90_Galleri", "45_2_90_NonMCED", "BaseCase")
+scenariosToVisualize <- c("50_3_70_MCC", "50_3_70_MCG", "50_3_70_Non-MC", "45_2_90_MCC", "45_2_90_MCG", "45_2_90_Non-MC", "BaseCase")
 
 colours <- list()
 
@@ -11,13 +11,13 @@ colours["Combined"] <- "#B28CD6"
 colours["Visualized"] <- "#1c9326"
 colours["Not Visualized"] <- "#000000"
 
-colours["Freq: 2 Years"] <- "#00394c"
-colours["Freq: 3 Years"] <- "#00ace6"
+colours["Interval: 2 Years"] <- "#00394c"
+colours["Interval: 3 Years"] <- "#00ace6"
 
 
-colours["Cost-efficient"] = "#1c9326"
-colours["Rejected due to dominance"] = "#c52929"
-colours["Rejected due to extended dominance"] = "#d1a237"
+colours["Cost-efficient"] <- "#1c9326"
+colours["Rejected due to dominance"] <- "#c52929"
+colours["Rejected due to extended dominance"] <- "#d1a237"
 
 ascendingStageColours <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026") #brewer.pal(5, name = "YlOrRd")
 
@@ -31,10 +31,12 @@ colours["Limited (Small Cell Lung)"] <- "#818BBB"
 colours["Extensive (Small Cell Lung)"] <- "#741C6D"
 
 
-colours["CancerSeek"] = "#ac5ed6"
-colours["Galleri"] = "#b89536"
-colours["NonMCED"] = "#a6a6a6"
+colours["MCC"] <- "#c47aec"
+colours["MCG"] <- "#d1ab43"
+colours["Non-MC"] <- "#bbbbbb"
 
+
+fontFam <- "Atkinson Hyperlegible"
 
 visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
 	dataset$ColumnToShow <- dataset[[variable]]
@@ -49,16 +51,16 @@ visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
+			theme(text = element_text(family = fontFam, size = 20))
 	)
 }
 
 visualizeParticipation <- function(dataset) {
-	plotList = list()
+	plotList <- list()
 
-	dataset$Label = paste(dataset$minAge, dataset$testType, sep = "\n")
+	dataset$Label <- paste(dataset$minAge, dataset$testType, sep = "\n")
 
-	twoYearData = dataset %>% filter(grepl("_2_", sce) | grepl("BaseCase", sce))
+	twoYearData <- dataset %>% filter(grepl("_2_", sce) | grepl("BaseCase", sce))
 	leftPlot <- ggplot(twoYearData, aes(x = Shiftable_year, y = percentScreenedWithin2Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
@@ -73,9 +75,9 @@ visualizeParticipation <- function(dataset) {
 		geom_hline(yintercept = 0.3, linetype = "dashed", colour = "blue") +
 		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
 		theme_minimal() +
-		theme(text = element_text(family = "Avenir", size = 20))
+		theme(text = element_text(family = fontFam, size = 20))
 
-	threeYearData = dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce))
+	threeYearData <- dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce))
 	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
@@ -90,43 +92,77 @@ visualizeParticipation <- function(dataset) {
 		geom_hline(yintercept = 0.3, linetype = "dashed", colour = "blue") +
 		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
 		theme_minimal() +
-		theme(text = element_text(family = "Avenir", size = 20))
+		theme(text = element_text(family = fontFam, size = 20))
 
 	ggarrange(leftPlot, rightPlot, nrow = 1)
 }
 
 
-formatNumber <- function(values) {
-	billion = 1000000000
-	million = 1000000
-	thousand = 1000
-	medianValue = median(abs(values[!is.na(values)]))
-	if (medianValue > billion / 10) {
-		return(scales::comma(values / billion, accuracy = 0.1, suffix = "B"))
-	} else if (medianValue > million / 10) {
-		return(scales::comma(values / million, accuracy = 0.1, suffix = "M"))
-	} else if (medianValue > thousand / 10) {
-		return(scales::comma(values / thousand, accuracy = 0.1, suffix = "K"))
-	}
-	return(scales::comma(values, accuracy = 0.1))
-}
+formatNumber <- function(values, facetVar = NULL) {
+	toReturn <- c()
 
+	formatItems <- list()
+	formatItems["B"] <- 1000000000
+	formatItems["M"] <- 1000000
+	formatItems["K"] <- 1000
+	formatItems[""] <- 0
+
+	for (item in values) {
+		for (potentialFormat in names(formatItems)) {
+			absValue <- abs(item)
+			currentDivide <- ifelse(potentialFormat == "", 0, formatItems[potentialFormat][[1]])
+			if (!is.na(item)) {
+				if (absValue >= currentDivide) {
+					currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 0.1, suffix = potentialFormat)
+					if (nchar(currentVal) > 5 | potentialFormat == "") {
+						currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 1, suffix = potentialFormat)
+					}
+
+					toReturn <- c(toReturn, currentVal)
+					break
+				}
+			} else {
+				toReturn <- c(toReturn, NA)
+				break
+			}
+		}
+	}
+	#if (!is.null(facetVar)) {
+	#		toReturn[grepl("Cost", facetVar)] = paste("$", toReturn[grepl("Cost", facetVar)], sep = "")#
+	#}
+
+	return(toReturn)
+}
+formatBarPosition <- function(allValues, facetVar) {
+	toReturn <- allValues
+	for (name in unique(facetVar)) {
+		values <- allValues[facetVar == name]
+		maxValue <- max(abs(values))
+		cutOffValue <- maxValue / 8
+		newValue <- cutOffValue * 1.2
+
+		currentReturn <- c()
+		for (value in values) {
+			if (abs(value) > cutOffValue) {
+				currentReturn <- c(currentReturn, value / 2)
+			} else {
+				currentReturn <- c(currentReturn, ifelse(value >= 0, newValue, -1 * newValue))
+			}
+		}
+		toReturn[facetVar == name] <- currentReturn
+	}
+	toReturn
+}
 
 visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 	dataset$ColumnToShow <- dataset[[variable]]
 	dataset$Type <- ifelse(dataset$cancertype == "Combined", "Combined", "Cancer Types")
 
-	position = "dodge"
-	text_position = position_dodge(width = 0.9)
-	text_position_divide = 2
-	if (abs(sum(dataset$ColumnToShow[dataset$Type == "Combined"]) - sum(dataset$ColumnToShow[dataset$Type != "Combined"])) < 1) {
-		dataset = dataset %>% filter(Type != "Combined")
-		position = "stack"
-		text_position = position_stack(vjust = 0.5)
-		text_position_divide = 1
-	}
+	position <- "dodge"
+	text_position <- position_dodge(width = 0.9)
+	text_position_divide <- 2
 
-	dataset$formattedName_NoTest[dataset$testType == "BaseCase"] = "BaseCase"
+	dataset$formattedName_NoTest[dataset$testType == "BaseCase"] <- "BaseCase"
 
 	return(
 		ggplot(dataset, aes(x = formattedName_NoTest, y = ColumnToShow, fill = cancertype)) +
@@ -136,11 +172,11 @@ visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 			scale_x_discrete("Scenario") +
 			scale_y_continuous(yAxisTitle, labels = scales::comma) +
 			scale_fill_manual("Cancer Type", values = colours) +
-			geom_text(aes(label = formatNumber(ColumnToShow), y = ColumnToShow / text_position_divide), colour = "black", family = "Avenir", size = 8, position = text_position) +
+			geom_text_repel(aes(label = formatNumber(ColumnToShow), y = ColumnToShow / text_position_divide), colour = "black", family = fontFam, size = 8, position = text_position) +
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 25))
+			theme(text = element_text(family = fontFam, size = 25))
 	)
 }
 
@@ -155,7 +191,7 @@ visualizeStages <- function(dataset) {
 			expand_limits(y = 0) +
 			ggtitle("Stage Distribution") +
 			theme_minimal() +
-			theme(text = element_text(family = "Avenir", size = 20))
+			theme(text = element_text(family = fontFam, size = 20))
 	)
 }
 
@@ -164,22 +200,22 @@ visualizeFrontier <- function(frontierData, type) {
 		mutate(Type = "Cost-efficient", ToVisualize = ifelse(sce %in% scenariosToVisualize, "Visualized", "Not Visualized")) %>%
 		filter(cancertype == type)
 
-	variableToUse = "Person_years"
+	variableToUse <- "Person_years"
 
 	if (variableToUse == "HAPY_PerPerson_WithDeaths") {
-		yLabel = "Health Adjusted Person Years Per Person (+ Deaths)"
+		yLabel <- "Health Adjusted Person Years Per Person (+ Deaths)"
 	}
 	if (variableToUse == "HAPY_PerPerson") {
-		yLabel = "Health Adjusted Person Years Per Person"
+		yLabel <- "Health Adjusted Person Years Per Person"
 	}
 	if (variableToUse == "Health_adjusted_person_years") {
-		yLabel = "Health Adjusted Person Years"
+		yLabel <- "Health Adjusted Person Years"
 	}
 	if (variableToUse == "Person_years") {
-		yLabel = "Person Years"
+		yLabel <- "Person Years"
 	}
 
-	frontierData$yVar = frontierData[[variableToUse]]
+	frontierData$yVar <- frontierData[[variableToUse]]
 
 	frontierData <- frontierData[order(frontierData$Total_Cost), ]
 
@@ -197,9 +233,9 @@ visualizeFrontier <- function(frontierData, type) {
 				frontierData$Total_Cost[r - 1]
 		}
 
-		dominanceType = "Rejected due to extended dominance"
+		dominanceType <- "Rejected due to extended dominance"
 		if (frontierCount == 1) {
-			dominanceType = "Rejected due to dominance"
+			dominanceType <- "Rejected due to dominance"
 		}
 		frontierDominated <- bind_rows(
 			frontierDominated,
@@ -219,42 +255,46 @@ visualizeFrontier <- function(frontierData, type) {
 	}
 
 	frontierPlotData <- bind_rows(frontierData, frontierDominated)
-	million <- 1000000
+	billion <- 1000000000
 
-	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", frontierPlotData$formattedName, "")
+	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
+	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar)), "")
+	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
+
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
 
-	ggplot(frontierPlotData, aes(y = yVar, x = Total_Cost / million, colour = Type, shape = testType)) +
+	ggplot(frontierPlotData, aes(y = yVar, x = Total_Cost / billion, colour = Type, shape = testType)) +
 		geom_point(size = 5) +
 		geom_line(data = frontierData %>% filter(Type == "Cost-efficient"), aes(group = Type), colour = "black", size = 2) +
 		geom_label_repel(
 			aes(
 				label = Labels,
+				force = 5,
 				y = 1.000005 * yVar #,
 				#	colour = ToVisualize
 			),
-			size = 5,
-			family = "Nunito",
+			size = 4,
+			family = fontFam,
 			colour = "black"
 		) +
 		scale_y_continuous(
 			yLabel,
-			labels = scales::comma
+			labels = scales::comma,
 		) +
 		scale_x_continuous(
-			"Total Screening and Treatment Cost (Millions $CAD)",
+			"Total Screening and Treatment Cost (Billions $CAD)",
 			labels = scales::dollar
 		) +
 		scale_shape_discrete("Test Type") +
 		scale_colour_manual("", values = colours) +
-		theme_minimal(16, "Nunito") +
+		theme_minimal(16, fontFam) +
 		ggtitle(type) +
 		guides(colour = guide_legend(nrow = 2, byrow = TRUE), shape = guide_legend(nrow = 2, byrow = TRUE))
 }
 
 visualizePoints <- function(totalData, x_var, y_var) {
-	totalData$x = totalData[[x_var]]
-	totalData$y = totalData[[y_var]]
+	totalData$x <- totalData[[x_var]]
+	totalData$y <- totalData[[y_var]]
 
 	ggplot(totalData, aes(y = y, x = x, colour = testType)) +
 		geom_point(size = 3) +
@@ -272,24 +312,24 @@ visualizePoints <- function(totalData, x_var, y_var) {
 		) +
 		scale_shape_discrete("Test Type") +
 		scale_colour_discrete("") +
-		theme_minimal(13, "Nunito")
+		theme_minimal(13, fontFam)
 }
 
 generateMaxToUse <- function(values) {
-	maximumVal = max(values, na.rm = TRUE)
-	secondMax = max(values[values != maximumVal], na.rm = TRUE)
+	maximumVal <- max(values, na.rm = TRUE)
+	secondMax <- max(values[values != maximumVal], na.rm = TRUE)
 
-	valueToUseAsMax = maximumVal
+	valueToUseAsMax <- maximumVal
 
 	if (maximumVal > secondMax * 5) {
-		valueToUseAsMax = secondMax
+		valueToUseAsMax <- secondMax
 	}
 
 	return(valueToUseAsMax)
 }
 
 visualizeSpecificCancerType <- function(totalData, typeToShow) {
-	rowCount = 4
+	rowCount <- 4
 	if (typeToShow != "Combined") {
 		currentDataToVisualize <- totalData %>%
 			filter(cancertype == typeToShow, testType != "BaseCase") %>%
@@ -302,61 +342,51 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 			#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
 			pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, Person_years_Diff, ICER_DetectedCases, ICER_PersonYears)) %>%
 			filter(!is.na(value))
-		rowCount = 3
+		rowCount <- 3
 	}
 
 	plotsToCombine <- list()
 
-	variableNames = list()
-	variableNames["Detected_Cases_Diff"] = "Difference in Detected Cases"
+	variableNames <- list()
+	variableNames["Detected_Cases_Diff"] <- "Difference in Detected Cases"
+	variableNames["Cancer_Deaths_Diff"] <- "Difference in Cancer Deaths"
+	variableNames["Total_Cost_Diff"] <- "Difference in Total Cost"
 	if (typeToShow != "Combined") {
-		variableNames["Health_adjusted_person_years_Diff"] = "Difference in Health\nAdjusted Person Years"
+		variableNames["Health_adjusted_person_years_Diff"] <- "Difference in Health\nAdjusted Person Years"
 	}
-	variableNames["Person_years_Diff"] = "Difference in Person Years"
+	variableNames["Person_years_Diff"] <- "Difference in Person Years"
 
-	variableNames["ICER_ReducedDeaths"] = "Difference in Cost Per\nReduction in Cancer Deaths"
-	variableNames["Cancer_Deaths_Diff"] = "Difference in Cancer Deaths"
-	variableNames["ICER_DetectedCases"] = "Difference in Cost Per\nAdditional Detection"
-	variableNames["ICER_PersonYears"] = "Difference in Cost Per\nAdditional Person Year"
-	variableNames["ICER_HAPY"] = "Difference in Cost Per Additional\nHealth Adjusted Person Year"
+	variableNames["ICER_DetectedCases"] <- "Difference in Cost Per\nAdditional Detection"
+	variableNames["ICER_ReducedDeaths"] <- "Difference in Cost Per\nReduction in Cancer Deaths"
+	variableNames["ICER_PersonYears"] <- "Difference in Cost Per\n100,000 Additional Person Years"
+	variableNames["ICER_HAPY"] <- "Difference in Cost Per Additional\n100,000 Health Adjusted Person Years"
 
-	variableNames["Total_Cost_Diff"] = "Difference in Total Cost"
+	dataToUse <- currentDataToVisualize %>% filter(name %in% names(variableNames))
 
-	plotCount = 1
-	for (variable in unique(currentDataToVisualize$name)) {
-		variableName <- variableNames[variable][[1]]
-
-		#if (plotCount %in% 1:4) {
-		#		textTheme = element_blank()
-		#} else {
-		textTheme = element_text()
-		#}
-		dataToUse = currentDataToVisualize %>% filter(name == variable)
-
-		plotsToCombine[variable] <- list(
-			ggplot(dataToUse, aes(x = formattedName_NoTest, y = value, fill = testType)) +
-				geom_bar(position = "dodge", stat = "identity") +
-				theme_minimal(24, "Avenir") +
-				geom_text(aes(label = formatNumber(value), y = value / 2), colour = "black", family = "Avenir", size = 7, position = position_dodge(width = 0.9)) +
-				scale_y_continuous("", label = formatNumber) +
-				scale_x_discrete("") +
-				scale_fill_manual("Test Type", values = colours) +
-				theme(axis.text.x = textTheme) +
-				geom_hline(aes(yintercept = 0), linetype = 2) +
-				ggtitle(variableName)
-		)
-		plotCount = plotCount + 1
+	for (name in names(variableNames)) {
+		dataToUse$name[dataToUse$name == name] <- variableNames[name][[1]]
 	}
-	ggarrange(plotlist = plotsToCombine, common.legend = TRUE, nrow = rowCount, ncol = 2)
+	dataToUse$name <- factor(dataToUse$name, levels = as.character(variableNames))
+
+	ggplot(dataToUse, aes(x = formattedName_NoTest, y = value, fill = testType, group = testType)) +
+		facet_wrap(vars(name), scales = "free_y", ncol = 2) +
+		geom_bar(position = "dodge", stat = "identity") +
+		theme_minimal(28, fontFam) +
+		geom_hline(aes(yintercept = 0), linetype = 2) +
+		geom_text(aes(label = formatNumber(value, name), y = formatBarPosition(value, name)), fill = "white", colour = "black", family = fontFam, size = 9, position = position_dodge(width = 0.9)) +
+		scale_y_continuous("", label = formatNumber) +
+		scale_x_discrete("") +
+		scale_fill_manual("Test Type", values = colours) +
+		theme(strip.text = element_text(size = 30), legend.position = "right")
 }
 
 visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) {
-	cancerType = "Combined"
+	cancerType <- "Combined"
 
 	currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
 		filter(cancertype == cancerType, testType %in% c(testToShow, "BaseCase"))
 
-	currentTable$Label <- paste("Freq: ", currentTable$frequency, " Years", sep = "")
+	currentTable$Label <- paste("Interval: ", currentTable$frequency, " Years", sep = "")
 	currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
 
 	currentTable$ExposureVar <- currentTable[[exposure]]
@@ -397,9 +427,9 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 		scale_y_continuous(outcomeTitle, label = scales::comma, expand = c(0, 0)) +
 		scale_x_continuous(exposureTitle, label = scales::comma) +
 		geom_hline(yintercept = baseCaseValue) +
-		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = "Avenir", size = 6, colour = "black") +
+		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = fontFam, size = 6, colour = "black") +
 		scale_colour_manual("Interval", values = colours) +
-		theme_minimal(20, "Avenir") +
+		theme_minimal(20, fontFam) +
 		scale_linetype_discrete("Minimum Age") +
 		ggtitle(testToShow)
 }

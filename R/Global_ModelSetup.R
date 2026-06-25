@@ -106,11 +106,11 @@ generateModelParameters <- function(modelsToUse) {
 
 	#https://www.galleri.com/patient/the-galleri-test/cost
 	# $949 USD ( $1,304.03 CAD)
-	testCosts["Galleri"] = 1304.03
+	testCosts["MCG"] = 1304.03
 
 	#https://www.cancerguard.com/
 	# $689 USD ($946.66 CAD)
-	testCosts["CancerSeek"] = 946.66
+	testCosts["MCC"] = 946.66
 
 	#Sensitivity THEN specificity
 	testPerformance = list()
@@ -118,22 +118,22 @@ generateModelParameters <- function(modelsToUse) {
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://www.annalsofoncology.org/article/S0923-7534(21)02046-9/fulltext CCGA3
 	# Using site-specific sensitivity and overall specificity
-	testPerformance["OncoSim-colorectal-Galleri"] = list(c(0.82, 0.995)) #Better than FIT (75)
-	testPerformance["OncoSim-breast-Galleri"] = list(c(0.305, 0.995))
-	testPerformance["OncoSim-lung-Galleri"] = list(c(0.748, 0.995))
+	testPerformance["OncoSim-colorectal-MCG"] = list(c(0.82, 0.995)) #Better than FIT (75)
+	testPerformance["OncoSim-breast-MCG"] = list(c(0.305, 0.995))
+	testPerformance["OncoSim-lung-MCG"] = list(c(0.748, 0.995))
 
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://pmc.ncbi.nlm.nih.gov/articles/PMC6080308/
 	# The specificity of CancerSEEK was greater than 99%
-	testPerformance["OncoSim-colorectal-CancerSeek"] = list(c(0.649, 0.99)) # Worse than FIT (75)
-	testPerformance["OncoSim-breast-CancerSeek"] = list(c(0.335, 0.99))
-	testPerformance["OncoSim-lung-CancerSeek"] = list(c(0.587, 0.99))
+	testPerformance["OncoSim-colorectal-MCC"] = list(c(0.649, 0.99)) # Worse than FIT (75)
+	testPerformance["OncoSim-breast-MCC"] = list(c(0.335, 0.99))
+	testPerformance["OncoSim-lung-MCC"] = list(c(0.587, 0.99))
 
 	parameterTables = data.frame()
 
 	scenarios <- c()
 
-	for (scenarioType in c("Galleri", "CancerSeek", "NonMCED")) {
+	for (scenarioType in c("MCG", "MCC", "Non-MC")) {
 		for (startAge in c(45, 50)) {
 			for (testFrequency in c(2, 3)) {
 				for (participation in c(30, 50, 70, 90)) {
@@ -156,7 +156,7 @@ generateModelParameters <- function(modelsToUse) {
 
 						currentTable$participation = participation / 100
 
-						if (scenarioType != "NonMCED") {
+						if (scenarioType != "Non-MC") {
 							currentTestParameters = testPerformance[paste(
 								cancerType,
 								scenarioType,

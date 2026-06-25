@@ -5,14 +5,14 @@ tar_source()
 
 tar_option_set(packages = c("tidyverse", "openmpp", "quarto"), workspace_on_error = TRUE)
 
-analysisName = "MCEDProject"
+analysisName <- "MCEDProject"
 
 ## Source R files ----
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
 
 #If OncoSim runs need to be downloaded. Disable this if they have been deleted from the server or have already been downloaded.
-downloadOncoSimRuns = FALSE
+downloadOncoSimRuns <- FALSE
 
 list(
 	tar_target(previousRunOutputs, "Placeholder"),

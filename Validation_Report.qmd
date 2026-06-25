@@ -67,7 +67,7 @@ breastScreening <- importedData$Breast_Cancer_Screen_Outcome_Modality_Table %>%
 	filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("Digital_radiography_mammogram", "Alternative_modality_E", "all"), Age == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-breastScreening <- breastScreening %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+breastScreening <- breastScreening %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastScreening) +
 	facet_grid(vars(Breast_screening_modalities), scales = "free") +
@@ -90,7 +90,7 @@ breastScreening2 <- importedData$Breast_Cancer_Screen_Outcome_Modality_Table %>%
 	filter(expr_name == "Number_of_breast_cancer_screens", Hackable_province == "all", Breast_screening_modalities %in% c("all", "Alternative_modality_E"), Age == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-breastScreening2 <- breastScreening2 %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+breastScreening2 <- breastScreening2 %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = Breast_screening_modalities), data = breastScreening2) +
 	facet_grid(vars(sce), scales = "free") +
@@ -131,16 +131,16 @@ ggplot(aes(x = Shiftable_year, y = percentScreenedWithin1Years, colour = sce), d
 #| warning: false
 
 # Should be 90%
-participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin1Years
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_MCC", ]$percentScreenedWithin1Years
 
 # Should be 30%
-participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin3Years
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_MCC", ]$percentScreenedWithin3Years
 
 
 ```
 
 
-**Detections should differ between all scenarios. If they are the same for MCED scenarios, then sensitivity/specificity is improper configured. CancerSeek should detect more than Galleri**
+**Detections should differ between all scenarios. If they are the same for MCED scenarios, then sensitivity/specificity is improper configured. MCC should detect more than MCG**
 
 ```{r}
 #| echo: false
@@ -150,7 +150,7 @@ detections <- importedData$Breast_Cancer_Cases_Table %>%
 	filter(expr_name == "Breast_cancer_detected_by_screen", Hackable_province == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-detections <- detections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+detections <- detections %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = detections) +
 	geom_line() +
@@ -161,7 +161,7 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = detections)
 	ggtitle("Breast_cancer_detected_by_screen - Smooth")
 ```
 
-**MCED should be more expensive than conventional. Galleri should be the most expensive**
+**MCED should be more expensive than conventional. MCG should be the most expensive**
 
 ```{r}
 #| echo: false
@@ -171,7 +171,7 @@ breastCost <- importedData$Breast_Cancer_Costs_Table %>%
 	filter(expr_name == "Cost_of_screening", Hackable_province == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-breastCost <- breastCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+breastCost <- breastCost %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost) +
 	geom_line() +
@@ -185,7 +185,7 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = breastCost)
 
 # Colorectal - Validation
 
-**FOBT Testing should only start in 2025 (MCED). Screening should be identical between Galleri and CancerSeek**
+**FOBT Testing should only start in 2025 (MCED). Screening should be identical between MCG and MCC**
 
 ```{r}
 #| echo: false
@@ -195,7 +195,7 @@ colonScreening <- importedData$Colorectal_Cancer_Screen_Table %>%
 	filter(expr_name %in% c("Screens_by_FOBT", "Screens_by_FIT"), Hackable_province == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-colonScreening <- colonScreening %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+colonScreening <- colonScreening %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonScreening) +
 	scale_y_continuous(labels = scales::number) +
@@ -214,7 +214,7 @@ colonScreening2 <- importedData$Colorectal_Cancer_Screen_Table %>%
 	filter(expr_name %in% c("Screens_by_FOBT", "Total_screens_x_iple_per_visit"), Hackable_province == "all", Shiftable_year != "all", ) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-colonScreening2 <- colonScreening2 %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+colonScreening2 <- colonScreening2 %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = expr_name), data = colonScreening2) +
 	scale_y_continuous(labels = scales::number) +
@@ -256,16 +256,16 @@ participation[participation$Shiftable_year == 2020 & participation$sce == "BaseC
 #| warning: false
 
 # Should be 90%
-participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin2Years
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_MCC", ]$percentScreenedWithin2Years
 
 # Should be 30%
-participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin2PointFiveYears
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_MCC", ]$percentScreenedWithin2PointFiveYears
 
 
 ```
 
 
-**Cancer detections should be different between Galleri and CancerSeek.**
+**Cancer detections should be different between MCG and MCC.**
 
 ```{r}
 #| echo: false
@@ -276,7 +276,7 @@ colonDetections <- importedData$Colorectal_Cancer_Screen_Table %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
-colonDetections <- colonDetections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+colonDetections <- colonDetections %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonDetections) +
 	geom_line() +
@@ -288,7 +288,7 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonDetect
 
 ```
 
-**MCED should be more expensive than conventional. Galleri should be the most expensive**
+**MCED should be more expensive than conventional. MCG should be the most expensive**
 
 ```{r}
 #| echo: false
@@ -298,7 +298,7 @@ colonCost <- importedData$Colorectal_Cancer_ICER_Table %>%
 	filter(expr_name == "Cost_of_screen_x_nical_diagnosis", Shiftable_year %in% 2020:2050) %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
-colonCost <- colonCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+colonCost <- colonCost %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = colonCost) +
 	geom_line() +
@@ -323,7 +323,7 @@ lungScreens <- importedData$Lung_Cancer_ScreenCases_Year_Table %>%
 	mutate(Year = as.numeric(Year))
 
 
-lungScreens <- lungScreens %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+lungScreens <- lungScreens %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungScreens) +
 	geom_line() +
@@ -372,10 +372,10 @@ participation[participation$Shiftable_year == 2025 & participation$sce == "BaseC
 #| warning: false
 
 # Should be 90%
-participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_CancerSeek", ]$percentScreenedWithin1Years
+participation[participation$Shiftable_year == 2050 & participation$sce == "45_1_90_MCC", ]$percentScreenedWithin1Years
 
 # Should be 30%
-participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_CancerSeek", ]$percentScreenedWithin3Years
+participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_30_MCC", ]$percentScreenedWithin3Years
 
 
 ```
@@ -383,7 +383,7 @@ participation[participation$Shiftable_year == 2050 & participation$sce == "50_3_
 
 
 
-**Cancer detections should be different between Galleri and CancerSeek. Galleri should be higher**
+**Cancer detections should be different between MCG and MCC. MCG should be higher**
 
 
 ```{r}
@@ -395,7 +395,7 @@ lungDetections <- importedData$Lung_Cancer_ScreenCases_Year_Table %>%
 	mutate(Year = as.numeric(Year))
 
 
-lungDetections <- lungDetections %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+lungDetections <- lungDetections %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungDetections) +
 	geom_line() +
@@ -407,7 +407,7 @@ ggplot(aes(x = Year, y = expr_value, colour = sce), data = lungDetections) +
 
 ```
 
-**Screening should cost more in the MCED scenarios, especially in Galleri.**
+**Screening should cost more in the MCED scenarios, especially in MCG.**
 ```{r}
 #| echo: false
 #| warning: false
@@ -417,7 +417,7 @@ lungCost <- importedData$Lung_Cancer_ICER_Table %>%
 	mutate(Shiftable_year = as.numeric(Shiftable_year))
 
 
-lungCost <- lungCost %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+lungCost <- lungCost %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
 	geom_line() +
@@ -440,7 +440,7 @@ ggplot(aes(x = Shiftable_year, y = expr_value, colour = sce), data = lungCost) +
 
 PrimaryTable <- combinedTables$PrimaryTable
 
-# PrimaryTable <- PrimaryTable %>% filter(formattedName %in% c("CancerSeek\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "Galleri\n PPT: 90%\nMinAge: 45\nFreq: 2 Years", "BaseCase"))
+# PrimaryTable <- PrimaryTable %>% filter(formattedName %in% c("MCC\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "MCG\n Participation: 90%\nStart Age: 45\nInterval: 2 Years", "BaseCase"))
 
 PrimaryTable$SexAdjustedScreens <- PrimaryTable$Total_Screens
 
