@@ -257,11 +257,11 @@ Parameter|Description|Planned Values|
 library(kableExtra)
 
 kableExtra::kable(
-	participationData %>%
-		filter(Shiftable_year == 2024, sce == "BaseCase") %>%
-		ungroup() %>%
-		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
-		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
+  participationData %>%
+    filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+    ungroup() %>%
+    mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
+    select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
 )
 ```
 
@@ -331,9 +331,9 @@ visualizeSpecificCancerType(totalData, "Lung")
 #| warning: false
 
 visualizeFrontier(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(testType != "Non-MC"),
-	"Breast"
+  combinedTables$`PrimaryTable_2025-2051` %>%
+    filter(testType != "Non-MC"),
+  "Breast"
 )
 
 ```
@@ -345,9 +345,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(testType != "Non-MC"),
-	"Colorectal"
+  combinedTables$`PrimaryTable_2025-2051` %>%
+    filter(testType != "Non-MC"),
+  "Colorectal"
 )
 
 ```
@@ -360,9 +360,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(testType != "Non-MC"),
-	"Lung"
+  combinedTables$`PrimaryTable_2025-2051` %>%
+    filter(testType != "Non-MC"),
+  "Lung"
 )
 
 ```
@@ -375,9 +375,9 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-	combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(testType != "Non-MC"),
-	"Combined"
+  combinedTables$`PrimaryTable_2025-2051` %>%
+    filter(testType != "Non-MC"),
+  "Combined"
 )
 
 ```
@@ -449,7 +449,51 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths
 
 ```
 
+# Results - Number of Deaths 
 
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "Cancer_Deaths", "Deaths  (2025-2051)", "Number of  Deaths")
+
+```
+
+# Results - Number of Person years 
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "Person_years", "Person_years  (2025-2051)", "Number of  PY")
+
+```
+
+# Results - Person years Diff
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "Person_years_Diff", "Person_years  (2025-2051)", "Number of  PY")
+
+```
+
+
+# Results - Number of Health_adjusted_person_years 
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "Health_adjusted_person_years", "Health_adjusted_person_years  (2025-2051)", "Number of  HAPY")
+
+```
+
+# Results - Number of Cases Detected 
+
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "Detected_Cases", "Detected_Cases  (2025-2051)", "Number of  Detected_Cases")
+
+```
 
 # Results - Screening Cost - Time
 
@@ -520,7 +564,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", 
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost", " in Screening Cost", " in Screening Cost")
+visualizeTotals(totalData, "Screening_Cost", " in Screening Cost", " in Screening Cost")
 
 ```
 
@@ -528,16 +572,24 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost", " in 
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ManageCost", " in Manage Cost", " in Manage Cost")
+visualizeTotals(totalData, "ManageCost", " in Manage Cost", " in Manage Cost")
 
 ```
 
+
+# Results - Manage Cost - Diff
+```{r,fig.width=24,fig.height=12}
+#| echo: false
+#| warning: false
+visualizeTotals(totalData, "ManageCost_Diff", "Diff in Manage Cost", "Diff in Manage Cost")
+
+```
 
 # Results - Total Cost - Total
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost", " in Total Cost", " in Total Cost")
+visualizeTotals(totalData, "Total_Cost", " in Total Cost", " in Total Cost")
 
 ```
 

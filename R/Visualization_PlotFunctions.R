@@ -99,6 +99,7 @@ visualizeParticipation <- function(dataset) {
 
 
 formatNumber <- function(values, facetVar = NULL) {
+	#return(scales::comma(values, accuracy = 1))
 	toReturn <- c()
 
 	formatItems <- list()
@@ -114,7 +115,7 @@ formatNumber <- function(values, facetVar = NULL) {
 			if (!is.na(item)) {
 				if (absValue >= currentDivide) {
 					currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 0.1, suffix = potentialFormat)
-					if (nchar(currentVal) > 5 | potentialFormat == "") {
+					if (nchar(currentVal) > 20 | potentialFormat == "") {
 						currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 1, suffix = potentialFormat)
 					}
 
@@ -257,8 +258,10 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierPlotData <- bind_rows(frontierData, frontierDominated)
 	billion <- 1000000000
 
+	refValue <- frontierPlotData[frontierPlotData$formattedName == "BaseCase", ]$YVar
+
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
-	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar)), "")
+	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), round(frontierPlotData$Total_Cost / billion), formatNumber(frontierPlotData$Person_years_Diff), sep = "\n"), "")
 	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
 
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)

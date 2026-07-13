@@ -149,7 +149,7 @@ print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 ## Breast
 
 
-```{r,fig.width=18,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Breast")
@@ -164,7 +164,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Colorectal
 
 
-```{r,fig.width=18,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Colorectal")
@@ -178,7 +178,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Lung
 
 
-```{r,fig.width=18,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Lung")
@@ -191,7 +191,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Combined
 
 
-```{r,fig.width=20,fig.height=12}
+```{r,fig.width=40,fig.height=14}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")

@@ -61,7 +61,6 @@ extractGeneralMetrics <- function(importedData) {
 
 	exprRename["Total_cost_as_x_and_treatment"] <- "Total_Cost"
 	exprRename["Total_cost_sc_x_ng_treatment"] <- "Total_Cost"
-	exprRename["Total_cost_va_x_all_treatment"] <- "Total_Cost"
 	exprRename["Total_cost"] <- "Total_Cost"
 
 	exprRename["Cost_of_screening"] <- "Screening_Cost"
