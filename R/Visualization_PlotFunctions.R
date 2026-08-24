@@ -1,5 +1,5 @@
 dateRangeToShow <- 2020:2051
-scenariosToVisualize <- c("50_3_70_MCC", "50_3_70_MCG", "50_3_70_Non-MC", "45_2_90_MCC", "45_2_90_MCG", "45_2_90_Non-MC", "BaseCase")
+scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "BaseCase")
 
 colours <- list()
 
@@ -31,8 +31,8 @@ colours["Limited (Small Cell Lung)"] <- "#818BBB"
 colours["Extensive (Small Cell Lung)"] <- "#741C6D"
 
 
-colours["MCC"] <- "#c47aec"
-colours["MCG"] <- "#d1ab43"
+colours["CS"] <- "#c47aec"
+colours["GA"] <- "#d1ab43"
 colours["Non-MC"] <- "#bbbbbb"
 
 
@@ -99,7 +99,7 @@ visualizeParticipation <- function(dataset) {
 
 
 formatNumber <- function(values, facetVar = NULL) {
-	#return(scales::comma(values, accuracy = 1))
+	return(scales::comma(values, accuracy = 1))
 	toReturn <- c()
 
 	formatItems <- list()
@@ -115,7 +115,7 @@ formatNumber <- function(values, facetVar = NULL) {
 			if (!is.na(item)) {
 				if (absValue >= currentDivide) {
 					currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 0.1, suffix = potentialFormat)
-					if (nchar(currentVal) > 20 | potentialFormat == "") {
+					if (nchar(currentVal) > 5 | potentialFormat == "") {
 						currentVal <- scales::comma(ifelse(currentDivide > 0, item / currentDivide, item), accuracy = 1, suffix = potentialFormat)
 					}
 
@@ -234,7 +234,7 @@ visualizeFrontier <- function(frontierData, type) {
 				frontierData$Total_Cost[r - 1]
 		}
 
-		dominanceType <- "Rejected due to extended dominance"
+		dominanceType <- "Rejected due to dominance"
 		if (frontierCount == 1) {
 			dominanceType <- "Rejected due to dominance"
 		}
@@ -261,8 +261,8 @@ visualizeFrontier <- function(frontierData, type) {
 	refValue <- frontierPlotData[frontierPlotData$formattedName == "BaseCase", ]$YVar
 
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
-	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), round(frontierPlotData$Total_Cost / billion), formatNumber(frontierPlotData$Person_years_Diff), sep = "\n"), "")
-	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
+	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), round(frontierPlotData$Total_Cost / billion), formatNumber(frontierPlotData$Person_years_Diff), sep = "\n"), "")
+	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
 
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
 
@@ -421,18 +421,21 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 
 	write.csv(linearRegressionResults, paste("Tables/RegressionResults_", testToShow, "_", cancerType, ".csv", sep = ""))
 
+	divide <- 1000000
+
 	ggplot(
 		currentTable %>% filter(testType == testToShow),
-		aes(x = ExposureVar, y = OutcomeVar, colour = Label)
+		aes(x = ExposureVar, y = OutcomeVar / divide, colour = Label)
 	) +
 		geom_point(size = 2) +
 		geom_smooth(method = "lm", aes(linetype = minAge), se = FALSE, linewidth = 2) +
-		scale_y_continuous(outcomeTitle, label = scales::comma, expand = c(0, 0)) +
+		scale_y_continuous(paste(outcomeTitle, "(millions)"), label = scales::comma, expand = c(0, 0)) +
 		scale_x_continuous(exposureTitle, label = scales::comma) +
-		geom_hline(yintercept = baseCaseValue) +
-		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue, family = fontFam, size = 6, colour = "black") +
+		geom_hline(yintercept = baseCaseValue / divide) +
+		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue / divide, family = fontFam, size = 6, colour = "black") +
 		scale_colour_manual("Interval", values = colours) +
 		theme_minimal(20, fontFam) +
 		scale_linetype_discrete("Minimum Age") +
-		ggtitle(testToShow)
+		ggtitle(testToShow) +
+		theme(panel.border = element_rect(colour = "grey", linewidth = 1, fill = NA))
 }

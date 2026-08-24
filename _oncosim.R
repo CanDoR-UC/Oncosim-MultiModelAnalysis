@@ -7,11 +7,11 @@ openmpp::use_OpenMpp_CPAC()
 ## Source R files ----
 purrr::walk(fs::dir_ls("./R", glob = "*.R$"), source)
 
-analysisName = "MCEDProject"
+analysisName <- "MCEDProject"
 
 modelsToUse <- c("OncoSim-breast", "OncoSim-colorectal", "OncoSim-lung")
 
-actuallyRun = FALSE
+actuallyRun <- FALSE
 
 tar_option_set(packages = c("openmpp", "tidyverse"), workspace_on_error = TRUE)
 

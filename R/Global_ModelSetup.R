@@ -1,8 +1,8 @@
-modelDigests = list()
-modelDigests["OncoSim-lung"] = "201e47e22502a6f0ec0593f7f539970c"
-modelDigests["OncoSim-breast"] = "7b6012a86dcbfce878eca24e4845736a"
-modelDigests["OncoSim-colorectal"] = "5af0eb8d41728e927b1e21e97f5434f1"
-modelDigests["OncoSim-allcancers"] = "c2cc80bad8c67abf432029f62682e97f"
+modelDigests <- list()
+modelDigests["OncoSim-lung"] <- "201e47e22502a6f0ec0593f7f539970c"
+modelDigests["OncoSim-breast"] <- "7b6012a86dcbfce878eca24e4845736a"
+modelDigests["OncoSim-colorectal"] <- "5af0eb8d41728e927b1e21e97f5434f1"
+modelDigests["OncoSim-allcancers"] <- "c2cc80bad8c67abf432029f62682e97f"
 #3.7.1.0
 
 paramsToAlter <- list()
@@ -37,10 +37,10 @@ paramsToAlter["OncoSim-lung"] <- list(c(
 	"LungRadsScreenFollowupTimeToNextScanAfterFP"
 ))
 
-treatmentCostMultiplier = list()
-treatmentCostMultiplier["OncoSim-colorectal"] = 1.597179
-treatmentCostMultiplier["OncoSim-breast"] = 1
-treatmentCostMultiplier["OncoSim-lung"] = 3
+treatmentCostMultiplier <- list()
+treatmentCostMultiplier["OncoSim-colorectal"] <- 1.597179
+treatmentCostMultiplier["OncoSim-breast"] <- 1
+treatmentCostMultiplier["OncoSim-lung"] <- 3
 
 
 outputTables <- list()
@@ -102,43 +102,43 @@ outputTables["OncoSim-lung"] <- list(c(
 ))
 
 generateModelParameters <- function(modelsToUse) {
-	testCosts = list()
+	testCosts <- list()
 
 	#https://www.galleri.com/patient/the-galleri-test/cost
 	# $949 USD ( $1,304.03 CAD)
-	testCosts["MCG"] = 1304.03
+	testCosts["GA"] <- 1304.03
 
 	#https://www.cancerguard.com/
 	# $689 USD ($946.66 CAD)
-	testCosts["MCC"] = 946.66
+	testCosts["CS"] <- 946.66
 
 	#Sensitivity THEN specificity
-	testPerformance = list()
+	testPerformance <- list()
 
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://www.annalsofoncology.org/article/S0923-7534(21)02046-9/fulltext CCGA3
 	# Using site-specific sensitivity and overall specificity
-	testPerformance["OncoSim-colorectal-MCG"] = list(c(0.82, 0.995)) #Better than FIT (75)
-	testPerformance["OncoSim-breast-MCG"] = list(c(0.305, 0.995))
-	testPerformance["OncoSim-lung-MCG"] = list(c(0.748, 0.995))
+	testPerformance["OncoSim-colorectal-GA"] <- list(c(0.82, 0.995)) #Better than FIT (75)
+	testPerformance["OncoSim-breast-GA"] <- list(c(0.305, 0.995))
+	testPerformance["OncoSim-lung-GA"] <- list(c(0.748, 0.995))
 
 	#https://www.ncbi.nlm.nih.gov/books/NBK611745/
 	#https://pmc.ncbi.nlm.nih.gov/articles/PMC6080308/
 	# The specificity of CancerSEEK was greater than 99%
-	testPerformance["OncoSim-colorectal-MCC"] = list(c(0.649, 0.99)) # Worse than FIT (75)
-	testPerformance["OncoSim-breast-MCC"] = list(c(0.335, 0.99))
-	testPerformance["OncoSim-lung-MCC"] = list(c(0.587, 0.99))
+	testPerformance["OncoSim-colorectal-CS"] <- list(c(0.649, 0.99)) # Worse than FIT (75)
+	testPerformance["OncoSim-breast-CS"] <- list(c(0.335, 0.99))
+	testPerformance["OncoSim-lung-CS"] <- list(c(0.587, 0.99))
 
-	parameterTables = data.frame()
+	parameterTables <- data.frame()
 
 	scenarios <- c()
 
-	for (scenarioType in c("MCG", "MCC", "Non-MC")) {
+	for (scenarioType in c("GA", "CS", "Non-MC")) {
 		for (startAge in c(45, 50)) {
 			for (testFrequency in c(2, 3)) {
 				for (participation in c(30, 50, 70, 90)) {
 					for (cancerType in modelsToUse) {
-						scenarioName = paste(
+						scenarioName <- paste(
 							cancerType,
 							startAge,
 							testFrequency,
@@ -146,28 +146,28 @@ generateModelParameters <- function(modelsToUse) {
 							scenarioType,
 							sep = "_"
 						)
-						currentTable = data.frame(name = scenarioName)
+						currentTable <- data.frame(name = scenarioName)
 
-						currentTable$type = scenarioType
-						currentTable$model = cancerType
-						currentTable$startAge = startAge
-						currentTable$endAge = 74
-						currentTable$frequency = testFrequency
+						currentTable$type <- scenarioType
+						currentTable$model <- cancerType
+						currentTable$startAge <- startAge
+						currentTable$endAge <- 74
+						currentTable$frequency <- testFrequency
 
-						currentTable$participation = participation / 100
+						currentTable$participation <- participation / 100
 
 						if (scenarioType != "Non-MC") {
-							currentTestParameters = testPerformance[paste(
+							currentTestParameters <- testPerformance[paste(
 								cancerType,
 								scenarioType,
 								sep = "-"
 							)][[1]]
-							currentTable$sensitivity = currentTestParameters[1]
-							currentTable$specificity = currentTestParameters[2]
-							currentTable$cost = testCosts[scenarioType][[1]]
+							currentTable$sensitivity <- currentTestParameters[1]
+							currentTable$specificity <- currentTestParameters[2]
+							currentTable$cost <- testCosts[scenarioType][[1]]
 						}
 
-						parameterTables = bind_rows(parameterTables, currentTable)
+						parameterTables <- bind_rows(parameterTables, currentTable)
 					}
 				}
 			}
@@ -176,13 +176,13 @@ generateModelParameters <- function(modelsToUse) {
 
 	for (scenarioType in c("BaseCase")) {
 		for (cancerType in modelsToUse) {
-			scenarioName = paste(cancerType, scenarioType, sep = "_")
-			currentTable = data.frame(name = scenarioName)
+			scenarioName <- paste(cancerType, scenarioType, sep = "_")
+			currentTable <- data.frame(name = scenarioName)
 
-			currentTable$model = cancerType
-			currentTable$type = scenarioType
+			currentTable$model <- cancerType
+			currentTable$type <- scenarioType
 
-			parameterTables = bind_rows(parameterTables, currentTable)
+			parameterTables <- bind_rows(parameterTables, currentTable)
 		}
 	}
 

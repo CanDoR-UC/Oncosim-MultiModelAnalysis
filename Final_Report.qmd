@@ -26,10 +26,10 @@ source("R/Visualization_PlotFunctions.R")
 # extrafont::font_import()
 extrafont::loadfonts()
 
-scenariosToVisualize <- c("50_3_70_MCC", "50_3_70_MCG", "50_3_70_Non-MC", "45_2_90_MCC", "45_2_90_MCG", "45_2_90_Non-MC", "BaseCase")
+scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "BaseCase")
 
 
-# scenariosToVisualize <- c("50_3_30_MCC", "45_1_90_MCC", "BaseCase")
+# scenariosToVisualize <- c("50_3_30_CS", "45_1_90_CS", "BaseCase")
 
 timeData <- combinedTables$PrimaryTable %>% filter(sce %in% scenariosToVisualize)
 timeData$formattedName <- paste(timeData$formattedName, "\n")
@@ -93,7 +93,7 @@ participationData <- combinedTables$Participation
 # Introduction - Multi Cancer Early Detection Testing (MCED)
 
 * MCED testing relies on identifying cancer signals (genetic signatures, methylation etc.) within a blood sample and using this to determine the presence and tissue of origin (TOO) of the cancer (7,18)
-* Previous studies, such as the NHS MCG trial and the PATHFINDER study, have recruited large populations (16,20)
+* Previous studies, such as the NHS GA trial and the PATHFINDER study, have recruited large populations (16,20)
 * Evidence in other jurisdictions are promising, but there is little evidence within Canada
 
 # Introduction - How Does MCED Address Gaps in Cancer Screening?
@@ -148,7 +148,7 @@ participationData <- combinedTables$Participation
 Parameter|Description|Planned Values|
 |--------|-----------|--------------|
 |Participation|Probability that an eligible patient will participate in MCED screening.|Values ranging between 30% and 90% |
-|MCED Test|Specific MCED test sensitivity/specificity and cost.|MCG and CancerSEEK. Plus a Non-MC scenario|
+|MCED Test|Specific MCED test sensitivity/specificity and cost.|GA and CancerSEEK. Plus a Non-MC scenario|
 |Minimum Screening Age|Minimum age when patients will be recruited for MCED screening.|45 and 50 years of age|
 |Screening Interval|How many years between each MCED screen performed, per patient.|1 years and 3 years|
 
@@ -156,7 +156,7 @@ Parameter|Description|Planned Values|
 
 - For each cancer type (Colorectal, Breast, Lung)
   + 4 Participation values (30%, 50%, 70%, 90%)
-  + 2 MCED Tests (MCG and MCC) + a Fake MCED Test (Non-MC)
+  + 2 MCED Tests (GA and CS) + a Fake MCED Test (Non-MC)
   + 2 Minimum Screening Ages (45 and 50 years old)
   + 2 Screening Intervals (1 year and 3 years)
   + Plus one base case scenario
@@ -166,7 +166,7 @@ Parameter|Description|Planned Values|
 
 # Methods Parameters
 
-|Model|MCG|MCC|
+|Model|GA|CS|
 |-----|-------|----------|
 |Colorectal (Sensitivity)|82%|64.9%|
 |Breast (Sensitivity)|30.5%|33.5%|
@@ -184,10 +184,10 @@ Parameter|Description|Planned Values|
 # Methods - Sources for Information
 
 - "Clinical validation of a targeted methylation-based multi-cancer early detection test using an independent validation set" Klein et. al
-	+ MCG Sensitivity and Specificty values
+	+ GA Sensitivity and Specificty values
 - "Detection and localization of surgically resectable cancers with a multi-analyte blood test" Cohen et. al
-	+ MCC Sensitivity and Specificity Values
--	MCG Website
+	+ CS Sensitivity and Specificity Values
+-	GA Website
 	+ "$949 USD"
 -	Multiple outlets (regarding cancerseek)
 	+ "$500 USD"
@@ -400,7 +400,7 @@ visualizeByTime(timeData, "Total_Screens", "Total Screens by Time", "Number of C
 
 MCEDScreenNum <- totalData
 
-MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("MCG", "MCC")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("MCG", "MCC")] * 2
+MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] * 2
 
 visualizeTotals(MCEDScreenNum, "Total_Screens", "Number of Total Screens (2025-2051)", "Number of Cancer Screens (Breast MCED Doubled)")
 
@@ -510,7 +510,7 @@ visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening
 
 MCEDTestCost <- totalData
 
-MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("MCG", "MCC")] <- MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("MCG", "MCC")] * 2
+MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] <- MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] * 2
 
 visualizeTotals(MCEDScreenNum, "Screening_Cost", "Screening Cost (2025-2051)", "Screening Cost (Breast MCED Doubled)")
 
