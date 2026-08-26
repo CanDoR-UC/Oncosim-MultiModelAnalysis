@@ -1,9 +1,9 @@
 SetParameters <- function(createdScenarios) {
 	scenario <- createdScenarios$scenario[[1]]
-	scenarioName = createdScenarios$name
-	currentParameters = createdScenarios
+	scenarioName <- createdScenarios$name
+	currentParameters <- createdScenarios
 
-	scenario$ReadOnly = FALSE
+	scenario$ReadOnly <- FALSE
 
 	if (currentParameters$model == "OncoSim-colorectal") {
 		modality_param <- scenario$get_param("CrcScreenPlanCanada")
@@ -12,41 +12,41 @@ SetParameters <- function(createdScenarios) {
 		] <- 1
 		scenario$set_param("CrcScreenPlanCanada", modality_param)
 
-		baseCaseParticipationValue = 0.5
-		newParticipationValue = ifelse(currentParameters$type != "BaseCase", currentParameters$participation, baseCaseParticipationValue)
+		baseCaseParticipationValue <- 0.5
+		newParticipationValue <- ifelse(currentParameters$type != "BaseCase", currentParameters$participation, baseCaseParticipationValue)
 
 		screen_param <- scenario$get_param("CrcScreenRecruitCanada")
 
-		screen_param$`0` = c(0, 1, 2009, 2009, 50, 74, 123, baseCaseParticipationValue, 2, 0, 99, newParticipationValue, 4)
-		screen_param$`1` = 0
-		screen_param$`2` = 0
+		screen_param$`0` <- c(0, 1, 2009, 2009, 50, 74, 123, baseCaseParticipationValue, 2, 0, 99, newParticipationValue, 4)
+		screen_param$`1` <- 0
+		screen_param$`2` <- 0
 
 		rectum_costs <- scenario$get_param("RectalCancerTreatmentCosts")
 		colon_costs <- scenario$get_param("ColonCancerTreatmentCosts")
 
-		rectum_costs[4:11] = rectum_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
-		colon_costs[4:11] = colon_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
+		rectum_costs[4:11] <- rectum_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
+		colon_costs[4:11] <- colon_costs[4:11] * treatmentCostMultiplier["OncoSim-colorectal"][[1]]
 
 		scenario$set_param("RectalCancerTreatmentCosts", rectum_costs)
 		scenario$set_param("ColonCancerTreatmentCosts", colon_costs)
 
 		#Add extra recruitment to allow a sharp increase (if needed)
 		if (newParticipationValue > baseCaseParticipationValue) {
-			yearToSelect = 2010
-			ageToSelect = 59
-			yearsBetween = 14
+			yearToSelect <- 2010
+			ageToSelect <- 59
+			yearsBetween <- 14
 			for (column in 3:17) {
-				screen_param[[paste(column)]] = c(0, 1, yearToSelect, yearToSelect, 50, ageToSelect, 123, baseCaseParticipationValue, 1, 1, yearsBetween, newParticipationValue, 4)
-				yearToSelect = yearToSelect + 1
-				ageToSelect = ageToSelect + 1
-				yearsBetween = yearsBetween - 1
+				screen_param[[paste(column)]] <- c(0, 1, yearToSelect, yearToSelect, 50, ageToSelect, 123, baseCaseParticipationValue, 1, 1, yearsBetween, newParticipationValue, 4)
+				yearToSelect <- yearToSelect + 1
+				ageToSelect <- ageToSelect + 1
+				yearsBetween <- yearsBetween - 1
 			}
 		} else {
-			screen_param$`3` = 0
-			screen_param$`4` = 0
+			screen_param$`3` <- 0
+			screen_param$`4` <- 0
 		}
-		screen_param$`18` = c(0, 1, 2010, 2024, 50, 74, 123, baseCaseParticipationValue, 1, 0, 99, newParticipationValue, 4)
-		screen_param$`19` = c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "Non-MC", 5, 4))
+		screen_param$`18` <- c(0, 1, 2010, 2024, 50, 74, 123, baseCaseParticipationValue, 1, 0, 99, newParticipationValue, 4)
+		screen_param$`19` <- c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "Non-MC", 5, 4))
 
 		scenario$set_param("CrcScreenRecruitCanada", screen_param)
 
@@ -110,12 +110,12 @@ SetParameters <- function(createdScenarios) {
 				#Altering effectiveness to emulate MCED
 				fit_param <- scenario$get_param("CrcTestPositivitySuccinct")
 				# 1-Specificity for "No polyp or cancer" and all others. If a polyp is detected, this is a false positive. Sensitivity for cancer
-				otherValues = as.numeric(scales::number(
+				otherValues <- as.numeric(scales::number(
 					1 - currentParameters$specificity,
 					accuracy = 0.001
 				))
 
-				effectivenessValues = c(
+				effectivenessValues <- c(
 					otherValues,
 					otherValues,
 					otherValues,
@@ -134,11 +134,11 @@ SetParameters <- function(createdScenarios) {
 	}
 	if (currentParameters$model == "OncoSim-breast") {
 		#Only need the original dispatcher
-		BreastScreeningUseLeanDispatcher = scenario$get_param(
+		BreastScreeningUseLeanDispatcher <- scenario$get_param(
 			"BreastScreeningUseLeanDispatcher"
 		)
-		BreastScreeningUseLeanDispatcher$Future_screening_era = FALSE
-		BreastScreeningUseLeanDispatcher$Past_screening_era = FALSE
+		BreastScreeningUseLeanDispatcher$Future_screening_era <- FALSE
+		BreastScreeningUseLeanDispatcher$Past_screening_era <- FALSE
 
 		scenario$set_param(
 			"BreastScreeningUseLeanDispatcher",
@@ -148,8 +148,8 @@ SetParameters <- function(createdScenarios) {
 		cost_1 <- scenario$get_param("BreastCancerCosts")
 		cost_2 <- scenario$get_param("BreastCancerCosts2")
 
-		cost_1$Cost = cost_1$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
-		cost_2$Cost = cost_2$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
+		cost_1$Cost <- cost_1$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
+		cost_2$Cost <- cost_2$Cost * treatmentCostMultiplier["OncoSim-breast"][[1]]
 
 		scenario$set_param("BreastCancerCosts", cost_1)
 		scenario$set_param("BreastCancerCosts2", cost_2)
@@ -165,7 +165,7 @@ SetParameters <- function(createdScenarios) {
 
 			#Set up parameters for how MCED screening works.
 			screen_param <- scenario$get_param("BreastScreeningProtocolDispatcher")
-			reference = screen_param$`3`[
+			reference <- screen_param$`3`[
 				screen_param$Screening_era == "Future_screening_era"
 			]
 
@@ -173,7 +173,7 @@ SetParameters <- function(createdScenarios) {
 				screen_param$Screening_era == "Future_screening_era"
 			] <- reference
 
-			futureScreeningEra = screen_param$Screening_era == "Future_screening_era"
+			futureScreeningEra <- screen_param$Screening_era == "Future_screening_era"
 
 			screen_param$`5`[
 				futureScreeningEra &
@@ -255,31 +255,31 @@ SetParameters <- function(createdScenarios) {
 
 			if (currentParameters$type != "Non-MC") {
 				specificity_param <- scenario$get_param("BreastScreeningSpecificityNew")
-				specificity = currentParameters$specificity
+				specificity <- currentParameters$specificity
 				specificity_param[
 					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-				]$`(-∞,40)` = specificity
+				]$`(-∞,40)` <- specificity
 
 				specificity_param[
 					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-				]$`[40,50)` = specificity
+				]$`[40,50)` <- specificity
 
 				specificity_param[
 					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-				]$`[50,60)` = specificity
+				]$`[50,60)` <- specificity
 
 				specificity_param[
 					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-				]$`[60,70)` = specificity
+				]$`[60,70)` <- specificity
 
 				specificity_param[
 					specificity_param$Breast_screening_modalities == "Alternative_modality_E",
-				]$`[70,∞)` = specificity
+				]$`[70,∞)` <- specificity
 
 				scenario$set_param("BreastScreeningSpecificityNew", specificity_param)
 
 				sensitivity_param <- scenario$get_param("BreastScreeningSensitivity")
-				sensitivity = currentParameters$sensitivity
+				sensitivity <- currentParameters$sensitivity
 				for (column in c(
 					"Tumor_size_data_point_1",
 					"Tumor_size_data_point_2",
@@ -294,7 +294,7 @@ SetParameters <- function(createdScenarios) {
 				)) {
 					sensitivity_param[
 						sensitivity_param$Breast_screening_modalities == "Alternative_modality_E",
-					][[column]] = sensitivity
+					][[column]] <- sensitivity
 				}
 				scenario$set_param("BreastScreeningSensitivity", sensitivity_param)
 			}
@@ -302,89 +302,88 @@ SetParameters <- function(createdScenarios) {
 	}
 
 	if (currentParameters$model == "OncoSim-lung") {
-		calibratingCosts = FALSE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
+		calibratingCosts <- FALSE # THIS IS ONLY SET TO TRUE WHEN FIGURING OUT MULTIPLIERS!!
 		if (!calibratingCosts) {
-			ReportYearPooled = scenario$get_param("ReportYearPooled")
-			ReportYearPooled$Start_value = 2025
-			ReportYearPooled$End_value = 2051
+			ReportYearPooled <- scenario$get_param("ReportYearPooled")
+			ReportYearPooled$Start_value <- 2025
+			ReportYearPooled$End_value <- 2051
 			scenario$set_param("ReportYearPooled", ReportYearPooled)
 
-			followUpProtocol = scenario$get_param("LungCancerScreenFollowupProtcol")
-			followUpProtocol[[1]] = "Custom"
+			followUpProtocol <- scenario$get_param("LungCancerScreenFollowupProtcol")
+			followUpProtocol[[1]] <- "Custom"
 			scenario$set_param("LungCancerScreenFollowupProtcol", followUpProtocol)
 
-			LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
+			LcDispatcherDefault <- scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
-			] = 1
+			] <- 1
 
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
-			] = 1
+			] <- 1
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
-			] = 0.39
+			] <- 0.39
 
 			scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 		}
 
 		costs <- scenario$get_param("LungCancerTreatmentCosts")
 
-		stageMultiplierRefTable = read.csv("InputParameters/LungCost_Multipliers.csv")
-		stageDrugMultipliers = stageMultiplierRefTable[stageMultiplierRefTable$Type == "Medication_Ratio", ]
-		stageRadioMultipliers = stageMultiplierRefTable[stageMultiplierRefTable$Type == "Radiation_Ratio", ]
+		stageMultiplierRefTable <- read.csv("InputParameters/LungCost_Multipliers.csv")
+		stageDrugMultipliers <- stageMultiplierRefTable[stageMultiplierRefTable$Type == "Medication_Ratio", ]
+		stageRadioMultipliers <- stageMultiplierRefTable[stageMultiplierRefTable$Type == "Radiation_Ratio", ]
 
-		stageOneCost = costs %>% filter(Stage == "Non_small_cell_stage_I")
-		stageOneDrug = stageOneCost$Drug
-		stageOneRadio = stageOneCost$Radiotherapy
+		stageOneCost <- costs %>% filter(Stage == "Non_small_cell_stage_I")
+		stageOneDrug <- stageOneCost$Drug
+		stageOneRadio <- stageOneCost$Radiotherapy
 
-		costs[costs$Stage == "Non_small_cell_stage_II", ]$Drug = stageOneDrug * stageDrugMultipliers$II
+		costs[costs$Stage == "Non_small_cell_stage_II", ]$Drug <- stageOneDrug * stageDrugMultipliers$II
 
-		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Drug = stageOneDrug * stageDrugMultipliers$III
-		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Drug = stageOneDrug * stageDrugMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Drug <- stageOneDrug * stageDrugMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Drug <- stageOneDrug * stageDrugMultipliers$III
 
-		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Drug = stageOneDrug * stageDrugMultipliers$IV
-		costs[costs$Stage == "Relapse_non_small_cell", ]$Drug = stageOneDrug * stageDrugMultipliers$IV
+		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Drug <- stageOneDrug * stageDrugMultipliers$IV
+		costs[costs$Stage == "Relapse_non_small_cell", ]$Drug <- stageOneDrug * stageDrugMultipliers$IV
 
-		costs[costs$Stage == "Small_cell_limited", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
-		costs[costs$Stage == "Small_cell_extensive", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
-		costs[costs$Stage == "Relapse_small_cell", ]$Drug = stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_limited", ]$Drug <- stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_extensive", ]$Drug <- stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Relapse_small_cell", ]$Drug <- stageOneDrug * stageDrugMultipliers$Small_Cell_Combined
 
-		costs[costs$Stage == "Non_small_cell_stage_II", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$II
+		costs[costs$Stage == "Non_small_cell_stage_II", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$II
 
-		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$III
-		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIA", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$III
+		costs[costs$Stage == "Non_small_cell_stage_IIIB", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$III
 
-		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$IV
-		costs[costs$Stage == "Relapse_non_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$IV
+		costs[costs$Stage == "Non_small_cell_stage_IV", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$IV
+		costs[costs$Stage == "Relapse_non_small_cell", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$IV
 
-		costs[costs$Stage == "Small_cell_limited", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
-		costs[costs$Stage == "Small_cell_extensive", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
-		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy = stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_limited", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Small_cell_extensive", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
+		costs[costs$Stage == "Relapse_small_cell", ]$Radiotherapy <- stageOneRadio * stageRadioMultipliers$Small_Cell_Combined
 
-		costs[5:12] = costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
+		costs[5:12] <- costs[5:12] * treatmentCostMultiplier["OncoSim-lung"][[1]]
 
-		costs[grepl("Surveillance", costs$Treatment_state), ]$Diagnostics = 21633.785 # May disable
+		costs[grepl("Surveillance", costs$Treatment_state), ]$Diagnostics <- 21633.785 # May disable
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 
 		if (currentParameters$type != "BaseCase" && !calibratingCosts) {
-			SwitchEligibilityRule = scenario$get_param("SwitchEligibilityRule")
-			SwitchEligibilityRule$Radon_RR = TRUE #Hack to get around eligibility rules and get high participation
-			scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
-
-			LcScreenEligibilityRiskThreshold = scenario$get_param("LcScreenEligibilityRiskThreshold") # Make sure anyone can be screened
-			LcScreenEligibilityRiskThreshold$High_risk_threshold = 0
-			LcScreenEligibilityRiskThreshold$Very_high_risk_threshold = 0
-			LcScreenEligibilityRiskThreshold$Prediction_horizon_years = 99
-
-			scenario$set_param("LcScreenEligibilityRiskThreshold", LcScreenEligibilityRiskThreshold)
-
 			if (currentParameters$type != "Non-MC") {
-				LcScreenCost = scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
-				LcScreenCost$LCS_LDCT_SCAN = currentParameters$cost
-				LcScreenCost$LCS_LDCT_SCAN_PROCESSING = 0
+				SwitchEligibilityRule <- scenario$get_param("SwitchEligibilityRule")
+				SwitchEligibilityRule$Radon_RR <- TRUE #Hack to get around eligibility rules and get high participation
+				scenario$set_param("SwitchEligibilityRule", SwitchEligibilityRule)
+
+				LcScreenEligibilityRiskThreshold <- scenario$get_param("LcScreenEligibilityRiskThreshold") # Make sure anyone can be screened
+				LcScreenEligibilityRiskThreshold$High_risk_threshold <- 0
+				LcScreenEligibilityRiskThreshold$Very_high_risk_threshold <- 0
+				LcScreenEligibilityRiskThreshold$Prediction_horizon_years <- 99
+
+				scenario$set_param("LcScreenEligibilityRiskThreshold", LcScreenEligibilityRiskThreshold)
+				LcScreenCost <- scenario$get_param("LcScreenCost") #Set screen as MCED cost. No interpretation cost
+				LcScreenCost$LCS_LDCT_SCAN <- currentParameters$cost
+				LcScreenCost$LCS_LDCT_SCAN_PROCESSING <- 0
 				scenario$set_param("LcScreenCost", LcScreenCost)
 
 				#Cancer detectable - 4(Highest risk) = True positive ~ Sensitivity
@@ -393,79 +392,79 @@ SetParameters <- function(createdScenarios) {
 				# No cancer detectable - 1(Lowest risk) = True negative ~ Specificity
 				# 1 means return to regular screening. 4 means do a follow-up scan
 
-				LungRadsScreenRegularDist = scenario$get_param(
+				LungRadsScreenRegularDist <- scenario$get_param(
 					"LungRadsScreenRegularDist"
 				)
 
-				LungRadsScreenRegularDist[4:9] = 0
+				LungRadsScreenRegularDist[4:9] <- 0
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
-				]$X_1 = currentParameters$specificity
+				]$X_1 <- currentParameters$specificity
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "No_cancer_detectable",
-				]$X_4 = 1 - currentParameters$specificity
+				]$X_4 <- 1 - currentParameters$specificity
 
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
-				]$X_1 = 1 - currentParameters$sensitivity
+				]$X_1 <- 1 - currentParameters$sensitivity
 				LungRadsScreenRegularDist[
 					LungRadsScreenRegularDist$Cancer_detectable_at_screen == "Cancer_detectable",
-				]$X_4 = currentParameters$sensitivity
+				]$X_4 <- currentParameters$sensitivity
 
 				scenario$set_param("LungRadsScreenRegularDist", LungRadsScreenRegularDist)
 
 				#Set follow-up time to 0 for 4
-				LungRadsScreenRegularTimeToNext = scenario$get_param(
+				LungRadsScreenRegularTimeToNext <- scenario$get_param(
 					"LungRadsScreenRegularTimeToNext"
 				)
-				LungRadsScreenRegularTimeToNext$X_4 = 0
+				LungRadsScreenRegularTimeToNext$X_4 <- 0
 				scenario$set_param("LungRadsScreenRegularTimeToNext", LungRadsScreenRegularTimeToNext)
 
 				#Return to regular screening after screen
-				LungRadsScreenFollowupTimeToNextScanAfterFP = scenario$get_param(
+				LungRadsScreenFollowupTimeToNextScanAfterFP <- scenario$get_param(
 					"LungRadsScreenFollowupTimeToNextScanAfterFP"
 				)
-				LungRadsScreenFollowupTimeToNextScanAfterFP[[1]] = currentParameters$frequency
+				LungRadsScreenFollowupTimeToNextScanAfterFP[[1]] <- currentParameters$frequency
 				scenario$set_param("LungRadsScreenFollowupTimeToNextScanAfterFP", LungRadsScreenFollowupTimeToNextScanAfterFP)
 			}
 
-			LcDispatcherDefault = scenario$get_param("LcDispatcherDefault") #Screening dispatcher
+			LcDispatcherDefault <- scenario$get_param("LcDispatcherDefault") #Screening dispatcher
 
-			LcDispatcherDefault$`1` = LcDispatcherDefault$`0`
+			LcDispatcherDefault$`1` <- LcDispatcherDefault$`0`
 
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
-			] = 1
+			] <- 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MIN_RECRUIT_AGE"
-			] = currentParameters$startAge
+			] <- currentParameters$startAge
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MAX_SCREEN_AGE"
-			] = currentParameters$endAge
+			] <- currentParameters$endAge
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_MAX_RECRUIT_AGE"
-			] = currentParameters$endAge
+			] <- currentParameters$endAge
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_start_year_integer"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-			] = 9999
+			] <- 9999
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-			] = 9999
+			] <- 9999
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Participation_rate_for_screening"
-			] = currentParameters$participation
+			] <- currentParameters$participation
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "Rescreen_rate"
-			] = 1
+			] <- 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
-			] = 1
+			] <- 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OL_RECRUIT_FREQ"
-			] = 0
+			] <- 0
 
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
@@ -475,7 +474,7 @@ SetParameters <- function(createdScenarios) {
 						"LUNG_SCREENING_x_EQ_VERYHIGHRISK",
 						"LUNG_SCREENING_x_EQ_VERYHIEnum22"
 					)
-			] = currentParameters$frequency
+			] <- currentParameters$frequency
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
 					c(
@@ -484,54 +483,54 @@ SetParameters <- function(createdScenarios) {
 						"LUNG_SCREENING_x_EQ_VERYHIEnum21",
 						"LUNG_SCREENING_x_EQ_VERYHIEnum23"
 					)
-			] = 99
+			] <- 99
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program %in%
 					c(
 						"LUNG_SCREENING_x_OTHER_PHASE_IN",
 						"LUNG_SCREENING_x_FIRST_PHASE_IN"
 					)
-			] = 1
+			] <- 1
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_ECRUIT_ATTEMPTS"
-			] = 1
+			] <- 1
 
 			#End previous screening
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`0`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-			] = 2025
+			] <- 2025
 
 			LcDispatcherDefault$`2`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`2`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`3`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`3`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`4`[
 				LcDispatcherDefault$Characteristics_of_program == "Recruitment_end_year_integer"
-			] = 2025
+			] <- 2025
 			LcDispatcherDefault$`4`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_END_SCREEN_YEAR"
-			] = 2025
+			] <- 2025
 
-			first = LcDispatcherDefault$`0`
-			second = LcDispatcherDefault$`1`
+			first <- LcDispatcherDefault$`0`
+			second <- LcDispatcherDefault$`1`
 
-			LcDispatcherDefault$`0` = second
-			LcDispatcherDefault$`1` = first
+			LcDispatcherDefault$`0` <- second
+			LcDispatcherDefault$`1` <- first
 
 			LcDispatcherDefault$`1`[
 				LcDispatcherDefault$Characteristics_of_program == "LUNG_SCREENING_x_OCOL_VISIBILITY"
-			] = 0 #Disable previous screening
+			] <- 0 #Disable previous screening
 
 			scenario$set_param("LcDispatcherDefault", LcDispatcherDefault)
 		}

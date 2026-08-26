@@ -45,7 +45,6 @@ timeData_BreastDouble <- timeData
 timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] <- timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] * 2
 
 participationData <- combinedTables$Participation
-
 ```
 
 
@@ -257,11 +256,11 @@ Parameter|Description|Planned Values|
 library(kableExtra)
 
 kableExtra::kable(
-  participationData %>%
-    filter(Shiftable_year == 2024, sce == "BaseCase") %>%
-    ungroup() %>%
-    mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
-    select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
+	participationData %>%
+		filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+		ungroup() %>%
+		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
+		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
 )
 ```
 
@@ -272,7 +271,6 @@ kableExtra::kable(
 #| warning: false
 
 visualizeParticipation(participationData %>% filter(cancertype == "Breast"))
-
 ```
 
 # Calibration - Participation (Lung)
@@ -282,7 +280,6 @@ visualizeParticipation(participationData %>% filter(cancertype == "Breast"))
 #| warning: false
 
 visualizeParticipation(participationData %>% filter(cancertype == "Lung"))
-
 ```
 
 
@@ -293,7 +290,6 @@ visualizeParticipation(participationData %>% filter(cancertype == "Lung"))
 #| warning: false
 
 visualizeParticipation(participationData %>% filter(cancertype == "Colorectal"))
-
 ```
 
 
@@ -303,7 +299,6 @@ visualizeParticipation(participationData %>% filter(cancertype == "Colorectal"))
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData, "Breast")
-
 ```
 
 # Model Specific Results (Colorectal)
@@ -312,7 +307,6 @@ visualizeSpecificCancerType(totalData, "Breast")
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData, "Colorectal")
-
 ```
 
 # Model Specific Results (Lung)
@@ -321,7 +315,6 @@ visualizeSpecificCancerType(totalData, "Colorectal")
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData, "Lung")
-
 ```
 
 # Efficiency Frontier (Excluding Non-MC) Breast
@@ -331,11 +324,10 @@ visualizeSpecificCancerType(totalData, "Lung")
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "Non-MC"),
-  "Breast"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "Non-MC"),
+	"Breast"
 )
-
 ```
 
 # Efficiency Frontier (Excluding Non-MC) Colorectal
@@ -345,11 +337,10 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "Non-MC"),
-  "Colorectal"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "Non-MC"),
+	"Colorectal"
 )
-
 ```
 
 
@@ -360,11 +351,10 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "Non-MC"),
-  "Lung"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "Non-MC"),
+	"Lung"
 )
-
 ```
 
 
@@ -375,11 +365,10 @@ visualizeFrontier(
 #| warning: false
 
 visualizeFrontier(
-  combinedTables$`PrimaryTable_2025-2051` %>%
-    filter(testType != "Non-MC"),
-  "Combined"
+	combinedTables$`PrimaryTable_2025-2051` %>%
+		filter(testType != "Non-MC"),
+	"Combined"
 )
-
 ```
 
 # Results - Number of MCED Screens - Time
@@ -389,8 +378,6 @@ visualizeFrontier(
 #| warning: false
 
 visualizeByTime(timeData, "Total_Screens", "Total Screens by Time", "Number of Cancer Screens")
-
-
 ```
 
 
@@ -403,7 +390,6 @@ MCEDScreenNum <- totalData
 MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] * 2
 
 visualizeTotals(MCEDScreenNum, "Total_Screens", "Number of Total Screens (2025-2051)", "Number of Cancer Screens (Breast MCED Doubled)")
-
 ```
 
 
@@ -412,7 +398,6 @@ visualizeTotals(MCEDScreenNum, "Total_Screens", "Number of Total Screens (2025-2
 ```{r,fig.width=24,fig.height=12}
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Screens_Diff", "Difference in Total Screens (2025-2051)", "Number of Additional Cancer Screens")
-
 ```
 
 # Results - Number of Detected Cancers - Time
@@ -428,7 +413,6 @@ visualizeByTime(timeData, "Detected_Cases", "Detected Cases by Time", "Number of
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", "Difference in Detected Cases (2025-2051)", "Number of Additional Detected Cancers")
-
 ```
 
 
@@ -446,7 +430,6 @@ visualizeByTime(timeData, "Cancer_Deaths", "Deaths by Time", "Number of Deaths")
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths_Diff = Cancer_Deaths_Diff * -1), "Cancer_Deaths_Diff", "Difference in Deaths Averted (2025-2051)", "Number of Averted Deaths")
-
 ```
 
 # Results - Number of Deaths 
@@ -455,7 +438,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Cancer_Deaths", "Deaths  (2025-2051)", "Number of  Deaths")
-
 ```
 
 # Results - Number of Person years 
@@ -464,7 +446,6 @@ visualizeTotals(totalData, "Cancer_Deaths", "Deaths  (2025-2051)", "Number of  D
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Person_years", "Person_years  (2025-2051)", "Number of  PY")
-
 ```
 
 # Results - Person years Diff
@@ -473,7 +454,6 @@ visualizeTotals(totalData, "Person_years", "Person_years  (2025-2051)", "Number 
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Person_years_Diff", "Person_years  (2025-2051)", "Number of  PY")
-
 ```
 
 
@@ -483,7 +463,6 @@ visualizeTotals(totalData, "Person_years_Diff", "Person_years  (2025-2051)", "Nu
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Health_adjusted_person_years", "Health_adjusted_person_years  (2025-2051)", "Number of  HAPY")
-
 ```
 
 # Results - Number of Cases Detected 
@@ -492,7 +471,6 @@ visualizeTotals(totalData, "Health_adjusted_person_years", "Health_adjusted_pers
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Detected_Cases", "Detected_Cases  (2025-2051)", "Number of  Detected_Cases")
-
 ```
 
 # Results - Screening Cost - Time
@@ -513,7 +491,6 @@ MCEDTestCost <- totalData
 MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] <- MCEDScreenNum$Screening_Cost[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] * 2
 
 visualizeTotals(MCEDScreenNum, "Screening_Cost", "Screening Cost (2025-2051)", "Screening Cost (Breast MCED Doubled)")
-
 ```
 
 
@@ -539,7 +516,6 @@ visualizeByTime(timeData, "Total_Cost", "Total Cost by Time", "Total Cost ($CAD)
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost")
-
 ```
 
 
@@ -556,7 +532,6 @@ visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Screening Cost", "Difference in Screening Cost")
-
 ```
 
 
@@ -565,7 +540,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", 
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Screening_Cost", " in Screening Cost", " in Screening Cost")
-
 ```
 
 # Results - Manage Cost - Total
@@ -573,7 +547,6 @@ visualizeTotals(totalData, "Screening_Cost", " in Screening Cost", " in Screenin
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "ManageCost", " in Manage Cost", " in Manage Cost")
-
 ```
 
 
@@ -582,7 +555,6 @@ visualizeTotals(totalData, "ManageCost", " in Manage Cost", " in Manage Cost")
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "ManageCost_Diff", "Diff in Manage Cost", "Diff in Manage Cost")
-
 ```
 
 # Results - Total Cost - Total
@@ -590,7 +562,6 @@ visualizeTotals(totalData, "ManageCost_Diff", "Diff in Manage Cost", "Diff in Ma
 #| echo: false
 #| warning: false
 visualizeTotals(totalData, "Total_Cost", " in Total Cost", " in Total Cost")
-
 ```
 
 # Results - Manage Cost - Additional
@@ -598,7 +569,6 @@ visualizeTotals(totalData, "Total_Cost", " in Total Cost", " in Total Cost")
 #| echo: false
 #| warning: false
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ManageCost_Diff", "Difference in Manage Cost", "Difference in Manage Cost")
-
 ```
 
 
@@ -609,7 +579,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ManageCost_Diff", "Dif
 #| warning: false
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_DetectedCases", "ICER: Difference in Cost Per Additional Detection", "Difference in Cost Per Additional Cancer Detection ($CAD/AdditionalDetection)")
-
 ```
 
 
@@ -621,7 +590,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_DetectedCases", "
 #| warning: false
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
-
 ```
 
 # Results - ICER (Difference in Cost per Additional Life Year)
@@ -631,7 +599,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "
 #| warning: false
 
 visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_PersonYears", "ICER: Difference in Cost Per Additional Life Year", "Difference in Cost Per Additional Life Year ($CAD/AdditionalLifeYear)")
-
 ```
 
 
@@ -643,7 +610,6 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_PersonYears", "IC
 #| warning: false
 
 visualizeStages(stageData)
-
 ```
 
 
