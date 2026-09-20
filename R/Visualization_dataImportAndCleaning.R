@@ -23,7 +23,7 @@ getOncoSimTables <- function(tableName, modelType) {
 			currentTable$cancertype <- str_to_title(modelType)
 			currentTable$formattedName <- name
 
-			if (!grepl("BaseCase", name)) {
+			if (!grepl("CurrentScreening", name)) {
 				nameSplit <- strsplit(name, "_")[[1]]
 				currentTable$minAge <- nameSplit[1]
 				currentTable$frequency <- nameSplit[2]
@@ -32,10 +32,10 @@ getOncoSimTables <- function(tableName, modelType) {
 				currentTable$formattedName <- paste(currentTable$testType, "\n Participation: ", currentTable$participation, "%\n", "Start Age: ", currentTable$minAge, "\nInterval: ", currentTable$frequency, " Years", sep = "")
 				currentTable$formattedName_NoTest <- paste("Participation: ", currentTable$participation, "%\n", "Start Age: ", currentTable$minAge, "\nInterval: ", currentTable$frequency, " Years", sep = "")
 			} else {
-				currentTable$minAge <- "BaseCase"
-				currentTable$frequency <- "BaseCase"
+				currentTable$minAge <- "CurrentScreening"
+				currentTable$frequency <- "CurrentScreening"
 				currentTable$participation <- 0
-				currentTable$testType <- "BaseCase"
+				currentTable$testType <- "CurrentScreening"
 			}
 			totalTable <- bind_rows(totalTable, currentTable)
 		}
@@ -156,11 +156,11 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 	print(nrow(
 		bind_rows(femaleOnlyTable, allSexTable) %>%
 			select(-cancertype) %>%
-			filter(sce != "BaseCase" & !grepl("Non-MC", sce))
+			filter(sce != "CurrentScreening" & !grepl("Non-MC", sce))
 	))
 	cancerMetricsTableAllCancerMCED <- bind_rows(femaleOnlyTable, allSexTable) %>%
 		select(-cancertype) %>%
-		filter(sce != "BaseCase" & !grepl("Non-MC", sce)) %>%
+		filter(sce != "CurrentScreening" & !grepl("Non-MC", sce)) %>%
 		group_by(Shiftable_year, sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType) %>%
 		summarize(
 			Detected_Cases = sum(Detected_Cases),
@@ -168,16 +168,16 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 			Total_Screens = mean(Total_Screens),
 			Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost),
 			Screening_Cost = mean(Screening_Cost),
-			Person_years = sum(Person_years),
+			Person_years = mean(Person_years),
 			Persons = sum(Persons),
 			ManageCost = sum(ManageCost)
 		) %>%
 		mutate(cancertype = "Combined")
 
 	print(nrow(cancerMetricsTableAllCancerMCED))
-	cancerMetricsTableAllCancerBaseCase <- cancerMetricsTable %>% #Don't need to multiply breast x2 for base case
+	cancerMetricsTableAllCancerCurrentScreening <- cancerMetricsTable %>% #Don't need to multiply breast x2 for base case
 		select(-cancertype) %>%
-		filter(sce == "BaseCase" | grepl("Non-MC", sce)) %>%
+		filter(sce == "CurrentScreening" | grepl("Non-MC", sce)) %>%
 		group_by(Shiftable_year, sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType) %>%
 		summarize(
 			Detected_Cases = sum(Detected_Cases),
@@ -185,13 +185,13 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 			Total_Screens = sum(Total_Screens),
 			Total_Cost = sum(Total_Cost),
 			Screening_Cost = sum(Screening_Cost),
-			Person_years = sum(Person_years),
+			Person_years = mean(Person_years),
 			Persons = sum(Persons),
 			ManageCost = sum(ManageCost)
 		) %>%
 		mutate(cancertype = "Combined")
 
-	combinedCancerTable <- bind_rows(cancerMetricsTableAllCancerMCED, cancerMetricsTableAllCancerBaseCase)
+	combinedCancerTable <- bind_rows(cancerMetricsTableAllCancerMCED, cancerMetricsTableAllCancerCurrentScreening)
 }
 
 
@@ -262,22 +262,22 @@ combineModelTables <- function(importedData) {
 	cancerMetricsTable$cancertype <- str_to_title(cancerMetricsTable$cancertype)
 	cancerMetricsTable$cancertype <- factor(cancerMetricsTable$cancertype, levels = c("Breast", "Colorectal", "Lung", "Combined"))
 
-	cancerMetricsTableBaseCase <- cancerMetricsTable %>% filter(sce == "BaseCase") %>% select(-c(sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType))
-	names(cancerMetricsTableBaseCase) <- paste("BASECASE", names(cancerMetricsTableBaseCase), sep = "_")
-	names(cancerMetricsTableBaseCase) <- gsub("BASECASE_Shiftable_year", "Shiftable_year", names(cancerMetricsTableBaseCase))
-	names(cancerMetricsTableBaseCase) <- gsub("BASECASE_cancertype", "cancertype", names(cancerMetricsTableBaseCase))
+	cancerMetricsTableCurrentScreening <- cancerMetricsTable %>% filter(sce == "CurrentScreening") %>% select(-c(sce, formattedName, formattedName_NoTest, minAge, frequency, participation, testType))
+	names(cancerMetricsTableCurrentScreening) <- paste("CurrentScreening", names(cancerMetricsTableCurrentScreening), sep = "_")
+	names(cancerMetricsTableCurrentScreening) <- gsub("CurrentScreening_Shiftable_year", "Shiftable_year", names(cancerMetricsTableCurrentScreening))
+	names(cancerMetricsTableCurrentScreening) <- gsub("CurrentScreening_cancertype", "cancertype", names(cancerMetricsTableCurrentScreening))
 
 	cancerMetricsTable <- cancerMetricsTable %>%
 		group_by(Shiftable_year, cancertype) %>%
-		left_join(cancerMetricsTableBaseCase)
+		left_join(cancerMetricsTableCurrentScreening)
 
 	createDifference <- c("Detected_Cases", "Cancer_Deaths", "Total_Screens", "Total_Cost", "Screening_Cost", "Person_years", "Health_adjusted_person_years", "ManageCost")
 
 	for (variable in createDifference) {
-		cancerMetricsTable[[paste(variable, "Diff", sep = "_")]] <- cancerMetricsTable[[variable]] - cancerMetricsTable[[paste("BASECASE", variable, sep = "_")]]
+		cancerMetricsTable[[paste(variable, "Diff", sep = "_")]] <- cancerMetricsTable[[variable]] - cancerMetricsTable[[paste("CurrentScreening", variable, sep = "_")]]
 	}
 
-	cancerMetricsTable <- cancerMetricsTable[, !grepl("BASECASE", names(cancerMetricsTable))]
+	cancerMetricsTable <- cancerMetricsTable[, !grepl("CurrentScreening", names(cancerMetricsTable))]
 
 	processedModelResults["PrimaryTable"] <- list(cancerMetricsTable)
 

@@ -28,7 +28,7 @@ library(daff)
 
 sourceDir <- "../Output/Scenarios/"
 specificScenario <- "breast_45_3_90_CS"
-referenceScenario <- "breast_BaseCase"
+referenceScenario <- "breast_CurrentScreening"
 
 scenarioDirectories <- list.dirs(sourceDir)
 

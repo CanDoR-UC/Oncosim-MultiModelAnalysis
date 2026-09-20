@@ -56,7 +56,7 @@ library(kableExtra)
 
 kableExtra::kable(
 	participationData %>%
-		filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+		filter(Shiftable_year == 2024, sce == "CurrentScreening") %>%
 		ungroup() %>%
 		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
 		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
@@ -64,7 +64,7 @@ kableExtra::kable(
 
 kableExtra::kable(
 	participationData %>%
-		filter(Shiftable_year %in% c(2020, 2025, 2035, 2045), grepl("50_2_", sce) & grepl("GA", sce) | grepl("BaseCase", sce)) %>%
+		filter(Shiftable_year %in% c(2020, 2025, 2035, 2045), grepl("50_2_", sce) & grepl("GA", sce) | grepl("CurrentScreening", sce)) %>%
 		ungroup() %>%
 		mutate(percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years, accuracy = 0.1)) %>%
 		select(Shiftable_year, participation, cancertype, percentScreenedWithin2Years) %>%
@@ -140,7 +140,7 @@ print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 ## Breast
 
 
-```{r,fig.width=24,fig.height=18}
+```{r,fig.width=32,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Breast")
@@ -154,7 +154,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Colorectal
 
 
-```{r,fig.width=24,fig.height=18}
+```{r,fig.width=32,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Colorectal")
@@ -167,7 +167,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Lung
 
 
-```{r,fig.width=24,fig.height=18}
+```{r,fig.width=32,fig.height=18}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Lung")
@@ -179,7 +179,7 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Combined
 
 
-```{r,fig.width=20,fig.height=14}
+```{r,fig.width=32,fig.height=14}
 #| echo: false
 #| warning: false
 visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")

@@ -174,7 +174,7 @@ generateModelParameters <- function(modelsToUse) {
 		}
 	}
 
-	for (scenarioType in c("BaseCase")) {
+	for (scenarioType in c("CurrentScreening")) {
 		for (cancerType in modelsToUse) {
 			scenarioName <- paste(cancerType, scenarioType, sep = "_")
 			currentTable <- data.frame(name = scenarioName)

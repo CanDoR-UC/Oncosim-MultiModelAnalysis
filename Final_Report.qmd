@@ -26,10 +26,10 @@ source("R/Visualization_PlotFunctions.R")
 # extrafont::font_import()
 extrafont::loadfonts()
 
-scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "BaseCase")
+scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "CurrentScreening")
 
 
-# scenariosToVisualize <- c("50_3_30_CS", "45_1_90_CS", "BaseCase")
+# scenariosToVisualize <- c("50_3_30_CS", "45_1_90_CS", "CurrentScreening")
 
 timeData <- combinedTables$PrimaryTable %>% filter(sce %in% scenariosToVisualize)
 timeData$formattedName <- paste(timeData$formattedName, "\n")
@@ -248,7 +248,7 @@ Parameter|Description|Planned Values|
   + between 83 - 89% within the past year for the 90% scenario
 
 
-# BaseCase - Participation
+# CurrentScreening - Participation
 
 ```{r,fig.width=18,fig.height=12}
 #| echo: false
@@ -257,7 +257,7 @@ library(kableExtra)
 
 kableExtra::kable(
 	participationData %>%
-		filter(Shiftable_year == 2024, sce == "BaseCase") %>%
+		filter(Shiftable_year == 2024, sce == "CurrentScreening") %>%
 		ungroup() %>%
 		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
 		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
@@ -397,7 +397,7 @@ visualizeTotals(MCEDScreenNum, "Total_Screens", "Number of Total Screens (2025-2
 
 ```{r,fig.width=24,fig.height=12}
 
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Screens_Diff", "Difference in Total Screens (2025-2051)", "Number of Additional Cancer Screens")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "Total_Screens_Diff", "Difference in Total Screens (2025-2051)", "Number of Additional Cancer Screens")
 ```
 
 # Results - Number of Detected Cancers - Time
@@ -412,7 +412,7 @@ visualizeByTime(timeData, "Detected_Cases", "Detected Cases by Time", "Number of
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Detected_Cases_Diff", "Difference in Detected Cases (2025-2051)", "Number of Additional Detected Cancers")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "Detected_Cases_Diff", "Difference in Detected Cases (2025-2051)", "Number of Additional Detected Cancers")
 ```
 
 
@@ -429,7 +429,7 @@ visualizeByTime(timeData, "Cancer_Deaths", "Deaths by Time", "Number of Deaths")
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase") %>% mutate(Cancer_Deaths_Diff = Cancer_Deaths_Diff * -1), "Cancer_Deaths_Diff", "Difference in Deaths Averted (2025-2051)", "Number of Averted Deaths")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening") %>% mutate(Cancer_Deaths_Diff = Cancer_Deaths_Diff * -1), "Cancer_Deaths_Diff", "Difference in Deaths Averted (2025-2051)", "Number of Averted Deaths")
 ```
 
 # Results - Number of Deaths 
@@ -500,7 +500,7 @@ visualizeTotals(MCEDScreenNum, "Screening_Cost", "Screening Cost (2025-2051)", "
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Total Screening Cost", "Additional Screening Cost ($CAD)")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "Screening_Cost_Diff", "Difference in Total Screening Cost", "Additional Screening Cost ($CAD)")
 ```
 
 # Results - Total Cost - Time
@@ -515,7 +515,7 @@ visualizeByTime(timeData, "Total_Cost", "Total Cost by Time", "Total Cost ($CAD)
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "Total_Cost_Diff", "Difference in Total Cost", "Difference in Total Cost")
 ```
 
 
@@ -531,7 +531,7 @@ visualizeByTime(timeData, "Screening_Cost", "Screening Cost by Time", "Screening
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "Screening_Cost_Diff", "Difference in Screening Cost", "Difference in Screening Cost")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "Screening_Cost_Diff", "Difference in Screening Cost", "Difference in Screening Cost")
 ```
 
 
@@ -568,7 +568,7 @@ visualizeTotals(totalData, "Total_Cost", " in Total Cost", " in Total Cost")
 ```{r,fig.width=24,fig.height=12}
 #| echo: false
 #| warning: false
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ManageCost_Diff", "Difference in Manage Cost", "Difference in Manage Cost")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "ManageCost_Diff", "Difference in Manage Cost", "Difference in Manage Cost")
 ```
 
 
@@ -578,7 +578,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ManageCost_Diff", "Dif
 #| echo: false
 #| warning: false
 
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_DetectedCases", "ICER: Difference in Cost Per Additional Detection", "Difference in Cost Per Additional Cancer Detection ($CAD/AdditionalDetection)")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "ICER_DetectedCases", "ICER: Difference in Cost Per Additional Detection", "Difference in Cost Per Additional Cancer Detection ($CAD/AdditionalDetection)")
 ```
 
 
@@ -589,7 +589,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_DetectedCases", "
 #| echo: false
 #| warning: false
 
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "ICER_ReducedDeaths", "ICER: Difference in Cost Per Reduction in Cancer Deaths", "Difference in Cost Per Reduction in Cancer Death ($CAD/AvertedDeath)")
 ```
 
 # Results - ICER (Difference in Cost per Additional Life Year)
@@ -598,7 +598,7 @@ visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_ReducedDeaths", "
 #| echo: false
 #| warning: false
 
-visualizeTotals(totalData %>% filter(sce != "BaseCase"), "ICER_PersonYears", "ICER: Difference in Cost Per Additional Life Year", "Difference in Cost Per Additional Life Year ($CAD/AdditionalLifeYear)")
+visualizeTotals(totalData %>% filter(sce != "CurrentScreening"), "ICER_PersonYears", "ICER: Difference in Cost Per Additional Life Year", "Difference in Cost Per Additional Life Year ($CAD/AdditionalLifeYear)")
 ```
 
 

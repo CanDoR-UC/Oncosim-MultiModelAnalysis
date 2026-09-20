@@ -12,12 +12,12 @@ SetParameters <- function(createdScenarios) {
 		] <- 1
 		scenario$set_param("CrcScreenPlanCanada", modality_param)
 
-		baseCaseParticipationValue <- 0.5
-		newParticipationValue <- ifelse(currentParameters$type != "BaseCase", currentParameters$participation, baseCaseParticipationValue)
+		CurrentScreeningParticipationValue <- 0.5
+		newParticipationValue <- ifelse(currentParameters$type != "CurrentScreening", currentParameters$participation, CurrentScreeningParticipationValue)
 
 		screen_param <- scenario$get_param("CrcScreenRecruitCanada")
 
-		screen_param$`0` <- c(0, 1, 2009, 2009, 50, 74, 123, baseCaseParticipationValue, 2, 0, 99, newParticipationValue, 4)
+		screen_param$`0` <- c(0, 1, 2009, 2009, 50, 74, 123, CurrentScreeningParticipationValue, 2, 0, 99, newParticipationValue, 4)
 		screen_param$`1` <- 0
 		screen_param$`2` <- 0
 
@@ -31,12 +31,12 @@ SetParameters <- function(createdScenarios) {
 		scenario$set_param("ColonCancerTreatmentCosts", colon_costs)
 
 		#Add extra recruitment to allow a sharp increase (if needed)
-		if (newParticipationValue > baseCaseParticipationValue) {
+		if (newParticipationValue > CurrentScreeningParticipationValue) {
 			yearToSelect <- 2010
 			ageToSelect <- 59
 			yearsBetween <- 14
 			for (column in 3:17) {
-				screen_param[[paste(column)]] <- c(0, 1, yearToSelect, yearToSelect, 50, ageToSelect, 123, baseCaseParticipationValue, 1, 1, yearsBetween, newParticipationValue, 4)
+				screen_param[[paste(column)]] <- c(0, 1, yearToSelect, yearToSelect, 50, ageToSelect, 123, CurrentScreeningParticipationValue, 1, 1, yearsBetween, newParticipationValue, 4)
 				yearToSelect <- yearToSelect + 1
 				ageToSelect <- ageToSelect + 1
 				yearsBetween <- yearsBetween - 1
@@ -45,8 +45,8 @@ SetParameters <- function(createdScenarios) {
 			screen_param$`3` <- 0
 			screen_param$`4` <- 0
 		}
-		screen_param$`18` <- c(0, 1, 2010, 2024, 50, 74, 123, baseCaseParticipationValue, 1, 0, 99, newParticipationValue, 4)
-		screen_param$`19` <- c(0, 1, 2025, 9999, ifelse(currentParameters$type != "BaseCase", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "BaseCase" & currentParameters$type != "Non-MC", 5, 4))
+		screen_param$`18` <- c(0, 1, 2010, 2024, 50, 74, 123, CurrentScreeningParticipationValue, 1, 0, 99, newParticipationValue, 4)
+		screen_param$`19` <- c(0, 1, 2025, 9999, ifelse(currentParameters$type != "CurrentScreening", currentParameters$startAge, 50), 74, 123, newParticipationValue, 0, 0, 99, newParticipationValue, ifelse(currentParameters$type != "CurrentScreening" & currentParameters$type != "Non-MC", 5, 4))
 
 		scenario$set_param("CrcScreenRecruitCanada", screen_param)
 
@@ -54,7 +54,7 @@ SetParameters <- function(createdScenarios) {
 		#withinModality[[1]] = FALSE
 		#scenario$set_param("ScreeningRoundWithinModality", withinModality)
 
-		if (currentParameters$type != "BaseCase") {
+		if (currentParameters$type != "CurrentScreening") {
 			timeToReturn <- scenario$get_param("TimeToRegularScreeningAfterColonoscopy")
 			timeToReturn[[1]] <- 0
 			scenario$set_param("TimeToRegularScreeningAfterColonoscopy", timeToReturn)
@@ -154,7 +154,7 @@ SetParameters <- function(createdScenarios) {
 		scenario$set_param("BreastCancerCosts", cost_1)
 		scenario$set_param("BreastCancerCosts2", cost_2)
 
-		if (currentParameters$type != "BaseCase") {
+		if (currentParameters$type != "CurrentScreening") {
 			if (currentParameters$type != "Non-MC") {
 				costs <- scenario$get_param("BreastScreeningCosts")
 				costs[
@@ -369,7 +369,7 @@ SetParameters <- function(createdScenarios) {
 
 		scenario$set_param("LungCancerTreatmentCosts", costs)
 
-		if (currentParameters$type != "BaseCase" && !calibratingCosts) {
+		if (currentParameters$type != "CurrentScreening" && !calibratingCosts) {
 			if (currentParameters$type != "Non-MC") {
 				SwitchEligibilityRule <- scenario$get_param("SwitchEligibilityRule")
 				SwitchEligibilityRule$Radon_RR <- TRUE #Hack to get around eligibility rules and get high participation

@@ -1,5 +1,5 @@
 dateRangeToShow <- 2020:2051
-scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "BaseCase")
+scenariosToVisualize <- c("50_3_70_CS", "50_3_70_GA", "50_3_70_Non-MC", "45_2_90_CS", "45_2_90_GA", "45_2_90_Non-MC", "CurrentScreening")
 
 colours <- list()
 
@@ -51,7 +51,7 @@ visualizeByTime <- function(dataset, variable, title, yAxisTitle) {
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
-			theme(text = element_text(family = fontFam, size = 20))
+			theme(text = element_text(family = fontFam, size = 20), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 	)
 }
 
@@ -60,7 +60,7 @@ visualizeParticipation <- function(dataset) {
 
 	dataset$Label <- paste(dataset$minAge, dataset$testType, sep = "\n")
 
-	twoYearData <- dataset %>% filter(grepl("_2_", sce) | grepl("BaseCase", sce))
+	twoYearData <- dataset %>% filter(grepl("_2_", sce) | grepl("CurrentScreening", sce))
 	leftPlot <- ggplot(twoYearData, aes(x = Shiftable_year, y = percentScreenedWithin2Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
@@ -75,10 +75,10 @@ visualizeParticipation <- function(dataset) {
 		geom_hline(yintercept = 0.3, linetype = "dashed", colour = "blue") +
 		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
 		theme_minimal() +
-		theme(text = element_text(family = fontFam, size = 20))
+		theme(text = element_text(family = fontFam, size = 20), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 
-	threeYearData <- dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce))
-	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("BaseCase", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = as.character(participation))) +
+	threeYearData <- dataset %>% filter(grepl("_3_", sce) | grepl("CurrentScreening", sce))
+	rightPlot <- ggplot(dataset %>% filter(grepl("_3_", sce) | grepl("CurrentScreening", sce)), aes(x = Shiftable_year, y = percentScreenedWithin3Years, colour = as.character(participation))) +
 		facet_grid(vars(Label), scales = "free") +
 		geom_line(size = 2) +
 		scale_x_continuous("Simulated Year") +
@@ -92,7 +92,7 @@ visualizeParticipation <- function(dataset) {
 		geom_hline(yintercept = 0.3, linetype = "dashed", colour = "blue") +
 		geom_vline(xintercept = 2025, linetype = "dashed", colour = "red") +
 		theme_minimal() +
-		theme(text = element_text(family = fontFam, size = 20))
+		theme(text = element_text(family = fontFam, size = 20), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 
 	ggarrange(leftPlot, rightPlot, nrow = 1)
 }
@@ -163,7 +163,11 @@ visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 	text_position <- position_dodge(width = 0.9)
 	text_position_divide <- 2
 
-	dataset$formattedName_NoTest[dataset$testType == "BaseCase"] <- "BaseCase"
+	dataset$formattedName_NoTest[dataset$testType == "CurrentScreening"] <- "CurrentScreening"
+
+	if (title == "Combined") {
+		title <- "Combined (Breast, Colorectal and Lung)"
+	}
 
 	return(
 		ggplot(dataset, aes(x = formattedName_NoTest, y = ColumnToShow, fill = cancertype)) +
@@ -177,7 +181,7 @@ visualizeTotals <- function(dataset, variable, title, yAxisTitle) {
 			expand_limits(y = 0) +
 			ggtitle(title) +
 			theme_minimal() +
-			theme(text = element_text(family = fontFam, size = 25))
+			theme(text = element_text(family = fontFam, size = 25), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 	)
 }
 
@@ -192,7 +196,7 @@ visualizeStages <- function(dataset) {
 			expand_limits(y = 0) +
 			ggtitle("Stage Distribution") +
 			theme_minimal() +
-			theme(text = element_text(family = fontFam, size = 20))
+			theme(text = element_text(family = fontFam, size = 20), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 	)
 }
 
@@ -258,17 +262,28 @@ visualizeFrontier <- function(frontierData, type) {
 	frontierPlotData <- bind_rows(frontierData, frontierDominated)
 	billion <- 1000000000
 
-	refValue <- frontierPlotData[frontierPlotData$formattedName == "BaseCase", ]$YVar
+	refValue <- frontierPlotData[frontierPlotData$formattedName == "CurrentScreening", ]$YVar
 
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
 	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), round(frontierPlotData$Total_Cost / billion), formatNumber(frontierPlotData$Person_years_Diff), sep = "\n"), "")
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
+	frontierPlotData$Labels <- ifelse(
+		frontierPlotData$Type == "Cost-efficient",
+		paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), formatNumber(frontierPlotData$Total_Cost / 27), formatNumber(frontierPlotData$Person_years_Diff / 27), formatNumber(frontierPlotData$Person_years / 27), sep = "\n"),
+		""
+	)
 
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
 
+	title <- type
+
+	if (title == "Combined") {
+		title <- "Combined (Breast, Colorectal and Lung)"
+	}
+	frontierPlotData$yVar <- frontierPlotData$yVar / 100000
 	ggplot(frontierPlotData, aes(y = yVar, x = Total_Cost / billion, colour = Type, shape = testType)) +
 		geom_point(size = 5) +
-		geom_line(data = frontierData %>% filter(Type == "Cost-efficient"), aes(group = Type), colour = "black", size = 2) +
+		geom_line(data = frontierData %>% filter(Type == "Cost-efficient") %>% mutate(yVar = yVar / 100000), aes(group = Type), colour = "black", size = 2) +
 		geom_label_repel(
 			aes(
 				label = Labels,
@@ -278,10 +293,11 @@ visualizeFrontier <- function(frontierData, type) {
 			),
 			size = 4,
 			family = fontFam,
-			colour = "black"
+			colour = "black",
+			fill = rgb(1, 1, 1, alpha = 0.7)
 		) +
 		scale_y_continuous(
-			yLabel,
+			paste(yLabel, "(/100,000)"),
 			labels = scales::comma,
 		) +
 		scale_x_continuous(
@@ -291,8 +307,9 @@ visualizeFrontier <- function(frontierData, type) {
 		scale_shape_discrete("Test Type") +
 		scale_colour_manual("", values = colours) +
 		theme_minimal(16, fontFam) +
-		ggtitle(type) +
-		guides(colour = guide_legend(nrow = 2, byrow = TRUE), shape = guide_legend(nrow = 2, byrow = TRUE))
+		ggtitle(title) +
+		guides(colour = guide_legend(nrow = 2, byrow = TRUE), shape = guide_legend(nrow = 2, byrow = TRUE)) +
+		theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 }
 
 visualizePoints <- function(totalData, x_var, y_var) {
@@ -315,7 +332,8 @@ visualizePoints <- function(totalData, x_var, y_var) {
 		) +
 		scale_shape_discrete("Test Type") +
 		scale_colour_discrete("") +
-		theme_minimal(13, fontFam)
+		theme_minimal(13, fontFam) +
+		theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 }
 
 generateMaxToUse <- function(values) {
@@ -335,13 +353,13 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	rowCount <- 4
 	if (typeToShow != "Combined") {
 		currentDataToVisualize <- totalData %>%
-			filter(cancertype == typeToShow, testType != "BaseCase") %>%
+			filter(cancertype == typeToShow, testType != "CurrentScreening") %>%
 			#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
 			pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, Health_adjusted_person_years_Diff, Person_years_Diff, ICER_DetectedCases, ICER_PersonYears, ICER_HAPY)) %>%
 			filter(!is.na(value))
 	} else {
 		currentDataToVisualize <- totalData %>%
-			filter(cancertype == typeToShow, testType != "BaseCase") %>%
+			filter(cancertype == typeToShow, testType != "CurrentScreening") %>%
 			#		pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, ICER_ReducedDeaths, ICER_DetectedCases, ICER_PersonYears))
 			pivot_longer(c(Detected_Cases_Diff, Cancer_Deaths_Diff, Total_Cost_Diff, Person_years_Diff, ICER_DetectedCases, ICER_PersonYears)) %>%
 			filter(!is.na(value))
@@ -362,14 +380,19 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	variableNames["ICER_DetectedCases"] <- "Difference in Cost Per\nAdditional Detection"
 	variableNames["ICER_ReducedDeaths"] <- "Difference in Cost Per\nReduction in Cancer Deaths"
 	variableNames["ICER_PersonYears"] <- "Difference in Cost Per\n100,000 Additional Person Years"
-	variableNames["ICER_HAPY"] <- "Difference in Cost Per Additional\n100,000 Health Adjusted Person Years"
+	if (typeToShow != "Combined") {
+		variableNames["ICER_HAPY"] <- "Difference in Cost Per Additional\n100,000 Health Adjusted Person Years"
+	}
 
 	dataToUse <- currentDataToVisualize %>% filter(name %in% names(variableNames))
 
+	letters <- c("A: ", "B: ", "C: ", "D: ", "E: ", "F: ", "G: ", "H: ", "I: ")
+	index <- 1
 	for (name in names(variableNames)) {
-		dataToUse$name[dataToUse$name == name] <- variableNames[name][[1]]
+		dataToUse$name[dataToUse$name == name] <- paste(letters[index], variableNames[name][[1]])
+		index <- index + 1
 	}
-	dataToUse$name <- factor(dataToUse$name, levels = as.character(variableNames))
+	dataToUse$name <- factor(dataToUse$name, levels = unique(dataToUse$name))
 
 	ggplot(dataToUse, aes(x = formattedName_NoTest, y = value, fill = testType, group = testType)) +
 		facet_wrap(vars(name), scales = "free_y", ncol = 2) +
@@ -380,17 +403,17 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 		scale_y_continuous("", label = formatNumber) +
 		scale_x_discrete("") +
 		scale_fill_manual("Test Type", values = colours) +
-		theme(strip.text = element_text(size = 30), legend.position = "right")
+		theme(strip.text = element_text(size = 30), legend.position = "right", panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 }
 
 visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) {
 	cancerType <- "Combined"
 
 	currentTable <- combinedTables$`PrimaryTable_2025-2051` %>%
-		filter(cancertype == cancerType, testType %in% c(testToShow, "BaseCase"))
+		filter(cancertype == cancerType, testType %in% c(testToShow, "CurrentScreening"))
 
 	currentTable$Label <- paste("Interval: ", currentTable$frequency, " Years", sep = "")
-	currentTable$Label[currentTable$testType == "BaseCase"] <- "BaseCase"
+	currentTable$Label[currentTable$testType == "CurrentScreening"] <- "CurrentScreening"
 
 	currentTable$ExposureVar <- currentTable[[exposure]]
 	currentTable$OutcomeVar <- currentTable[[outcome]]
@@ -400,11 +423,11 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 
 	linearRegressionResults <- data.frame()
 
-	baseCaseValue <- currentTable[currentTable$testType == "BaseCase", ]$OutcomeVar
+	CurrentScreeningValue <- currentTable[currentTable$testType == "CurrentScreening", ]$OutcomeVar
 
 	for (label in unique(currentTable$Label)) {
 		for (age in unique(currentTable$minAge)) {
-			if (age != "BaseCase" & label != "BaseCase") {
+			if (age != "CurrentScreening" & label != "CurrentScreening") {
 				filteredTable <- currentTable %>% filter(minAge == age, Label == label)
 				model <- lm(OutcomeVar ~ ExposureVar, data = filteredTable)
 
@@ -412,7 +435,7 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 				currentResults$intercept <- coef(model)[1]
 				currentResults$slope <- coef(model)[2]
 
-				currentResults$BaseCaseIntercept <- (baseCaseValue - currentResults$intercept) / currentResults$slope
+				currentResults$CurrentScreeningIntercept <- (CurrentScreeningValue - currentResults$intercept) / currentResults$slope
 
 				linearRegressionResults <- bind_rows(linearRegressionResults, currentResults)
 			}
@@ -431,8 +454,8 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 		geom_smooth(method = "lm", aes(linetype = minAge), se = FALSE, linewidth = 2) +
 		scale_y_continuous(paste(outcomeTitle, "(millions)"), label = scales::comma, expand = c(0, 0)) +
 		scale_x_continuous(exposureTitle, label = scales::comma) +
-		geom_hline(yintercept = baseCaseValue / divide) +
-		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(BaseCaseIntercept / 100, accuracy = 0.1), x = BaseCaseIntercept), y = baseCaseValue / divide, family = fontFam, size = 6, colour = "black") +
+		geom_hline(yintercept = CurrentScreeningValue / divide) +
+		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(CurrentScreeningIntercept / 100, accuracy = 0.1), x = CurrentScreeningIntercept), y = CurrentScreeningValue / divide, family = fontFam, size = 6, colour = "black") +
 		scale_colour_manual("Interval", values = colours) +
 		theme_minimal(20, fontFam) +
 		scale_linetype_discrete("Minimum Age") +
