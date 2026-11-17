@@ -2,7 +2,9 @@ modelDigests <- list()
 modelDigests["OncoSim-lung"] <- "201e47e22502a6f0ec0593f7f539970c"
 modelDigests["OncoSim-breast"] <- "7b6012a86dcbfce878eca24e4845736a"
 modelDigests["OncoSim-colorectal"] <- "5af0eb8d41728e927b1e21e97f5434f1"
-modelDigests["OncoSim-allcancers"] <- "c2cc80bad8c67abf432029f62682e97f"
+
+
+modelDigests["OncoSim-allcancers"] <- "17b14afec4e0a769f7ba327293549efb" #TEMP
 
 
 allCancerModelRuns <- load_model(modelDigests["OncoSim-allcancers"][[1]])$ModelRuns

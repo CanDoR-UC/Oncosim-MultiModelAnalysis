@@ -55,12 +55,13 @@ SetParameters <- function(createdScenarios) {
 		#scenario$set_param("ScreeningRoundWithinModality", withinModality)
 
 		if (currentParameters$type != "CurrentScreening") {
-			timeToReturn <- scenario$get_param("TimeToRegularScreeningAfterColonoscopy")
-			timeToReturn[[1]] <- 0
-			scenario$set_param("TimeToRegularScreeningAfterColonoscopy", timeToReturn)
-
 			if (currentParameters$type != "Non-MC") {
-				#Set MCED Cost
+				#Set MCED Cost. Does not apply to NonMC
+
+				timeToReturn <- scenario$get_param("TimeToRegularScreeningAfterColonoscopy")
+				timeToReturn[[1]] <- 0
+				scenario$set_param("TimeToRegularScreeningAfterColonoscopy", timeToReturn)
+
 				costs <- scenario$get_param("CrcScreenCostCanada")
 				costs$FOBT_KIT <- currentParameters$cost
 				costs$FOBT_PROCESSING <- 0

@@ -218,6 +218,10 @@ visualizeFrontier <- function(frontierData, type) {
 	}
 	if (variableToUse == "Person_years") {
 		yLabel <- "Person Years"
+
+		if (type == "Combined") {
+			yLabel <- "Average Person Years"
+		}
 	}
 
 	frontierData$yVar <- frontierData[[variableToUse]]
@@ -265,13 +269,25 @@ visualizeFrontier <- function(frontierData, type) {
 	refValue <- frontierPlotData[frontierPlotData$formattedName == "CurrentScreening", ]$YVar
 
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
-	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), round(frontierPlotData$Total_Cost / billion), formatNumber(frontierPlotData$Person_years_Diff), sep = "\n"), "")
-	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
 	frontierPlotData$Labels <- ifelse(
 		frontierPlotData$Type == "Cost-efficient",
-		paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), formatNumber(frontierPlotData$Total_Cost / 27), formatNumber(frontierPlotData$Person_years_Diff / 27), formatNumber(frontierPlotData$Person_years / 27), sep = "\n"),
+		paste(
+			frontierPlotData$formattedName,
+			formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar),
+			round(frontierPlotData$Total_Cost / billion),
+			formatNumber(frontierPlotData$Total_Cost / 27),
+			formatNumber(frontierPlotData$Person_years_Diff),
+			formatNumber(frontierPlotData$Person_years_Diff / 27),
+			sep = "\n"
+		),
 		""
 	)
+	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
+	#frontierPlotData$Labels <- ifelse(
+	#		frontierPlotData$Type == "Cost-efficient", #
+	#		paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), formatNumber(frontierPlotData$Person_years_Diff / 27), formatNumber(frontierPlotData$Person_years / 27), sep = "\n"),
+	#		""
+	#)
 
 	frontierPlotData$Size <- ifelse(frontierPlotData$Type == "Cost-efficient", 3, 1)
 
@@ -369,7 +385,7 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	plotsToCombine <- list()
 
 	variableNames <- list()
-	variableNames["Detected_Cases_Diff"] <- "Difference in Detected Cases"
+	variableNames["Detected_Cases_Diff"] <- "Difference in Screen-Detected Cases"
 	variableNames["Cancer_Deaths_Diff"] <- "Difference in Cancer Deaths"
 	variableNames["Total_Cost_Diff"] <- "Difference in Total Cost"
 	if (typeToShow != "Combined") {
@@ -378,7 +394,6 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 	variableNames["Person_years_Diff"] <- "Difference in Person Years"
 
 	variableNames["ICER_DetectedCases"] <- "Difference in Cost Per\nAdditional Detection"
-	variableNames["ICER_ReducedDeaths"] <- "Difference in Cost Per\nReduction in Cancer Deaths"
 	variableNames["ICER_PersonYears"] <- "Difference in Cost Per\n100,000 Additional Person Years"
 	if (typeToShow != "Combined") {
 		variableNames["ICER_HAPY"] <- "Difference in Cost Per Additional\n100,000 Health Adjusted Person Years"
@@ -392,10 +407,9 @@ visualizeSpecificCancerType <- function(totalData, typeToShow) {
 		dataToUse$name[dataToUse$name == name] <- paste(letters[index], variableNames[name][[1]])
 		index <- index + 1
 	}
-	dataToUse$name <- factor(dataToUse$name, levels = unique(dataToUse$name))
 
 	ggplot(dataToUse, aes(x = formattedName_NoTest, y = value, fill = testType, group = testType)) +
-		facet_wrap(vars(name), scales = "free_y", ncol = 2) +
+		facet_wrap(vars(name), scales = "free", ncol = 2) +
 		geom_bar(position = "dodge", stat = "identity") +
 		theme_minimal(28, fontFam) +
 		geom_hline(aes(yintercept = 0), linetype = 2) +
@@ -452,13 +466,13 @@ visualizeLinearModel <- function(combinedTables, testToShow, outcome, exposure) 
 	) +
 		geom_point(size = 2) +
 		geom_smooth(method = "lm", aes(linetype = minAge), se = FALSE, linewidth = 2) +
-		scale_y_continuous(paste(outcomeTitle, "(millions)"), label = scales::comma, expand = c(0, 0)) +
+		scale_y_continuous(paste("Average", outcomeTitle, "(millions)"), label = scales::comma, expand = c(0, 0)) +
 		scale_x_continuous(exposureTitle, label = scales::comma) +
 		geom_hline(yintercept = CurrentScreeningValue / divide) +
 		geom_label_repel(data = linearRegressionResults, aes(label = scales::percent(CurrentScreeningIntercept / 100, accuracy = 0.1), x = CurrentScreeningIntercept), y = CurrentScreeningValue / divide, family = fontFam, size = 6, colour = "black") +
-		scale_colour_manual("Interval", values = colours) +
 		theme_minimal(20, fontFam) +
-		scale_linetype_discrete("Minimum Age") +
+		scale_linetype_manual("Minimum Age", values = c("dotted", "solid")) +
+		scale_colour_manual("Interval", values = colours) +
 		ggtitle(testToShow) +
 		theme(panel.border = element_rect(colour = "grey", linewidth = 1, fill = NA))
 }

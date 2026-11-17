@@ -35,7 +35,9 @@ stageData <- combinedTables$StageDist
 stageData$formattedName <- paste(stageData$formattedName, "\n")
 
 timeData_BreastDouble <- timeData
-timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] <- timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] * 2
+timeData_BreastDouble$Total_Screens[
+  timeData$cancertype == "Breast"
+] <- timeData_BreastDouble$Total_Screens[timeData$cancertype == "Breast"] * 2
 
 participationData <- combinedTables$Participation
 ```
@@ -58,17 +60,47 @@ kableExtra::kable(
 	participationData %>%
 		filter(Shiftable_year == 2024, sce == "CurrentScreening") %>%
 		ungroup() %>%
-		mutate(percentScreenedWithin3Years = scales::percent(percentScreenedWithin3Years), percentScreenedWithin1Years = scales::percent(percentScreenedWithin1Years), percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)) %>%
-		select(Shiftable_year, cancertype, percentScreenedWithin1Years, percentScreenedWithin2Years, percentScreenedWithin3Years)
+		mutate(
+			percentScreenedWithin3Years = scales::percent(
+				percentScreenedWithin3Years
+			),
+			percentScreenedWithin1Years = scales::percent(
+				percentScreenedWithin1Years
+			),
+			percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years)
+		) %>%
+		select(
+			Shiftable_year,
+			cancertype,
+			percentScreenedWithin1Years,
+			percentScreenedWithin2Years,
+			percentScreenedWithin3Years
+		)
 )
 
 kableExtra::kable(
 	participationData %>%
-		filter(Shiftable_year %in% c(2020, 2025, 2035, 2045), grepl("50_2_", sce) & grepl("GA", sce) | grepl("CurrentScreening", sce)) %>%
+		filter(
+			Shiftable_year %in% c(2020, 2025, 2035, 2045),
+			grepl("50_2_", sce) & grepl("GA", sce) | grepl("CurrentScreening", sce)
+		) %>%
 		ungroup() %>%
-		mutate(percentScreenedWithin2Years = scales::percent(percentScreenedWithin2Years, accuracy = 0.1)) %>%
-		select(Shiftable_year, participation, cancertype, percentScreenedWithin2Years) %>%
-		pivot_wider(values_from = percentScreenedWithin2Years, names_from = Shiftable_year)
+		mutate(
+			percentScreenedWithin2Years = scales::percent(
+				percentScreenedWithin2Years,
+				accuracy = 0.1
+			)
+		) %>%
+		select(
+			Shiftable_year,
+			participation,
+			cancertype,
+			percentScreenedWithin2Years
+		) %>%
+		pivot_wider(
+			values_from = percentScreenedWithin2Years,
+			names_from = Shiftable_year
+		)
 )
 ```
 
@@ -78,18 +110,29 @@ kableExtra::kable(
 
 
 ```{r,fig.width=24,fig.height=12}
-
 MCEDScreenNum <- totalData
 
-MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] <- MCEDScreenNum$Total_Screens[MCEDScreenNum$cancertype == "Breast" & MCEDScreenNum$testType %in% c("GA", "CS")] * 2
+MCEDScreenNum$Total_Screens[
+  MCEDScreenNum$cancertype == "Breast" &
+    MCEDScreenNum$testType %in% c("GA", "CS")
+] <- MCEDScreenNum$Total_Screens[
+  MCEDScreenNum$cancertype == "Breast" &
+    MCEDScreenNum$testType %in% c("GA", "CS")
+] *
+  2
 
-visualizeTotals(MCEDScreenNum %>% filter(sce %in% scenariosToVisualize), "Total_Screens", "Number of Total Screens (2025-2051)", "Number of Cancer Screens (Breast MCED Doubled)")
+visualizeTotals(
+  MCEDScreenNum %>% filter(sce %in% scenariosToVisualize),
+  "Total_Screens",
+  "Number of Total Screens (2025-2051)",
+  "Number of Cancer Screens (Breast MCED Doubled)"
+)
 ```
 
 ## Efficiency Frontiers
 
 
-```{r,fig.width=11,fig.height=12}
+```{r,fig.width=20,fig.height=20}
 #| echo: false
 #| warning: false
 
@@ -107,21 +150,46 @@ for (type in c("Breast", "Colorectal", "Lung", "Combined")) {
 		combinedTables$`PrimaryTable_2025-2051` %>%
 			filter(cancertype == type) %>%
 			ungroup() %>%
-			select(sce, cancertype, testType, Person_years, Person_years_Diff, Total_Cost, Total_Cost_Diff) %>%
-			mutate(Person_years = scales::comma(Person_years), Person_years_Diff = scales::comma(Person_years_Diff), Total_Cost = scales::dollar(Total_Cost), Total_Cost_Diff = scales::dollar(Total_Cost_Diff))
+			select(
+				sce,
+				cancertype,
+				testType,
+				Person_years,
+				Person_years_Diff,
+				Total_Cost,
+				Total_Cost_Diff
+			) %>%
+			mutate(
+				Person_years = scales::comma(Person_years),
+				Person_years_Diff = scales::comma(Person_years_Diff),
+				Total_Cost = scales::dollar(Total_Cost),
+				Total_Cost_Diff = scales::dollar(Total_Cost_Diff)
+			)
 	)
 }
 ```
 
 
 ```{r}
-
 kableExtra::kable(
 	combinedTables$`PrimaryTable_2025-2051` %>%
 		ungroup() %>%
-		select(sce, cancertype, testType, Person_years, Person_years_Diff, Total_Cost, Total_Cost_Diff) %>%
+		select(
+			sce,
+			cancertype,
+			testType,
+			Person_years,
+			Person_years_Diff,
+			Total_Cost,
+			Total_Cost_Diff
+		) %>%
 		mutate(Per = scales::dollar(100000 * Total_Cost / Person_years)) %>%
-		mutate(Person_years = scales::comma(Person_years), Person_years_Diff = scales::comma(Person_years_Diff), Total_Cost = scales::dollar(Total_Cost), Total_Cost_Diff = scales::dollar(Total_Cost_Diff))
+		mutate(
+			Person_years = scales::comma(Person_years),
+			Person_years_Diff = scales::comma(Person_years_Diff),
+			Total_Cost = scales::dollar(Total_Cost),
+			Total_Cost_Diff = scales::dollar(Total_Cost_Diff)
+		)
 )
 ```
 
@@ -140,10 +208,13 @@ print(ggarrange(plotlist = efficiencyPlots, common.legend = TRUE))
 ## Breast
 
 
-```{r,fig.width=32,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
-visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Breast")
+visualizeSpecificCancerType(
+  totalData %>% filter(sce %in% scenariosToVisualize),
+  "Breast"
+)
 ```
 
 
@@ -154,10 +225,13 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Colorectal
 
 
-```{r,fig.width=32,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
-visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Colorectal")
+visualizeSpecificCancerType(
+  totalData %>% filter(sce %in% scenariosToVisualize),
+  "Colorectal"
+)
 ```
 
 - GA with 90% participation is the only MCED scenario that results in fewer cancer deaths.
@@ -167,10 +241,13 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Lung
 
 
-```{r,fig.width=32,fig.height=18}
+```{r,fig.width=40,fig.height=18}
 #| echo: false
 #| warning: false
-visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Lung")
+visualizeSpecificCancerType(
+  totalData %>% filter(sce %in% scenariosToVisualize),
+  "Lung"
+)
 ```
 
 - Beside the Non-MC scenarios, 90% GA leads to the lowest increase in cost per additional detection. However, CS leads to the lowest increase in cost per death averted.
@@ -179,10 +256,13 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 ## Combined
 
 
-```{r,fig.width=32,fig.height=14}
+```{r,fig.width=40,fig.height=14}
 #| echo: false
 #| warning: false
-visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize), "Combined")
+visualizeSpecificCancerType(
+  totalData %>% filter(sce %in% scenariosToVisualize),
+  "Combined"
+)
 ```
 
 - Beside the NonMED scenario, CS 90% leads to the lowest increase in cost per additional detection (among scenarios that increase detections)
@@ -190,15 +270,27 @@ visualizeSpecificCancerType(totalData %>% filter(sce %in% scenariosToVisualize),
 
 ## Linear Modelling
 
-```{r,fig.width=12,fig.height=13}
+```{r,fig.width=14,fig.height=13}
 #| echo: false
 #| warning: false
 
 linearPlots <- list()
 
 for (testType in c("GA", "CS", "Non-MC")) {
-	linearPlots[testType] <- list(visualizeLinearModel(combinedTables, testType, "Person_years", "participation"))
+	linearPlots[testType] <- list(visualizeLinearModel(
+		combinedTables,
+		testType,
+		"Person_years",
+		"participation"
+	))
 }
-print(ggarrange(plotlist = linearPlots, common.legend = TRUE, nrow = 3, ncol = 1))
+
+
+library(patchwork)
+
+linearPlots["GA"][[1]] /
+	linearPlots["CS"][[1]] /
+	linearPlots["Non-MC"][[1]] +
+	plot_layout(guides = "collect")
 ```
 

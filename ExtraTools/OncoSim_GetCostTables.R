@@ -27,11 +27,13 @@ CurrentScreeningLungCost <- read.csv("Output/Runs/AutomatedRun_ MCEDProject Onco
 
 
 defaultLungCostFiltered <- bind_rows(defaultLungCost, CurrentScreeningLungCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
+	filter(Hackable_province == "all", Shiftable_year %in% totalYears) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
-	summarize(AverageTreatmentCost = sum(Cost) / max(Number_of_patients_treated), .by = c("Stage_at_diagnosis_or_recurrence", "Type")) %>%
+	summarize(MaxPatientsTreated = max(Number_of_patients_treated), TreatmentCost = sum(Cost), .by = c("Stage_at_diagnosis_or_recurrence", "Type", "Shiftable_year")) %>%
+	summarize(AverageTreatmentCost = sum(TreatmentCost) / sum(MaxPatientsTreated), .by = c("Stage_at_diagnosis_or_recurrence", "Type")) %>%
 	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
-	mutate(Ratio = `MCEDScenarios` / Default)
+	mutate(Ratio = `MCEDScenarios` / Default) %>%
+	mutate(MCEDScenarios = scales::dollar(MCEDScenarios, accuracy = 0.01))
 
 
 breastModelRuns <- load_model(modelDigests["OncoSim-breast"][[1]])$ModelRuns
@@ -41,12 +43,14 @@ CurrentScreeningBreastCost <- read.csv("Output/Runs/AutomatedRun_ MCEDProject On
 
 
 defaultBreastCostFiltered <- bind_rows(defaultBreastCost, CurrentScreeningBreastCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
+	filter(Hackable_province == "all", Shiftable_year %in% totalYears) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
 	mutate(Number_of_patients = Treatment_cost / Average_treatm_x_r_person_year) %>%
-	summarize(AverageTreatmentCost = sum(Treatment_cost) / max(Number_of_patients), .by = c("Stage", "Type")) %>%
+	summarize(MaxPatientsTreated = max(Number_of_patients), TreatmentCost = sum(Treatment_cost), .by = c("Stage", "Type", "Shiftable_year")) %>%
+	summarize(AverageTreatmentCost = sum(TreatmentCost) / sum(MaxPatientsTreated), .by = c("Stage", "Type")) %>%
 	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
-	mutate(Ratio = `MCEDScenarios` / Default)
+	mutate(Ratio = `MCEDScenarios` / Default) %>%
+	mutate(MCEDScenarios = scales::dollar(MCEDScenarios, accuracy = 0.01))
 
 colorectalModelRuns <- load_model(modelDigests["OncoSim-colorectal"][[1]])$ModelRuns
 defaultColorectal <- load_run(modelDigests["OncoSim-colorectal"][[1]], colorectalModelRuns$RunDigest[colorectalModelRuns$Name == "Default_first_run_48M_cases_12_subs"])
@@ -55,10 +59,12 @@ CurrentScreeningColorectalCost <- read.csv("Output/Runs/AutomatedRun_ MCEDProjec
 
 
 defaultColorectalCostFiltered <- bind_rows(defaultColorectalCost, CurrentScreeningColorectalCost) %>%
-	filter(Hackable_province == "all", Shiftable_year == 2025) %>%
+	filter(Hackable_province == "all", Shiftable_year %in% totalYears) %>%
 	pivot_wider(names_from = expr_name, values_from = expr_value) %>%
 	mutate(Treatment_cost = Average_treatm_x_patient_treated * Number_of_patients_treated) %>%
 	mutate(Treatment_cost = ifelse(Number_of_patients_treated == 0, 0, Treatment_cost)) %>%
-	summarize(AverageTreatmentCost = sum(Treatment_cost) / max(Number_of_patients_treated), .by = c("Stage_of_invasive_cancer_TNM", "Type")) %>%
+	summarize(MaxPatientsTreated = max(Number_of_patients_treated), TreatmentCost = sum(Treatment_cost), .by = c("Stage_of_invasive_cancer_TNM", "Type", "Shiftable_year")) %>%
+	summarize(AverageTreatmentCost = sum(TreatmentCost) / sum(MaxPatientsTreated), .by = c("Stage_of_invasive_cancer_TNM", "Type")) %>%
 	pivot_wider(names_from = Type, values_from = AverageTreatmentCost) %>%
-	mutate(Ratio = `MCEDScenarios` / Default)
+	mutate(Ratio = `MCEDScenarios` / Default) %>%
+	mutate(MCEDScenarios = scales::dollar(MCEDScenarios, accuracy = 0.01))

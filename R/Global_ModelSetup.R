@@ -186,6 +186,8 @@ generateModelParameters <- function(modelsToUse) {
 		}
 	}
 
+	parameterTables <- parameterTables %>% filter(type == "Non-MC")
+
 	print(nrow(parameterTables))
 
 	parameterTables

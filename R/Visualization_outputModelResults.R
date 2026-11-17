@@ -3,12 +3,12 @@ outputAllTables <- function(previousRunOutputs) {
 	if (downloadOncoSimRuns) {
 		openmpp::use_OpenMpp_CPAC()
 		#unlink("Output", recursive = TRUE)
-		models = c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")
+		models <- c("OncoSim-colorectal", "OncoSim-lung", "OncoSim-breast")[1]
 		for (modelToUse in models) {
 			print(modelToUse)
-			modelDigest = modelDigests[modelToUse][[1]]
+			modelDigest <- modelDigests[modelToUse][[1]]
 
-			model = load_model(modelDigest)
+			model <- load_model(modelDigest)
 
 			outputDirectory <- paste("Output", sep = "")
 			dir.create(outputDirectory, showWarnings = FALSE)
@@ -45,9 +45,9 @@ outputAllTables <- function(previousRunOutputs) {
 			allRuns <- allRuns[grepl(analysisName, allRuns)]
 
 			for (runName in allRuns) {
-				modelDigest = modelDigests[modelToUse][[1]]
+				modelDigest <- modelDigests[modelToUse][[1]]
 
-				model = load_model(modelDigest)
+				model <- load_model(modelDigest)
 
 				model <- load_run(modelDigest, allRunTable[allRunTable$Name == runName, ]$RunDigest)
 
@@ -59,16 +59,16 @@ outputAllTables <- function(previousRunOutputs) {
 		}
 	}
 
-	allTables = list()
+	allTables <- list()
 
 	for (breastTable in outputTables["OncoSim-breast"][[1]]) {
-		allTables[breastTable] = list(getOncoSimTables(breastTable, "breast"))
+		allTables[breastTable] <- list(getOncoSimTables(breastTable, "breast"))
 	}
 	for (colonTable in outputTables["OncoSim-colorectal"][[1]]) {
-		allTables[colonTable] = list(getOncoSimTables(colonTable, "colorectal"))
+		allTables[colonTable] <- list(getOncoSimTables(colonTable, "colorectal"))
 	}
 	for (lungTable in outputTables["OncoSim-lung"][[1]]) {
-		allTables[lungTable] = list(getOncoSimTables(lungTable, "lung"))
+		allTables[lungTable] <- list(getOncoSimTables(lungTable, "lung"))
 	}
 	allTables
 }

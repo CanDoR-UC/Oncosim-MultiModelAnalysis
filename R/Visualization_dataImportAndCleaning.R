@@ -168,7 +168,7 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 			Total_Screens = mean(Total_Screens),
 			Total_Cost = sum(Total_Cost - Screening_Cost) + mean(Screening_Cost),
 			Screening_Cost = mean(Screening_Cost),
-			Person_years = mean(Person_years),
+			Person_years = sum(Person_years) / 2.5,
 			Persons = sum(Persons),
 			ManageCost = sum(ManageCost)
 		) %>%
@@ -185,7 +185,7 @@ createCombinedCancerTypesData <- function(cancerMetricsTable) {
 			Total_Screens = sum(Total_Screens),
 			Total_Cost = sum(Total_Cost),
 			Screening_Cost = sum(Screening_Cost),
-			Person_years = mean(Person_years),
+			Person_years = sum(Person_years) / 2.5,
 			Persons = sum(Persons),
 			ManageCost = sum(ManageCost)
 		) %>%
@@ -311,6 +311,11 @@ combineModelTables <- function(importedData) {
 	cancerMetricsTableCombinedYears$ICER_DetectedCases <- cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Detected_Cases_Diff)
 	cancerMetricsTableCombinedYears$ICER_PersonYears <- 100000 * cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Person_years_Diff)
 	cancerMetricsTableCombinedYears$ICER_HAPY <- 100000 * cancerMetricsTableCombinedYears$Total_Cost_Diff / (cancerMetricsTableCombinedYears$Health_adjusted_person_years_Diff)
+
+	cancerMetricsTableCombinedYears$ICER_ReducedDeaths <- ifelse(cancerMetricsTableCombinedYears$Cancer_Deaths_Diff < 0, cancerMetricsTableCombinedYears$ICER_ReducedDeaths, NA)
+	cancerMetricsTableCombinedYears$ICER_DetectedCases <- ifelse(cancerMetricsTableCombinedYears$Detected_Cases_Diff > 0, cancerMetricsTableCombinedYears$ICER_DetectedCases, NA)
+	cancerMetricsTableCombinedYears$ICER_PersonYears <- ifelse(cancerMetricsTableCombinedYears$Person_years_Diff > 0, cancerMetricsTableCombinedYears$ICER_PersonYears, NA)
+	cancerMetricsTableCombinedYears$ICER_HAPY <- ifelse(cancerMetricsTableCombinedYears$Health_adjusted_person_years_Diff > 0, cancerMetricsTableCombinedYears$ICER_HAPY, NA)
 
 	#One row per set of years
 	if (!(nrow(cancerMetricsTableCombinedYears) * length(yearsToFilterWith) == nrow(cancerMetricsTable %>% filter(Shiftable_year %in% yearsToFilterWith)))) {
