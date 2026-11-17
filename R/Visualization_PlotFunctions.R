@@ -99,7 +99,7 @@ visualizeParticipation <- function(dataset) {
 
 
 formatNumber <- function(values, facetVar = NULL) {
-	return(scales::comma(values, accuracy = 1))
+	#return(scales::comma(values, accuracy = 1))
 	toReturn <- c()
 
 	formatItems <- list()
@@ -269,20 +269,20 @@ visualizeFrontier <- function(frontierData, type) {
 	refValue <- frontierPlotData[frontierPlotData$formattedName == "CurrentScreening", ]$YVar
 
 	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(formatNumber(frontierPlotData$Total_Cost), formatNumber(frontierPlotData$yVar), frontierPlotData$formattedName), "")
-	frontierPlotData$Labels <- ifelse(
-		frontierPlotData$Type == "Cost-efficient",
-		paste(
-			frontierPlotData$formattedName,
-			formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar),
-			round(frontierPlotData$Total_Cost / billion),
-			formatNumber(frontierPlotData$Total_Cost / 27),
-			formatNumber(frontierPlotData$Person_years_Diff),
-			formatNumber(frontierPlotData$Person_years_Diff / 27),
-			sep = "\n"
-		),
-		""
-	)
-	#frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
+	#frontierPlotData$Labels <- ifelse(
+	#		frontierPlotData$Type == "Cost-efficient",#
+	#	paste(
+	#			frontierPlotData$formattedName,
+	#		formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar),
+	#		round(frontierPlotData$Total_Cost / billion),
+	#		formatNumber(frontierPlotData$Total_Cost / 27),
+	#		formatNumber(frontierPlotData$Person_years_Diff),
+	#		formatNumber(frontierPlotData$Person_years_Diff / 27),
+	#		sep = "\n"
+	#	),
+	#	""
+	#)
+	frontierPlotData$Labels <- ifelse(frontierPlotData$Type == "Cost-efficient", paste(frontierPlotData$formattedName), "")
 	#frontierPlotData$Labels <- ifelse(
 	#		frontierPlotData$Type == "Cost-efficient", #
 	#		paste(frontierPlotData$formattedName, formatNumber(100000 * frontierPlotData$Total_Cost / frontierPlotData$yVar), formatNumber(frontierPlotData$Person_years_Diff / 27), formatNumber(frontierPlotData$Person_years / 27), sep = "\n"),
